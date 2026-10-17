@@ -44,10 +44,15 @@ export async function tick(store: Store, clock: Clock): Promise<number> {
       await store.saveEngine(contract.id, row);
       continue;
     }
-    const evs = readyPrefix(await store.evidenceAfter(contract.id, row.evSeq), (x) => x.e.t, now);
-    const acts = readyPrefix(await store.actionsAfter(contract.id, row.actSeq), (x) => x.a.t, now);
     let state = row.state;
     const from = (state.lastEvalAt ?? now - 1) + 1;
+    // This minute was already evaluated (a second tick in the same minute, e.g. timer jitter).
+    // There is nothing to run, so do NOT fetch rows and advance the cursors: an item that arrived
+    // since the last tick would be marked delivered without ever reaching the engine. It waits
+    // for the next evaluated minute, where it is delivered at max(minute, its time).
+    if (from > now) continue;
+    const evs = readyPrefix(await store.evidenceAfter(contract.id, row.evSeq), (x) => x.e.t, now);
+    const acts = readyPrefix(await store.actionsAfter(contract.id, row.actSeq), (x) => x.a.t, now);
     for (let m = from; m <= now; m++) {
       const r = evaluate({
         contract,
