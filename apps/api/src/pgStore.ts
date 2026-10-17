@@ -59,10 +59,10 @@ export class PgStore implements Store {
       [contractId, a.type, a.by, a.targetPersonId, a.t, a.reason ?? null],
     );
   }
-  async evidenceAfter(contractId: string, seq: number, upToT: number) {
+  async evidenceAfter(contractId: string, seq: number) {
     const r = await this.pool.query(
-      "SELECT * FROM evidence WHERE contract_id = $1 AND seq > $2 AND t <= $3 ORDER BY seq",
-      [contractId, seq, upToT],
+      "SELECT * FROM evidence WHERE contract_id = $1 AND seq > $2 ORDER BY seq",
+      [contractId, seq],
     );
     return r.rows.map((x) => ({
       seq: Number(x.seq),
@@ -79,10 +79,10 @@ export class PgStore implements Store {
       } satisfies EvidenceReport,
     }));
   }
-  async actionsAfter(contractId: string, seq: number, upToT: number) {
+  async actionsAfter(contractId: string, seq: number) {
     const r = await this.pool.query(
-      "SELECT * FROM actions WHERE contract_id = $1 AND seq > $2 AND t <= $3 ORDER BY seq",
-      [contractId, seq, upToT],
+      "SELECT * FROM actions WHERE contract_id = $1 AND seq > $2 ORDER BY seq",
+      [contractId, seq],
     );
     return r.rows.map((x) => ({
       seq: Number(x.seq),

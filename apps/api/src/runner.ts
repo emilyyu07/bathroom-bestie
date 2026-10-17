@@ -7,6 +7,15 @@ import type { Store } from "./store";
  * at a time (so a missed tick catches up with exact timings) and stores any alerts.
  * `now` comes from the injected clock, never from Date.
  */
+/**
+ * Rows up to (not including) the first whose `t` is after `now`. The cursor only advances over
+ * delivered rows, so a row is never skipped because a later-seq row was due first; it waits a tick.
+ */
+const readyPrefix = <R>(rows: R[], tOf: (r: R) => number, now: number) => {
+  const i = rows.findIndex((r) => tOf(r) > now);
+  return i < 0 ? rows : rows.slice(0, i);
+};
+
 export async function tick(store: Store, clock: Clock): Promise<number> {
   const now = clock.nowMinute();
   let emitted = 0;
@@ -19,8 +28,9 @@ export async function tick(store: Store, clock: Clock): Promise<number> {
     if (row.state.version !== ENGINE_STATE_VERSION) {
       // The cache came from an older engine. State is derived (invariant 2): rebuild it from the
       // append-only logs. Past minutes emit no new alerts; already-stored alerts are left alone.
-      const allEv = await store.evidenceAfter(contract.id, 0, now);
-      const allAct = await store.actionsAfter(contract.id, 0, now);
+      // Same cursor rule as below: only rows that are due count as delivered.
+      const allEv = readyPrefix(await store.evidenceAfter(contract.id, 0), (x) => x.e.t, now);
+      const allAct = readyPrefix(await store.actionsAfter(contract.id, 0), (x) => x.a.t, now);
       row = {
         state: rebuild({
           contract,
@@ -34,8 +44,8 @@ export async function tick(store: Store, clock: Clock): Promise<number> {
       await store.saveEngine(contract.id, row);
       continue;
     }
-    const evs = await store.evidenceAfter(contract.id, row.evSeq, now);
-    const acts = await store.actionsAfter(contract.id, row.actSeq, now);
+    const evs = readyPrefix(await store.evidenceAfter(contract.id, row.evSeq), (x) => x.e.t, now);
+    const acts = readyPrefix(await store.actionsAfter(contract.id, row.actSeq), (x) => x.a.t, now);
     let state = row.state;
     const from = (state.lastEvalAt ?? now - 1) + 1;
     for (let m = from; m <= now; m++) {
