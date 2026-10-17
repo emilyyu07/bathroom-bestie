@@ -22,6 +22,8 @@ export interface Store {
   saveContract(c: Contract): Promise<void>;
   getContract(id: string): Promise<StoredContract | null>;
   setReadiness(id: string, r: ReadinessReport): Promise<void>;
+  /** Replaces a draft contract's body and clears its readiness. False if missing or not a draft. */
+  updateDraft(c: Contract): Promise<boolean>;
   activate(id: string): Promise<void>;
   listActive(): Promise<Contract[]>;
   addEvidence(e: EvidenceReport): Promise<void>;
@@ -52,6 +54,12 @@ export class MemoryStore implements Store {
   }
   async setReadiness(id: string, r: ReadinessReport) {
     this.contracts.get(id)!.readiness = r;
+  }
+  async updateDraft(c: Contract) {
+    const s = this.contracts.get(c.id);
+    if (s?.status !== "draft") return false;
+    this.contracts.set(c.id, { contract: c, status: "draft", readiness: null });
+    return true;
   }
   async activate(id: string) {
     this.contracts.get(id)!.status = "active";

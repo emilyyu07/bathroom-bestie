@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ReadinessSnapshot } from "@bathroombestie/schema";
+import { thresholdsFor, type ReadinessSnapshot } from "@bathroombestie/schema";
 import { FakeClock } from "../src/clock";
 import { MockCompiler, withRetry, type CompileContext, type Compiler } from "../src/compile";
 import { tick } from "../src/runner";
@@ -65,6 +65,45 @@ describe("api", () => {
     });
     expect(warn.json().state).toBe("ready_with_warnings"); // one watcher
     expect((await act()).statusCode).toBe(200);
+  });
+
+  it("the preset picked in the app sets thresholds, only before the night starts", async () => {
+    const { contract } = await compile(); // "careful" -> cautious
+    const pick = (preset: string) =>
+      app.inject({ method: "POST", url: `/contracts/${contract.id}/preset`, payload: { preset } });
+    const r = await pick("relaxed");
+    expect(r.statusCode).toBe(200);
+    expect(r.json().contract).toMatchObject({ id: contract.id, preset: "relaxed" });
+    expect(r.json().terms.join(" ")).toContain("relaxed");
+    const stored = (await store.getContract(contract.id))!;
+    expect(stored.contract.thresholds).toEqual(thresholdsFor("relaxed", contract.thresholds));
+    expect((await pick("loud")).statusCode).toBe(400);
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/contracts/nope/preset",
+          payload: { preset: "relaxed" },
+        })
+      ).statusCode,
+    ).toBe(404);
+
+    await app.inject({
+      method: "POST",
+      url: "/preflight",
+      payload: { contractId: contract.id, snapshot: good },
+    });
+    await pick("standard"); // a change after pre-flight needs a fresh pre-flight
+    const act = () => app.inject({ method: "POST", url: `/contracts/${contract.id}/activate` });
+    expect((await act()).statusCode).toBe(409);
+    await app.inject({
+      method: "POST",
+      url: "/preflight",
+      payload: { contractId: contract.id, snapshot: good },
+    });
+    expect((await act()).statusCode).toBe(200);
+    expect((await pick("cautious")).statusCode).toBe(409); // never mid-night
+    expect((await store.getContract(contract.id))!.contract.preset).toBe("standard");
   });
 
   it("rounds evidence location before storage", async () => {

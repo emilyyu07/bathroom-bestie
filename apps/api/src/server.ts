@@ -4,8 +4,10 @@ import {
   EvidenceReport,
   FriendAction,
   FriendReason,
+  PresetName,
   ReadinessSnapshot,
   roundCoord,
+  thresholdsFor,
 } from "@bathroombestie/schema";
 import { preflight } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
@@ -27,6 +29,7 @@ const CompileBody = z.object({
     .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
     .optional(),
 });
+const PresetBody = z.object({ preset: PresetName });
 const PreflightBody = z.object({ contractId: z.string(), snapshot: ReadinessSnapshot });
 const ActionBody = z.object({
   contractId: z.string(),
@@ -68,6 +71,18 @@ export function buildServer({ store, clock, compiler }: Deps) {
       readBack: safeReadBack(draft.read_back, contract),
       terms: termsOf(contract),
     };
+  });
+
+  // The preset picked in the app. Only before the night starts; readiness must be re-run after.
+  app.post<{ Params: { id: string } }>("/contracts/:id/preset", async (req, reply) => {
+    const { preset } = PresetBody.parse(req.body);
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    const prev = stored.contract;
+    const contract = { ...prev, preset, thresholds: thresholdsFor(preset, prev.thresholds) };
+    if (!(await store.updateDraft(contract)))
+      return reply.code(409).send({ error: "already_active" });
+    return { contract, terms: termsOf(contract) };
   });
 
   app.post("/preflight", async (req, reply) => {

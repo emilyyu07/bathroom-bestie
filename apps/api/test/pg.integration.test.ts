@@ -122,6 +122,23 @@ describe.skipIf(!url)("postgres integration", () => {
       expect((await store.listActive()).map((c) => c.id)).toEqual([contract.id]);
     });
 
+    it("updates a draft's preset and refuses once active", async () => {
+      const { contract } = await compile();
+      const pick = (preset: string) =>
+        app.inject({
+          method: "POST",
+          url: `/contracts/${contract.id}/preset`,
+          payload: { preset },
+        });
+      expect((await pick("relaxed")).statusCode).toBe(200);
+      const stored = (await store.getContract(contract.id))!;
+      expect(stored.contract.preset).toBe("relaxed");
+      expect(stored.contract.thresholds.silence_min).toBe(30);
+      await store.activate(contract.id);
+      expect((await pick("cautious")).statusCode).toBe(409);
+      expect((await store.getContract(contract.id))!.contract.preset).toBe("relaxed");
+    });
+
     it("stores only the rounded area", async () => {
       const { contract } = await compile();
       await app.inject({

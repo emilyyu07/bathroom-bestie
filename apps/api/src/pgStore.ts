@@ -25,6 +25,13 @@ export class PgStore implements Store {
   async setReadiness(id: string, rep: ReadinessReport) {
     await this.pool.query("UPDATE contracts SET readiness = $2 WHERE id = $1", [id, rep]);
   }
+  async updateDraft(c: Contract) {
+    const r = await this.pool.query(
+      "UPDATE contracts SET body = $2, readiness = NULL WHERE id = $1 AND status = 'draft'",
+      [c.id, c],
+    );
+    return r.rowCount === 1;
+  }
   async activate(id: string) {
     await this.pool.query("UPDATE contracts SET status = 'active' WHERE id = $1", [id]);
   }
