@@ -42,6 +42,19 @@ describe("api", () => {
     expect(r.terms.length).toBeGreaterThan(0);
   });
 
+  it("allows browser calls from local dev pages only", async () => {
+    const pre = (origin: string) =>
+      app.inject({
+        method: "OPTIONS",
+        url: "/contracts/compile",
+        headers: { origin, "access-control-request-method": "POST" },
+      });
+    const ok = await pre("http://localhost:8081");
+    expect(ok.headers["access-control-allow-origin"]).toBe("http://localhost:8081");
+    const evil = await pre("https://example.com");
+    expect(evil.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+
   it("rejects bad input with 400", async () => {
     const r = await app.inject({ method: "POST", url: "/contracts/compile", payload: {} });
     expect(r.statusCode).toBe(400);
