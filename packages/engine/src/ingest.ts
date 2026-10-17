@@ -5,6 +5,13 @@ import type { EngineState } from "./state";
 /** Fold one evidence report into the derived per-person state (evidence itself stays append-only). */
 export function ingest(contract: Contract, state: EngineState, e: EvidenceReport): void {
   const p = state.people[e.personId]!;
+  if (p.lastReportAt === null) {
+    // Her first report: monitoring starts here. The "left the area" and "stopped moving" clocks
+    // start at this moment too, so someone whose phone joins late is not charged for the time
+    // before it existed.
+    p.lastCorridorAt = e.t;
+    p.lastMoveAt = e.t;
+  }
   p.lastReportAt = Math.max(p.lastReportAt ?? e.t, e.t);
   p.prevBattery = p.lastBattery;
   p.lastBattery = e.batteryPct;

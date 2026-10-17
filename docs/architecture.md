@@ -43,6 +43,16 @@ confirm or the home event.
   (`ENGINE_STATE_VERSION`) is checked by `evaluate`; the API runner rebuilds a stale cache instead of trusting it.
   Bump the version whenever state or incident semantics change.
 
+## Who is monitored
+
+A member is monitored **from their first report** (`PersonState.lastReportAt !== null`). Until then no incident is opened
+about them and they are not a comparison peer (peers must be fresh). This keeps a friend who has not installed or joined
+(or whose phone is off) from generating "went quiet" alerts, and it degrades safely: with only one phone reporting the
+engine raises nothing, and the group-based detectors (separation, exit-alone, unexplained stop) are inert because there is
+no one to compare her with. A friend's worry about someone who never reported is a human report: it still opens an
+incident and climbs. The "left the area" and "stopped moving" clocks also start at the first report, so a phone that joins
+late is not charged for the time before it existed. State version 6.
+
 ## Exit-alone (`cohesion.ts`, `concerns.ts`)
 
 "She left the group alone and nobody has confirmed she got home." The longer clock behind the separation nudge.

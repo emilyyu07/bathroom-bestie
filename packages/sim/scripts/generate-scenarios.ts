@@ -376,3 +376,20 @@ sc(
   },
   "13-exit-alone-never-arrives.json",
 );
+
+// 14. Only her phone reports: friends who have not joined raise nothing.
+sc(
+  {
+    name: "14-solo-reporter",
+    description:
+      "Bea and Cy are in the group but have not joined (their phones never report). Only Ana's phone reports; nothing is raised about anyone.",
+    contract: makeContract(),
+    timelines: {
+      ana: every(0, 297, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 75 })),
+    },
+    durationMin: 300,
+    truth: "normal",
+    label: { expect: "no_alert" },
+  },
+  "14-solo-reporter.json",
+);

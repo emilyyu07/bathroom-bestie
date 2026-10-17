@@ -86,7 +86,11 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     }
     if (!active) continue;
 
-    const concern = detectConcern(ctx, id, observe(ctx, id));
+    // Monitored from the first report. Someone who has never reported (a friend who has not joined,
+    // or whose phone is off) raises nothing automatically; a friend's worry about them is a human
+    // report and still opens an incident and climbs, so an open incident is still stepped.
+    const monitored = p.lastReportAt !== null;
+    const concern = monitored ? detectConcern(ctx, id, observe(ctx, id)) : null;
     if (!open) {
       if (concern && (p.cooldownUntil === null || now >= p.cooldownUntil)) {
         emit(openIncident(ctx, id, concern, 1, "self"));
