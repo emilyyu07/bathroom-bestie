@@ -5,6 +5,14 @@ export const Minute = z.number().int();
 export type Minute = z.infer<typeof Minute>;
 
 /** ~110 m at the equator. Invariant 5: round before storage. */
+/**
+ * How often a phone reports while a night is active (minutes). Part of the contract as
+ * `thresholds.report_every_min` so the app, the simulator and the engine agree; this is only the
+ * default. Presets are written in minutes of silence, which at 3 min/report is a whole number of
+ * missed reports (cautious: 12 min = 4 reports).
+ */
+export const DEFAULT_REPORT_EVERY_MIN = 3;
+
 export const COORD_DECIMALS = 3;
 export const roundCoord = (n: number): number => {
   const f = 10 ** COORD_DECIMALS;

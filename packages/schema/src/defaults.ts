@@ -1,4 +1,5 @@
 import type { ConfidenceModel } from "./contract";
+import { DEFAULT_REPORT_EVERY_MIN } from "./common";
 import { PRESETS, type PresetName } from "./preset";
 import type { Thresholds } from "./contract";
 
@@ -15,6 +16,7 @@ export const thresholdsFor = (preset: PresetName, prev?: Thresholds): Thresholds
     ack_timeout_min: p.ack_timeout_min,
     milestone_grace_min: p.milestone_grace_min,
     exit_alone_min: p.exit_alone_min,
+    report_every_min: prev?.report_every_min ?? DEFAULT_REPORT_EVERY_MIN,
   };
 };
 

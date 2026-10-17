@@ -39,7 +39,8 @@
       "watch_slot_min": 90,
       "ack_timeout_min": 5,
       "milestone_grace_min": 10,
-      "exit_alone_min": 45
+      "exit_alone_min": 45,
+      "report_every_min": 3
     },
     "confidence": {
       "corridor": {

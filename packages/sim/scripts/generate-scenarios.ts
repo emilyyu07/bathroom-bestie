@@ -1,7 +1,12 @@
 // Generates scenarios/*.json. Run: pnpm --filter @bathroombestie/sim generate
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { makeContract, ScenarioFile, type ScenarioEvidence } from "@bathroombestie/schema";
+import {
+  DEFAULT_REPORT_EVERY_MIN,
+  makeContract,
+  ScenarioFile,
+  type ScenarioEvidence,
+} from "@bathroombestie/schema";
 import { SCENARIO_DIR } from "../src/scenarios";
 
 type Ev = ScenarioEvidence;
@@ -12,10 +17,11 @@ const FAR = { lat: 43.66, lon: -79.38 }; // ~1.1 km from A
 
 const base: Ev = { area: A, motion: "still", batteryPct: 80, charging: false, permissionOk: true };
 
-/** Report every 5 min from `from` to `to` (inclusive), computing the evidence from the minute. */
+/** Report every DEFAULT_REPORT_EVERY_MIN from `from` to `to` (inclusive), computing the evidence from the minute. */
 const every = (from: number, to: number, f: (t: number) => Partial<Ev>): Timeline => {
   const out: Timeline = [];
-  for (let t = from; t <= to; t += 5) out.push({ at: t, evidence: { ...base, ...f(t) } });
+  for (let t = from; t <= to; t += DEFAULT_REPORT_EVERY_MIN)
+    out.push({ at: t, evidence: { ...base, ...f(t) } });
   return out;
 };
 const mid = (t: number) => (t < 60 ? A : t < 85 ? A : B);
@@ -225,7 +231,7 @@ sc(
       expect: "alert",
       rung: 1,
       from: 125,
-      to: 125,
+      to: 129, // the first apart report lands on a report tick, so the nudge is at 127
       onset: 100,
       maxRung: 1,
       resolvedBy: "rejoined",

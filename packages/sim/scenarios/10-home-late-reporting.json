@@ -46,7 +46,8 @@
       "watch_slot_min": 90,
       "ack_timeout_min": 5,
       "milestone_grace_min": 10,
-      "exit_alone_min": 45
+      "exit_alone_min": 45,
+      "report_every_min": 3
     },
     "confidence": {
       "corridor": {
@@ -90,7 +91,7 @@
         }
       },
       {
-        "at": 5,
+        "at": 3,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -103,7 +104,33 @@
         }
       },
       {
-        "at": 10,
+        "at": 6,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 9,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 12,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -129,20 +156,46 @@
         }
       },
       {
-        "at": 20,
+        "at": 18,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
-          "motion": "walking",
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 25,
+        "at": 21,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 24,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 27,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -168,7 +221,7 @@
         }
       },
       {
-        "at": 35,
+        "at": 33,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -181,13 +234,39 @@
         }
       },
       {
-        "at": 40,
+        "at": 36,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
-          "motion": "walking",
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 39,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 42,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
@@ -207,7 +286,7 @@
         }
       },
       {
-        "at": 50,
+        "at": 48,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -220,7 +299,33 @@
         }
       },
       {
-        "at": 55,
+        "at": 51,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 54,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 57,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -246,7 +351,7 @@
         }
       },
       {
-        "at": 65,
+        "at": 63,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -259,7 +364,33 @@
         }
       },
       {
-        "at": 70,
+        "at": 66,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 69,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 72,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -285,7 +416,20 @@
         }
       },
       {
-        "at": 80,
+        "at": 78,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 81,
         "evidence": {
           "area": {
             "lat": 43.65,
@@ -298,7 +442,20 @@
         }
       },
       {
-        "at": 85,
+        "at": 84,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "walking",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 87,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -324,7 +481,7 @@
         }
       },
       {
-        "at": 95,
+        "at": 93,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -337,13 +494,39 @@
         }
       },
       {
-        "at": 100,
+        "at": 96,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 99,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 102,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
@@ -363,7 +546,7 @@
         }
       },
       {
-        "at": 110,
+        "at": 108,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -376,7 +559,33 @@
         }
       },
       {
-        "at": 115,
+        "at": 111,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 114,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 117,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -402,7 +611,7 @@
         }
       },
       {
-        "at": 125,
+        "at": 123,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -415,7 +624,33 @@
         }
       },
       {
-        "at": 130,
+        "at": 126,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 129,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 132,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -441,20 +676,46 @@
         }
       },
       {
-        "at": 140,
+        "at": 138,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 145,
+        "at": 141,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 144,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 147,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -480,7 +741,7 @@
         }
       },
       {
-        "at": 155,
+        "at": 153,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -493,13 +754,39 @@
         }
       },
       {
-        "at": 160,
+        "at": 156,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 159,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 162,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
@@ -519,7 +806,7 @@
         }
       },
       {
-        "at": 170,
+        "at": 168,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -532,7 +819,33 @@
         }
       },
       {
-        "at": 175,
+        "at": 171,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 174,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 177,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -558,7 +871,7 @@
         }
       },
       {
-        "at": 185,
+        "at": 183,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -571,7 +884,33 @@
         }
       },
       {
-        "at": 190,
+        "at": 186,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 189,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 192,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -597,20 +936,46 @@
         }
       },
       {
-        "at": 200,
+        "at": 198,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 205,
+        "at": 201,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 204,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 207,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -636,7 +1001,7 @@
         }
       },
       {
-        "at": 215,
+        "at": 213,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -649,13 +1014,39 @@
         }
       },
       {
-        "at": 220,
+        "at": 216,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 219,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 222,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
@@ -675,7 +1066,7 @@
         }
       },
       {
-        "at": 230,
+        "at": 228,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -688,7 +1079,33 @@
         }
       },
       {
-        "at": 235,
+        "at": 231,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 234,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 237,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -714,7 +1131,7 @@
         }
       },
       {
-        "at": 245,
+        "at": 243,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -727,7 +1144,33 @@
         }
       },
       {
-        "at": 250,
+        "at": 246,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 249,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 252,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -753,20 +1196,46 @@
         }
       },
       {
-        "at": 260,
+        "at": 258,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 265,
+        "at": 261,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 264,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 267,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -792,7 +1261,7 @@
         }
       },
       {
-        "at": 275,
+        "at": 273,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -805,13 +1274,39 @@
         }
       },
       {
-        "at": 280,
+        "at": 276,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 279,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 282,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
           "batteryPct": 70,
           "charging": false,
           "permissionOk": true
@@ -831,7 +1326,7 @@
         }
       },
       {
-        "at": 290,
+        "at": 288,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -844,7 +1339,20 @@
         }
       },
       {
-        "at": 295,
+        "at": 291,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 294,
         "evidence": {
           "area": {
             "lat": 43.653,
@@ -886,27 +1394,53 @@
         }
       },
       {
-        "at": 5,
+        "at": 3,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 89.5,
+          "batteryPct": 89.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 10,
+        "at": 6,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 89,
+          "batteryPct": 89.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 9,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 89.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 12,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 88.8,
           "charging": false,
           "permissionOk": true
         }
@@ -925,27 +1459,53 @@
         }
       },
       {
-        "at": 20,
-        "evidence": {
-          "area": {
-            "lat": 43.65,
-            "lon": -79.38
-          },
-          "motion": "walking",
-          "batteryPct": 88,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 25,
+        "at": 18,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 87.5,
+          "batteryPct": 88.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 21,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 87.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 24,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 87.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 27,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 87.3,
           "charging": false,
           "permissionOk": true
         }
@@ -964,27 +1524,53 @@
         }
       },
       {
-        "at": 35,
+        "at": 33,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 86.5,
+          "batteryPct": 86.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 40,
+        "at": 36,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
-          "motion": "walking",
-          "batteryPct": 86,
+          "motion": "still",
+          "batteryPct": 86.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 39,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 86.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 42,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 85.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1003,27 +1589,53 @@
         }
       },
       {
-        "at": 50,
+        "at": 48,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 85,
+          "batteryPct": 85.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 55,
+        "at": 51,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 84.5,
+          "batteryPct": 84.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 54,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 84.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 57,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 84.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1042,27 +1654,53 @@
         }
       },
       {
-        "at": 65,
+        "at": 63,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 83.5,
+          "batteryPct": 83.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 70,
+        "at": 66,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 83,
+          "batteryPct": 83.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 69,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 83.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 72,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 82.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1081,27 +1719,53 @@
         }
       },
       {
-        "at": 80,
+        "at": 78,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 82.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 81,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "walking",
-          "batteryPct": 82,
+          "batteryPct": 81.9,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 85,
+        "at": 84,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "walking",
+          "batteryPct": 81.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 87,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 81.5,
+          "batteryPct": 81.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1120,27 +1784,53 @@
         }
       },
       {
-        "at": 95,
+        "at": 93,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 80.5,
+          "batteryPct": 80.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 100,
+        "at": 96,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 80,
+          "motion": "still",
+          "batteryPct": 80.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 99,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 80.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 102,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 79.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1159,27 +1849,53 @@
         }
       },
       {
-        "at": 110,
+        "at": 108,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 79,
+          "batteryPct": 79.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 115,
+        "at": 111,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 78.5,
+          "batteryPct": 78.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 114,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 78.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 117,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 78.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1198,27 +1914,53 @@
         }
       },
       {
-        "at": 125,
+        "at": 123,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 77.5,
+          "batteryPct": 77.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 130,
+        "at": 126,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 77,
+          "batteryPct": 77.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 129,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 77.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 132,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 76.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1237,27 +1979,53 @@
         }
       },
       {
-        "at": 140,
-        "evidence": {
-          "area": {
-            "lat": 43.653,
-            "lon": -79.383
-          },
-          "motion": "walking",
-          "batteryPct": 76,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 145,
+        "at": 138,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 75.5,
+          "batteryPct": 76.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 141,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 75.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 144,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 75.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 147,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 75.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1276,27 +2044,53 @@
         }
       },
       {
-        "at": 155,
+        "at": 153,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 74.5,
+          "batteryPct": 74.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 160,
+        "at": 156,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 74,
+          "motion": "still",
+          "batteryPct": 74.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 159,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 74.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 162,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 73.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1315,27 +2109,53 @@
         }
       },
       {
-        "at": 170,
+        "at": 168,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 73,
+          "batteryPct": 73.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 175,
+        "at": 171,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 72.5,
+          "batteryPct": 72.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 174,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 72.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 177,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 72.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1354,27 +2174,53 @@
         }
       },
       {
-        "at": 185,
+        "at": 183,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 71.5,
+          "batteryPct": 71.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 190,
+        "at": 186,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 71,
+          "batteryPct": 71.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 189,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 71.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 192,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1393,27 +2239,53 @@
         }
       },
       {
-        "at": 200,
-        "evidence": {
-          "area": {
-            "lat": 43.653,
-            "lon": -79.383
-          },
-          "motion": "walking",
-          "batteryPct": 70,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 205,
+        "at": 198,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 69.5,
+          "batteryPct": 70.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 201,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 69.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 204,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 69.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 207,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 69.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1432,27 +2304,53 @@
         }
       },
       {
-        "at": 215,
+        "at": 213,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 68.5,
+          "batteryPct": 68.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 220,
+        "at": 216,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 68,
+          "motion": "still",
+          "batteryPct": 68.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 219,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 68.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 222,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 67.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1471,27 +2369,53 @@
         }
       },
       {
-        "at": 230,
+        "at": 228,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 67,
+          "batteryPct": 67.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 235,
+        "at": 231,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 66.5,
+          "batteryPct": 66.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 234,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 66.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 237,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 66.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1510,27 +2434,53 @@
         }
       },
       {
-        "at": 245,
+        "at": 243,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 65.5,
+          "batteryPct": 65.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 250,
+        "at": 246,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 65,
+          "batteryPct": 65.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 249,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 65.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 252,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 64.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1549,27 +2499,53 @@
         }
       },
       {
-        "at": 260,
-        "evidence": {
-          "area": {
-            "lat": 43.653,
-            "lon": -79.383
-          },
-          "motion": "walking",
-          "batteryPct": 64,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 265,
+        "at": 258,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 63.5,
+          "batteryPct": 64.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 261,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 63.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 264,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 63.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 267,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 63.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1588,27 +2564,53 @@
         }
       },
       {
-        "at": 275,
+        "at": 273,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 62.5,
+          "batteryPct": 62.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 280,
+        "at": 276,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 62,
+          "motion": "still",
+          "batteryPct": 62.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 279,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 62.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 282,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 61.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1627,27 +2629,53 @@
         }
       },
       {
-        "at": 290,
+        "at": 288,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 61,
+          "batteryPct": 61.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 295,
+        "at": 291,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 60.5,
+          "batteryPct": 60.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 294,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 60.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 297,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 60.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1681,27 +2709,53 @@
         }
       },
       {
-        "at": 5,
+        "at": 3,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 84.5,
+          "batteryPct": 84.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 10,
+        "at": 6,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 84,
+          "batteryPct": 84.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 9,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 84.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 12,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 83.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1720,27 +2774,53 @@
         }
       },
       {
-        "at": 20,
-        "evidence": {
-          "area": {
-            "lat": 43.65,
-            "lon": -79.38
-          },
-          "motion": "walking",
-          "batteryPct": 83,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 25,
+        "at": 18,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 82.5,
+          "batteryPct": 83.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 21,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 82.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 24,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 82.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 27,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 82.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1759,27 +2839,53 @@
         }
       },
       {
-        "at": 35,
+        "at": 33,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 81.5,
+          "batteryPct": 81.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 40,
+        "at": 36,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
-          "motion": "walking",
-          "batteryPct": 81,
+          "motion": "still",
+          "batteryPct": 81.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 39,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 81.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 42,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 80.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1798,27 +2904,53 @@
         }
       },
       {
-        "at": 50,
+        "at": 48,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 80,
+          "batteryPct": 80.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 55,
+        "at": 51,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 79.5,
+          "batteryPct": 79.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 54,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 79.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 57,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 79.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1837,27 +2969,53 @@
         }
       },
       {
-        "at": 65,
+        "at": 63,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 78.5,
+          "batteryPct": 78.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 70,
+        "at": 66,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "still",
-          "batteryPct": 78,
+          "batteryPct": 78.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 69,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 78.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 72,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 77.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1876,27 +3034,53 @@
         }
       },
       {
-        "at": 80,
+        "at": 78,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "still",
+          "batteryPct": 77.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 81,
         "evidence": {
           "area": {
             "lat": 43.65,
             "lon": -79.38
           },
           "motion": "walking",
-          "batteryPct": 77,
+          "batteryPct": 76.9,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 85,
+        "at": 84,
+        "evidence": {
+          "area": {
+            "lat": 43.65,
+            "lon": -79.38
+          },
+          "motion": "walking",
+          "batteryPct": 76.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 87,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 76.5,
+          "batteryPct": 76.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1915,27 +3099,53 @@
         }
       },
       {
-        "at": 95,
+        "at": 93,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 75.5,
+          "batteryPct": 75.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 100,
+        "at": 96,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 75,
+          "motion": "still",
+          "batteryPct": 75.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 99,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 75.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 102,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 74.8,
           "charging": false,
           "permissionOk": true
         }
@@ -1954,27 +3164,53 @@
         }
       },
       {
-        "at": 110,
+        "at": 108,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 74,
+          "batteryPct": 74.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 115,
+        "at": 111,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 73.5,
+          "batteryPct": 73.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 114,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 73.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 117,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 73.3,
           "charging": false,
           "permissionOk": true
         }
@@ -1993,27 +3229,53 @@
         }
       },
       {
-        "at": 125,
+        "at": 123,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 72.5,
+          "batteryPct": 72.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 130,
+        "at": 126,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 72,
+          "batteryPct": 72.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 129,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 72.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 132,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 71.8,
           "charging": false,
           "permissionOk": true
         }
@@ -2032,27 +3294,53 @@
         }
       },
       {
-        "at": 140,
-        "evidence": {
-          "area": {
-            "lat": 43.653,
-            "lon": -79.383
-          },
-          "motion": "walking",
-          "batteryPct": 71,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 145,
+        "at": 138,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 70.5,
+          "batteryPct": 71.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 141,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 144,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 147,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 70.3,
           "charging": false,
           "permissionOk": true
         }
@@ -2071,27 +3359,53 @@
         }
       },
       {
-        "at": 155,
+        "at": 153,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 69.5,
+          "batteryPct": 69.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 160,
+        "at": 156,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 69,
+          "motion": "still",
+          "batteryPct": 69.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 159,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 69.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 162,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 68.8,
           "charging": false,
           "permissionOk": true
         }
@@ -2110,27 +3424,53 @@
         }
       },
       {
-        "at": 170,
+        "at": 168,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 68,
+          "batteryPct": 68.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 175,
+        "at": 171,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 67.5,
+          "batteryPct": 67.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 174,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 67.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 177,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 67.3,
           "charging": false,
           "permissionOk": true
         }
@@ -2149,27 +3489,53 @@
         }
       },
       {
-        "at": 185,
+        "at": 183,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 66.5,
+          "batteryPct": 66.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 190,
+        "at": 186,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 66,
+          "batteryPct": 66.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 189,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 66.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 192,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 65.8,
           "charging": false,
           "permissionOk": true
         }
@@ -2188,27 +3554,53 @@
         }
       },
       {
-        "at": 200,
-        "evidence": {
-          "area": {
-            "lat": 43.653,
-            "lon": -79.383
-          },
-          "motion": "walking",
-          "batteryPct": 65,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 205,
+        "at": 198,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 64.5,
+          "batteryPct": 65.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 201,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 64.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 204,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 64.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 207,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 64.3,
           "charging": false,
           "permissionOk": true
         }
@@ -2227,27 +3619,53 @@
         }
       },
       {
-        "at": 215,
+        "at": 213,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 63.5,
+          "batteryPct": 63.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 220,
+        "at": 216,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 63,
+          "motion": "still",
+          "batteryPct": 63.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 219,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 63.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 222,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 62.8,
           "charging": false,
           "permissionOk": true
         }
@@ -2266,27 +3684,53 @@
         }
       },
       {
-        "at": 230,
+        "at": 228,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 62,
+          "batteryPct": 62.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 235,
+        "at": 231,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 61.5,
+          "batteryPct": 61.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 234,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 61.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 237,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 61.3,
           "charging": false,
           "permissionOk": true
         }
@@ -2305,27 +3749,53 @@
         }
       },
       {
-        "at": 245,
+        "at": 243,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 60.5,
+          "batteryPct": 60.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 250,
+        "at": 246,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 60,
+          "batteryPct": 60.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 249,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 60.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 252,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 59.8,
           "charging": false,
           "permissionOk": true
         }
@@ -2344,27 +3814,53 @@
         }
       },
       {
-        "at": 260,
-        "evidence": {
-          "area": {
-            "lat": 43.653,
-            "lon": -79.383
-          },
-          "motion": "walking",
-          "batteryPct": 59,
-          "charging": false,
-          "permissionOk": true
-        }
-      },
-      {
-        "at": 265,
+        "at": 258,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 58.5,
+          "batteryPct": 59.2,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 261,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 58.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 264,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 58.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 267,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 58.3,
           "charging": false,
           "permissionOk": true
         }
@@ -2383,27 +3879,53 @@
         }
       },
       {
-        "at": 275,
+        "at": 273,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 57.5,
+          "batteryPct": 57.7,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 280,
+        "at": 276,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
-          "motion": "walking",
-          "batteryPct": 57,
+          "motion": "still",
+          "batteryPct": 57.4,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 279,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 57.1,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 282,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 56.8,
           "charging": false,
           "permissionOk": true
         }
@@ -2422,27 +3944,53 @@
         }
       },
       {
-        "at": 290,
+        "at": 288,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 56,
+          "batteryPct": 56.2,
           "charging": false,
           "permissionOk": true
         }
       },
       {
-        "at": 295,
+        "at": 291,
         "evidence": {
           "area": {
             "lat": 43.653,
             "lon": -79.383
           },
           "motion": "still",
-          "batteryPct": 55.5,
+          "batteryPct": 55.9,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 294,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 55.6,
+          "charging": false,
+          "permissionOk": true
+        }
+      },
+      {
+        "at": 297,
+        "evidence": {
+          "area": {
+            "lat": 43.653,
+            "lon": -79.383
+          },
+          "motion": "still",
+          "batteryPct": 55.3,
           "charging": false,
           "permissionOk": true
         }
