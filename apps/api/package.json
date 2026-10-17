@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/main.ts",
-    "migrate": "tsx src/migrate.ts",
+    "dev": "tsx --env-file-if-exists=../../.env src/main.ts",
+    "migrate": "tsx --env-file-if-exists=../../.env src/migrate.ts",
     "typecheck": "tsc -p ."
   },
   "dependencies": {
