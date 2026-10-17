@@ -59,7 +59,7 @@ and `pnpm sim run` clean.
   `separation_m` of her last-known area.
 - **Tests.** Factor present when together-and-quiet, absent when apart; banned-word scan covers it.
 
-#### A3. Display names in alerts (M) — _deferred until after the milestone engine (now unblocked)_
+#### A3. Display names in alerts — **replaced by id-as-name (section 4.2)** _(original design kept below for reference)_
 
 - **Purpose.** Alerts currently use raw ids ("me's phone stopped sending updates"). Visible in any demo.
 - **Spec.** Optional `group.names: Record<PersonId, string>`; `render.ts` maps id to display name; recipients (`Alert.to`,
@@ -70,7 +70,7 @@ and `pnpm sim run` clean.
   already has `me`). No schema change; costs: id collisions, ids changing with names.
 - **Coordination.** Needs B: name field in the Plan screen and compile body.
 
-#### A4. Scenarios, sweep metrics, calibration (M-L) — _partially done (scenarios 1-11)_
+#### A4. Scenarios, sweep metrics, calibration (M-L) — _partially done (scenarios 1-11); calibration reduced to a minimal trade-off table (section 4.2)_
 
 - **Purpose.** The sweep is the product's evidence for "false alarms vs speed". Today it has only two concerning nights
   (03, 11), so its medians are thin and the false-alert axis is skewed by scenario 4's hand-timed confirm.
@@ -94,7 +94,7 @@ and `pnpm sim run` clean.
 - **Decision needed:** rebuild after an engine version change emits no alerts for the past. Backfill, or accept silently?
 - Replace the 4 skipped handoff `todo` tests with real ones as A1 lands.
 
-#### A6. Pickup and stall timers (M) — _stub; lowest priority, first to cut_
+#### A6. Pickup and stall timers — **dropped for this sprint (section 4.2)** _(stub stays)_
 
 - **Spec sketch.** Stall = vehicle motion, then still outside home for more than N minutes. Pickup = needs a definition of
   what starts the timer. Both reuse the exit-alone machinery.
@@ -150,12 +150,12 @@ and `pnpm sim run` clean.
 - Add a fallback decision for Gemini outages: compile currently returns `503 compiler_unavailable`. Either keep (she
   retries) or fall back to the offline mock.
 
-#### B5. Console: group map and scrubber (M) — _optional_
+#### B5. Console: group map and scrubber — **dropped for this sprint (section 4.2)**
 
 - Map of last-known areas and separation; incident timeline; step/scrub control on the replay page. Optional live mode
   reading `/incidents` (CORS already allows localhost).
 
-#### B6. Plan screen follow-ups (S) — _incoming with A3_
+#### B6. Plan screen follow-ups (S) — _id-as-name: her real name goes in the compile body's `me` field_
 
 - Name field in the compile body; show the home time in the terms (already returned by the API).
 
@@ -227,7 +227,7 @@ Fallback if the phone path breaks: the scripted `pnpm demo` plus the console rep
 
 | Hours       | Emily (A)                                                                                                                                | Elika (B)                                                              |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **H0-H1**   | Sync: decisions in section 6; paste the real scope into `docs/scope.md` and diff it (**S1**); merge PR #8                                | Same                                                                   |
+| **H0-H1**   | Sync: decisions in section 7; paste the real scope into `docs/scope.md` and diff it (**S1**); merge PR #8                                | Same                                                                   |
 | **H1-H5**   | CI (1 h) · `GET /incidents?to=` (0.5 h, supports B3) · `pnpm demo` (1.5 h) · "group still together" factor A2 (0.5 h) · start A1 (0.5 h) | **B1 home geofence**, timeboxed 4 h                                    |
 | **H5-H9**   | **A1 exit-alone** + scenarios 12-13 (4 h)                                                                                                | **B3 friend alert view** (3 h) · **B4 verify Postgres + Gemini** (1 h) |
 | **H9-H13**  | A5 hardening subset · A4 minimal: scenarios 14-15, nudges-per-night metric, trade-off table (4 h)                                        | **B2 background reporting**, timeboxed 4 h                             |
@@ -283,13 +283,17 @@ B3, the H15 freeze, S1, S3.
 
 ## 7. Decisions for the sync
 
-1. Names: add `group.names`, or have the app pass her real name as the planner id? (A3)
-2. Rung 3/4 semantics as described in S2. Agree?
-3. Rebuild backfill policy (A5).
-4. Compile fallback when Gemini is down: 503 or fall back to the mock? (B4)
-5. Alert delivery for the demo: polling only, or polling plus local notifications? (B3)
-6. Friend-side alert view: confirm it is in scope for the demo (B3).
-7. Hackathon end time, to turn section 5 into a calendar and set the cut line.
+Already settled by the clock (section 4.2): names via id-as-name, no console map, no pickup/stall, polling-only alert
+delivery, 18 working hours. Still to decide:
+
+1. **Geofence fallback.** If the real geofence misses the H5 gate, is a clearly labelled "simulate arriving home" debug
+   action acceptable for the demo?
+2. **Rung 3 and 4 semantics** as described in S2. Agree?
+3. **Rebuild backfill policy** (A5): backfill alerts after an engine version change, or accept silently?
+4. **Compile fallback** when Gemini is down: 503 (she retries) or fall back to the offline mock? (B4)
+5. **Friend view scope:** confirm a plain polled list with the rung-4 script as text is enough (B3).
+6. **Sleep schedule:** staggered, or one shared block? The H15-H18 integration pass needs both people rested.
+7. **Real scope document:** paste it at H0 and confirm nothing in it reshuffles this plan (S1).
 
 ## 8. Original definition of done: status
 
