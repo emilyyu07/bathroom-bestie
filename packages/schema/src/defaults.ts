@@ -19,6 +19,29 @@ export const thresholdsFor = (preset: PresetName, prev?: Thresholds): Thresholds
 /** Starting weights; calibrate with the sweep. */
 export const DEFAULT_CONFIDENCE: ConfidenceModel = {
   corridor: { w: 1, tau_min: 20 },
-  movement: { w: 0.6, tau_min: 25 },
+  movement: { w: 0.5, tau_min: 90 },
   freshness: { w: 1, tau_min: 10 },
 };
+
+import type { Contract } from "./contract";
+
+/** Test/sim helper: a valid contract around downtown Toronto. Window starts at minute 0. */
+export const makeContract = (over: Partial<Contract> = {}): Contract => ({
+  id: "c1",
+  corridor: { center: { lat: 43.65, lon: -79.38 }, radius_m: 2000 },
+  window: { start: 0, end: 360 },
+  milestones: [],
+  group: {
+    members: ["ana", "bea", "cy"],
+    watch: [
+      { who: "bea", from: 0, to: 180 },
+      { who: "cy", from: 180, to: 360 },
+    ],
+  },
+  thresholds: thresholdsFor("standard"),
+  confidence: DEFAULT_CONFIDENCE,
+  preset: "standard",
+  wishes: { alert_order: ["bea", "cy"], offer_911_script: true },
+  expires: 480,
+  ...over,
+});
