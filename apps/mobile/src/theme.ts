@@ -10,8 +10,9 @@ export const color = {
   butter: "#FFE38A", // selected chips, small highlights
   primary: "#C2185B", // deep raspberry: the important buttons (white text 5.9:1)
   primaryPressed: "#9C1149",
-  honey: "#9A5B00", // "I'm worried": stands out without looking like an alarm (white 5.4:1)
-  honeyPressed: "#7A4800",
+  worry: "#7A0E3A", // "I'm worried": very dark pink, the logo's overlap (white 10.8:1)
+  worryPressed: "#5C0A2B",
+  honey: "#9A5B00", // the "!" on pre-flight tips
   berry: "#8E1046", // the most serious alert cards (rung 4)
   text: "#3D1A2B", // deep plum
   muted: "#7A4A5E",

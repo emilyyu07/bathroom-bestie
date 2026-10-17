@@ -151,7 +151,7 @@ export function FriendAlerts({
               <Button title="I'm with her" onPress={() => void act(a, "confirm")} />
             </View>
             <View style={{ flex: 1 }}>
-              <Button tone="honey" title="I'm worried" onPress={() => void act(a, "worry")} />
+              <Button tone="worry" title="I'm worried" onPress={() => void act(a, "worry")} />
             </View>
           </View>
           {sent[a.id] &&
