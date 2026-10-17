@@ -22,6 +22,17 @@ emulator doesn't have: run Metro with `EXPO_PUBLIC_REPORT_ACCURACY=high npx expo
 feed positions with `adb emu geo fix <lon> <lat>` (repeating the same position registers nothing;
 vary it slightly).
 
+Home is a geofence on the phone (`src/home.ts`, invariant 5). "Set home to where I am now" on the
+Pre-flight screen stores the position on this device only and registers a 150 m geofence. When she
+enters it during a night, the phone sends one report with `homeArrived: true` and no area at all,
+then stops reporting: the engine treats her as home for the rest of the night, and an ordinary
+report from home would reveal where home is. Entering home outside a night does nothing. Android
+geofences can take a minute or two to fire, so the last ordinary reports before arrival may come
+from near home (documented limit).
+
+Motion: when Android gives no speed (common with Balanced location), the app estimates it from the
+distance to the previous fix (kept on the phone), so walking/vehicle reach the engine.
+
 No device? The screens run in a browser against the local API (`pnpm api` first):
 
     npx expo start --web          # http://localhost:8081
