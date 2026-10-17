@@ -1,6 +1,6 @@
 # Remaining scope and delegation plan
 
-Status as of `main` @ `bfb3270` (2026-10-17). Purpose: one place for the sync-up on what is left, who owns it, and in what
+Status as of `main` @ `bfb3270` (2026-10-17). About 24 hours remain; this plan assumes 18 working hours (section 4). Purpose: one place for the sync-up on what is left, who owns it, and in what
 order. `docs/scope.md` is still a placeholder; reconciling it with the real scope document is item **S1** below and gates
 the final sign-off.
 
@@ -192,42 +192,83 @@ S1 scope reconcile ────────▶ final sign-off
 The critical path is **B1**. A1 can be built and fully tested in the sim without it, but cannot be shown on a phone
 until B1 lands. B2 and B3 are independent of each other and of A.
 
-## 4. Suggested delegation (most efficient split)
+## 4. Plan for the remaining ~24 hours (about 18 working hours)
 
-Principle: the work splits by _where it runs_. Elika owns everything on the device because she has the emulator setup and
-has already verified flows there; Emily owns everything the simulator can prove. The interfaces between them already exist
-(`homeArrived` in evidence, `Alert.to`), so neither blocks the other.
+The raw estimates in earlier drafts summed to about 17 h for Emily and 20 h for Elika before any integration time, so
+Elika's side did not fit. This plan cuts scope to fit 18 working hours each, with the last ~6 h of the clock held back for
+sleep and demo preparation. `H0` is the sync-up.
 
-|                           | Emily (A)                                                              | Elika (B)                                                    |
-| ------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **Phase 1** (unblock)     | A7 CI + `pnpm demo` · A2 factor · start A1                             | **B1 geofence** (first) · B4 verify Postgres + Gemini        |
-| **Phase 2** (core)        | A1 exit-alone + scenarios 12-13 · A5 hardening                         | B2 background reporting · B3 friend alert view + `to` filter |
-| **Phase 3** (credibility) | A4 calibration, nudges per night, scenarios 14-15 · A3 names           | B6 name field · B5 console map (if time)                     |
-| **Phase 4** (together)    | S1 scope reconcile · S2 sign-off · S3 final summary and demo rehearsal | same                                                         |
+### 4.1 What the demo must do (this defines priority)
 
-Why this order:
+Anything not on this path is cut or deferred.
 
-- B1 first because everything home-related waits on it; A1 is built in parallel so it is ready when B1 lands.
-- CI first for A: it is quick, and it protects both owners for the rest of the project.
-- B3 before B5: it is required for a demo that shows an alert reaching a friend; the console map is nice-to-have.
-- Names late: cosmetic, and they touch both sides.
+1. Type a sentence that includes a home time; see the read-back and the terms (Gemini, or the mock).
+2. Pre-flight reaches ready with a real watcher and a real home geofence.
+3. Activate; the phone reports.
+4. She drifts away or goes quiet; the ladder runs (nudge, watcher, escalation); her Status screen shows the nudge.
+5. **A friend sees the alert** (rung, message, factors, last-known area) and taps "I'm with her"; it resolves.
+6. Console replay and the sweep chart tell the "false alarms vs speed" story honestly, caveats included.
 
-**Cut line, if time is short (cut in this order):** pickup and stall (A6) → console map (B5) → names (A3) → calibration
-depth (A4) → local notifications on the friend view. Do **not** cut: B1, B3, S1, S3.
+Fallback if the phone path breaks: the scripted `pnpm demo` plus the console replay carry steps 3-6.
 
-## 5. Estimated effort
+### 4.2 Decisions made to fit the clock (changes from the first draft)
 
-No deadline was provided, so these are work-hours per owner. Map them to the hackathon end time at the sync.
+| Change                                                                   | Effect                                                                     |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Pickup and stall timers (A6): **dropped**                                | Saves ~3 h; documented stub stays                                          |
+| Console group map (B5): **dropped**                                      | Saves ~3 h; replay and sweep pages already exist                           |
+| Names via `group.names` (A3): **replaced by id-as-name**                 | The app sends her real name as the planner id; no schema work (saves ~3 h) |
+| Local notifications on the friend view: **dropped**                      | Polling only                                                               |
+| `pnpm sim calibrate` full grid: **reduced** to a minimal trade-off table | Saves ~2 h                                                                 |
+| Background reporting (B2): **timeboxed** to 4 h, with a go/no-go gate    | Fallback below                                                             |
+| Geofence (B1): **timeboxed** to 4 h, with a gate                         | Fallback below                                                             |
 
-| Phase | Emily           | Elika           |
-| ----- | --------------- | --------------- |
-| 1     | ~4 h            | ~5 h            |
-| 2     | ~5 h            | ~8 h            |
-| 3     | ~5 h            | ~4 h            |
-| 4     | ~3 h (together) | ~3 h (together) |
+### 4.3 Schedule (work-hours from the sync)
 
-Elika's side carries more risk (Android background work), so spare capacity on Emily's side should go toward helping verify
-B1/B2 on the emulator, not toward new features.
+| Hours       | Emily (A)                                                                                                                                | Elika (B)                                                              |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **H0-H1**   | Sync: decisions in section 6; paste the real scope into `docs/scope.md` and diff it (**S1**); merge PR #8                                | Same                                                                   |
+| **H1-H5**   | CI (1 h) · `GET /incidents?to=` (0.5 h, supports B3) · `pnpm demo` (1.5 h) · "group still together" factor A2 (0.5 h) · start A1 (0.5 h) | **B1 home geofence**, timeboxed 4 h                                    |
+| **H5-H9**   | **A1 exit-alone** + scenarios 12-13 (4 h)                                                                                                | **B3 friend alert view** (3 h) · **B4 verify Postgres + Gemini** (1 h) |
+| **H9-H13**  | A5 hardening subset · A4 minimal: scenarios 14-15, nudges-per-night metric, trade-off table (4 h)                                        | **B2 background reporting**, timeboxed 4 h                             |
+| **H13-H15** | Pair with Elika on the emulator (verify geofence and background); id-as-name request                                                     | id-as-name field in the Plan screen (0.5 h) + fixes                    |
+| **H15**     | **Feature freeze** (no new features after this)                                                                                          |                                                                        |
+| **H15-H18** | Integration: clean-clone check, end-to-end dry run of the demo path, fix list, final summary (**S3**)                                    | Same                                                                   |
+| **H18-H24** | Sleep and demo prep: script and talk track, rehearsal twice, backup screen recording                                                     | Same                                                                   |
+
+Capacity check. Emily: 1 + 4 + 4 + 4 + 2 + 3 = 18 h. Elika: 1 + 4 + 4 + 4 + 2 + 3 = 18 h.
+
+### 4.4 Gates (go / no-go)
+
+| Gate    | Check                                                                                  | If it fails                                                                                                  |
+| ------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **H5**  | Entering and leaving the home region on the emulator produces one `homeArrived` report | Ship a clearly labelled "simulate arriving home" debug action that posts the same report; say so in the demo |
+| **H9**  | A friend can see an alert addressed to them and confirm it, end to end                 | Cut polish; the friend view is non-negotiable, shrink it to a plain list                                     |
+| **H13** | The reporter keeps reporting while the app is backgrounded for 15+ min                 | Fall back to the foreground reporter; demo with the app open; list it as a known limitation                  |
+| **H15** | Feature freeze                                                                         | Nothing new merges except fixes to the demo path                                                             |
+
+### 4.5 Working rules for the sprint
+
+- Small PRs (about 150 lines of hand-written change), reviewed within ~30 minutes, merged the same hour.
+- Merge `main` into your branch before opening a PR; no long-lived branches.
+- Announce any schema change before merging it.
+- Generated files (sweep, replay, scenario JSON): regenerate after a merge; never hand-edit.
+- Before every merge: `pnpm test && pnpm typecheck && pnpm lint && pnpm sim run`.
+- Sleep: stagger it if possible, and do the integration block (H15-H18) with both people rested. A tired integration pass
+  is where demo-breaking mistakes happen.
+
+### 4.6 Delegation principle
+
+The work splits by where it runs. Elika owns everything on the device because she has the emulator setup and has already
+verified flows there. Emily owns everything the simulator can prove, plus CI, the demo script and the small API change that
+unblocks the friend view. The interfaces between them already exist (`homeArrived` in evidence, `Alert.to`), so neither
+blocks the other, and Emily's spare time at H13-H15 goes to pairing on the emulator, not to new features.
+
+## 5. Cut line if the schedule slips
+
+Cut in this order: local notifications (already cut) → calibration beyond the minimal table → scenarios 14-15 → hardening
+beyond the multi-member and expiry tests → the "group still together" factor. **Never cut:** B1 (or its labelled fallback),
+B3, the H15 freeze, S1, S3.
 
 ## 6. Risks
 
