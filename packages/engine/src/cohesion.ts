@@ -53,7 +53,6 @@ export const updateApart = (
   now: number,
 ): void => {
   const p = state.people[id]!;
-  p.apartSince ??= null; // states cached before cohesion existed lack the field
   if (p.home) {
     p.apartSince = null;
     return;
@@ -71,7 +70,7 @@ export const separatedFor = (
   now: number,
 ): number => {
   const p = state.people[id]!;
-  if (p.apartSince === null || p.apartSince === undefined) return 0;
+  if (p.apartSince === null) return 0;
   const end = isFresh(contract, state, id, now) ? now : (p.lastReportAt ?? now);
   return Math.max(0, end - p.apartSince);
 };
@@ -83,6 +82,6 @@ export const wasSeparatedAtLastReport = (
   id: string,
 ): boolean => {
   const p = state.people[id]!;
-  if (p.apartSince === null || p.apartSince === undefined || p.lastReportAt === null) return false;
+  if (p.apartSince === null || p.lastReportAt === null) return false;
   return p.lastReportAt - p.apartSince >= contract.thresholds.separation_min;
 };

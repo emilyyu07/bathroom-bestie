@@ -117,3 +117,29 @@ describe("api", () => {
     expect(list.alerts[0].message).toContain("cy");
   });
 });
+
+describe("runner", () => {
+  it("rebuilds a cache written by an older engine version from the logs instead of trusting it", async () => {
+    const { contract } = (
+      await app.inject({
+        method: "POST",
+        url: "/contracts/compile",
+        payload: { sentence: "out with Bea and Cy" },
+      })
+    ).json();
+    await app.inject({
+      method: "POST",
+      url: "/preflight",
+      payload: { contractId: contract.id, snapshot: good },
+    });
+    await app.inject({ method: "POST", url: `/contracts/${contract.id}/activate` });
+    await store.saveEngine(contract.id, {
+      state: { ...(await import("@bathroombestie/engine")).initialState(contract), version: 1 },
+      evSeq: 0,
+      actSeq: 0,
+    });
+    await tick(store, clock);
+    const row = await store.getEngine(contract.id);
+    expect(row!.state.version).toBeGreaterThan(1);
+  });
+});

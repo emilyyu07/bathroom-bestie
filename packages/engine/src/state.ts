@@ -56,7 +56,11 @@ export interface SoftNote {
   text: string;
 }
 
+/** Bump whenever PersonState/Incident/EngineState semantics change; stale caches are rebuilt from the logs. */
+export const ENGINE_STATE_VERSION = 2;
+
 export interface EngineState {
+  version: number;
   people: Record<string, PersonState>;
   incidents: Incident[];
   actionLog: ActionLogEntry[];
@@ -68,6 +72,7 @@ export const COOLDOWN_MIN = 30;
 export const WORRY_RATE_LIMIT_MIN = 15;
 
 export const initialState = (contract: Contract): EngineState => ({
+  version: ENGINE_STATE_VERSION,
   people: Object.fromEntries(
     contract.group.members.map((id) => [
       id,

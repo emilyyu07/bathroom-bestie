@@ -1,4 +1,4 @@
-import { evaluate, initialState } from "@bathroombestie/engine";
+import { ENGINE_STATE_VERSION, evaluate, initialState, rebuild } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
 import type { Store } from "./store";
 
@@ -11,11 +11,29 @@ export async function tick(store: Store, clock: Clock): Promise<number> {
   const now = clock.nowMinute();
   let emitted = 0;
   for (const contract of await store.listActive()) {
-    const row = (await store.getEngine(contract.id)) ?? {
+    let row = (await store.getEngine(contract.id)) ?? {
       state: initialState(contract),
       evSeq: 0,
       actSeq: 0,
     };
+    if (row.state.version !== ENGINE_STATE_VERSION) {
+      // The cache came from an older engine. State is derived (invariant 2): rebuild it from the
+      // append-only logs. Past minutes emit no new alerts; already-stored alerts are left alone.
+      const allEv = await store.evidenceAfter(contract.id, 0, now);
+      const allAct = await store.actionsAfter(contract.id, 0, now);
+      row = {
+        state: rebuild({
+          contract,
+          evidence: allEv.map((x) => x.e),
+          actions: allAct.map((x) => x.a),
+          to: now,
+        }),
+        evSeq: Math.max(0, ...allEv.map((x) => x.seq)),
+        actSeq: Math.max(0, ...allAct.map((x) => x.seq)),
+      };
+      await store.saveEngine(contract.id, row);
+      continue;
+    }
     const evs = await store.evidenceAfter(contract.id, row.evSeq, now);
     const acts = await store.actionsAfter(contract.id, row.actSeq, now);
     let state = row.state;

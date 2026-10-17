@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeContract, type EvidenceReport } from "@bathroombestie/schema";
-import { initialState, separatedFor } from "../src";
+import { separatedFor } from "../src";
 import { darkAna, ev, run } from "./helpers";
 
 const A = { lat: 43.65, lon: -79.38 };
@@ -112,13 +112,6 @@ describe("group cohesion", () => {
     });
     expect(alerts).toEqual([]);
     expect(state.people.ana!.apartSince).toBeNull();
-  });
-
-  it("states cached before cohesion existed still evaluate", () => {
-    const c = makeContract();
-    const s = initialState(c);
-    for (const p of Object.values(s.people)) delete (p as Partial<typeof p>).apartSince;
-    expect(() => separatedFor(c, s, "ana", 10)).not.toThrow();
   });
 });
 

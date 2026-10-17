@@ -25,6 +25,21 @@ a human: a `worry` from the current watcher. Evidence returning resolves from
 any rung; resolve and confirm start a 30 min cooldown. A `worry` incident is not closed by normal evidence, only by a
 confirm or the home event.
 
+## Engine layout (`packages/engine/src`)
+
+`evaluate.ts` is a thin orchestrator: ingest evidence → apply friend actions → per member `observe` → `detectConcern` →
+`stepIncident`.
+
+- `ingest.ts` folds evidence into per-person state. `actions.ts` applies confirm/worry. `observe.ts` is the only step that
+  updates tick-level tracking (score dip timer, soft notes).
+- `concerns.ts`: detectors in priority order (`DETECTORS`), each a read-only function over the tick's `Signals`, plus
+  `SEVERITY` (hard / advisory / notice). New concerns (e.g. overdue handoffs) are added here, not in the loop.
+- `ladder.ts`: resolve / upgrade-in-place / escalate for one open incident. `incidents.ts`: open, resolve, cooldown.
+- `render.ts`: the only place an incident becomes alert text and recipients (fixed templates).
+- `replay.ts`: `replay`/`rebuild` derive state and alerts purely from the logs. `EngineState.version`
+  (`ENGINE_STATE_VERSION`) is checked by `evaluate`; the API runner rebuilds a stale cache instead of trusting it.
+  Bump the version whenever state or incident semantics change.
+
 ## Cohesion (`packages/engine/src/cohesion.ts`)
 
 `updateApart` runs for every member each tick and maintains `PersonState.apartSince`.
