@@ -16,3 +16,9 @@ describe("invariant 6: banned words", () => {
     });
   }
 });
+
+describe("nudges are informational (no check-ins)", () => {
+  it("the separation nudge states a fact and gives no instruction", () => {
+    expect(TEMPLATES.separation).not.toMatch(/let (them|your friends) know|check in|tap|press/i);
+  });
+});

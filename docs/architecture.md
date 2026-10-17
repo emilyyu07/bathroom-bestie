@@ -83,6 +83,12 @@ good to about one grid cell. Tightening it needs finer coordinates, which would 
 5. Mobile Status: drop the "I'm fine" TODO ("no check-ins"; returning evidence already clears a nudge).
 6. After the scenario PRs merge, re-run `pnpm test:db` (it replays every scenario on Postgres).
 
+## Decision log
+
+- **No "I'm fine" button (agreed by both owners).** The product has no check-ins. Opening the app already sends an
+  evidence report immediately, which clears silence and low-score nudges. Nudges the app cannot clear (separation, and later
+  missed milestone) are worded as facts, never as instructions. The mobile Status screen shows "watching" only.
+
 ## Decisions to confirm
 
 - Times are integer epoch minutes everywhere.
