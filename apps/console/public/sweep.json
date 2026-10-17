@@ -2,8 +2,8 @@
   "presets": {
     "relaxed": {
       "falseAlertsPerNormalNight": 0,
-      "medianTimeToAlertMin": 34.5,
-      "worstTimeToAlertMin": 37,
+      "medianTimeToAlertMin": 35.5,
+      "worstTimeToAlertMin": 40,
       "knownMisses": [],
       "scenarios": [
         {
@@ -22,7 +22,7 @@
           "name": "03-separated-then-silent",
           "truth": "concerning",
           "alertsToOthers": 3,
-          "timeToAlert": 37
+          "timeToAlert": 40
         },
         {
           "name": "04-false-alarm-confirmed",
@@ -58,14 +58,14 @@
           "name": "11-home-missed-and-quiet",
           "truth": "concerning",
           "alertsToOthers": 3,
-          "timeToAlert": 32
+          "timeToAlert": 31
         }
       ]
     },
     "standard": {
       "falseAlertsPerNormalNight": 0.143,
-      "medianTimeToAlertMin": 22.5,
-      "worstTimeToAlertMin": 25,
+      "medianTimeToAlertMin": 21,
+      "worstTimeToAlertMin": 23,
       "knownMisses": [],
       "scenarios": [
         {
@@ -84,7 +84,7 @@
           "name": "03-separated-then-silent",
           "truth": "concerning",
           "alertsToOthers": 3,
-          "timeToAlert": 25
+          "timeToAlert": 23
         },
         {
           "name": "04-false-alarm-confirmed",
@@ -120,14 +120,14 @@
           "name": "11-home-missed-and-quiet",
           "truth": "concerning",
           "alertsToOthers": 3,
-          "timeToAlert": 20
+          "timeToAlert": 19
         }
       ]
     },
     "cautious": {
       "falseAlertsPerNormalNight": 0.429,
-      "medianTimeToAlertMin": 12.5,
-      "worstTimeToAlertMin": 15,
+      "medianTimeToAlertMin": 11,
+      "worstTimeToAlertMin": 13,
       "knownMisses": [],
       "scenarios": [
         {
@@ -146,7 +146,7 @@
           "name": "03-separated-then-silent",
           "truth": "concerning",
           "alertsToOthers": 3,
-          "timeToAlert": 15
+          "timeToAlert": 13
         },
         {
           "name": "04-false-alarm-confirmed",
@@ -182,7 +182,7 @@
           "name": "11-home-missed-and-quiet",
           "truth": "concerning",
           "alertsToOthers": 3,
-          "timeToAlert": 10
+          "timeToAlert": 9
         }
       ]
     }
