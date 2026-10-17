@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, SafeAreaView, View } from "react-native";
 import { Plan } from "./src/screens/Plan";
 import { Preflight } from "./src/screens/Preflight";
 import { Status } from "./src/screens/Status";
 import { Watcher } from "./src/screens/Watcher";
-import { useNightReporting } from "./src/night";
+import { endNight, runningNight, useNightReporting } from "./src/night";
 
 // TODO: real identity/auth is out of scope; ids are placeholders.
 export default function App() {
@@ -12,6 +12,15 @@ export default function App() {
   const [contractId, setContractId] = useState("");
   const [active, setActive] = useState(false);
   useNightReporting(contractId, "me", active);
+  // Reopened while a night is still being reported in the background: show that night.
+  useEffect(() => {
+    void runningNight().then((n) => {
+      if (!n) return;
+      setContractId(n.contractId);
+      setActive(true);
+      setScreen("status");
+    });
+  }, []);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 40 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
@@ -22,6 +31,7 @@ export default function App() {
       {screen === "plan" && (
         <Plan
           onCompiled={(c) => {
+            void endNight();
             setContractId(c.id);
             setActive(false);
             setScreen("preflight");

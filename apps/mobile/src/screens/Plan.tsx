@@ -40,14 +40,20 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string }) => void }
       <Button
         title="Make my plan"
         onPress={async () => {
-          const r = await post<Compiled & { readBack: string }>("/contracts/compile", {
-            sentence,
-            localTime: new Date().toTimeString().slice(0, 5), // lets "until 2am" become hours
-          });
-          setReadBack(r.readBack);
-          setId(r.contract.id);
-          setPreset(r.contract.preset);
-          setTerms(r.terms);
+          try {
+            const r = await post<Compiled & { readBack: string }>("/contracts/compile", {
+              sentence,
+              localTime: new Date().toTimeString().slice(0, 5), // lets "until 2am" become hours
+            });
+            setReadBack(r.readBack);
+            setId(r.contract.id);
+            setPreset(r.contract.preset);
+            setTerms(r.terms);
+            setError(null);
+          } catch {
+            // e.g. 503 compiler_unavailable when the model is overloaded; her sentence is kept.
+            setError("Couldn't make your plan right now. Try again in a moment.");
+          }
         }}
       />
       {readBack && <Text>{readBack}</Text>}

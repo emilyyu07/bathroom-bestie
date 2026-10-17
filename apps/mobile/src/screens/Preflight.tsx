@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Text, View } from "react-native";
+import { Button, Linking, Platform, Text, View } from "react-native";
 import { post } from "../api";
 import { collectSnapshot, requestPermissions } from "../readiness";
 
@@ -45,6 +45,9 @@ export function Preflight({
   const needsPermissions = report?.checks.some(
     (c) => c.status === "fail" && (c.id === "background_location" || c.id === "notifications"),
   );
+  const batteryRestricted =
+    Platform.OS === "android" &&
+    report?.checks.some((c) => c.id === "battery_settings" && c.status === "fail");
   return (
     <View style={{ padding: 16, gap: 8 }}>
       <Button
@@ -59,6 +62,18 @@ export function Preflight({
             await requestPermissions();
             await run();
           }}
+        />
+      )}
+      {batteryRestricted && (
+        // She exempts the app herself; we don't request REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+        // (restricted by Play policy). Re-run pre-flight after to see the change.
+        <Button
+          title="Open battery settings"
+          onPress={() =>
+            void Linking.sendIntent("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS").catch(
+              () => Linking.openSettings(),
+            )
+          }
         />
       )}
       {report && <Text style={{ fontSize: 20 }}>{TITLE[report.state]}</Text>}
