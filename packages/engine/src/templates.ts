@@ -12,6 +12,7 @@ export const TEMPLATES = {
   group: "Nobody has responded about {name}, who hasn't sent an update for {minutes} min.",
   unexplained:
     "{name}'s phone stopped sending updates {minutes} min ago while apart from the group.",
+  separation: "You've been apart from your group for {minutes} min. Let them know you're okay.",
   evidenceLost:
     "BathroomBestie can't see updates from {name}'s phone because a permission was turned off.",
   worry: "{friend} reports: {reasonText}.",
@@ -34,7 +35,7 @@ export const FACTOR_TEMPLATES = {
   outsideArea: "Not seen in the planned area for {minutes} min",
   noMovement: "No movement for {minutes} min",
   battery: "Phone was at {battery}% battery at its last update",
-  apart: "Away from the rest of the group",
+  apartFor: "Apart from the group for {minutes} min",
   score: "Confidence of normal is {score}",
 } as const;
 

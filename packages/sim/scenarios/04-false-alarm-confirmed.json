@@ -1,6 +1,6 @@
 {
   "name": "04-false-alarm-confirmed",
-  "description": "Ana loses signal for 50 minutes while apart; Bea confirms she is with her.",
+  "description": "Ana wanders off at 60, loses signal at 100 for 50 minutes; Bea confirms she is with her.",
   "contract": {
     "id": "c1",
     "corridor": {
@@ -16,7 +16,11 @@
     },
     "milestones": [],
     "group": {
-      "members": ["ana", "bea", "cy"],
+      "members": [
+        "ana",
+        "bea",
+        "cy"
+      ],
       "watch": [
         {
           "who": "bea",
@@ -55,7 +59,10 @@
     },
     "preset": "standard",
     "wishes": {
-      "alert_order": ["bea", "cy"],
+      "alert_order": [
+        "bea",
+        "cy"
+      ],
       "offer_911_script": true
     },
     "expires": 480
@@ -222,7 +229,7 @@
         "at": 60,
         "evidence": {
           "area": {
-            "lat": 43.65,
+            "lat": 43.66,
             "lon": -79.38
           },
           "motion": "walking",
@@ -235,7 +242,7 @@
         "at": 65,
         "evidence": {
           "area": {
-            "lat": 43.65,
+            "lat": 43.66,
             "lon": -79.38
           },
           "motion": "walking",
@@ -248,7 +255,7 @@
         "at": 70,
         "evidence": {
           "area": {
-            "lat": 43.65,
+            "lat": 43.66,
             "lon": -79.38
           },
           "motion": "walking",
@@ -261,7 +268,7 @@
         "at": 75,
         "evidence": {
           "area": {
-            "lat": 43.65,
+            "lat": 43.66,
             "lon": -79.38
           },
           "motion": "walking",

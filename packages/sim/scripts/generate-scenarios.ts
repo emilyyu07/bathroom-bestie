@@ -73,7 +73,7 @@ sc(
     contract: makeContract(),
     timelines: {
       ana: every(0, 150, (t) => ({
-        area: t >= 90 ? FAR : A,
+        area: mid(t), // stays with the group: this scenario is about the battery, not separation
         motion: "walking",
         batteryPct: Math.max(3, Math.round(50 - t / 3.2)),
       })),
@@ -111,12 +111,13 @@ sc(
 sc(
   {
     name: "04-false-alarm-confirmed",
-    description: "Ana loses signal for 50 minutes while apart; Bea confirms she is with her.",
+    description:
+      "Ana wanders off at 60, loses signal at 100 for 50 minutes; Bea confirms she is with her.",
     contract: makeContract(),
     timelines: {
       ana: [
         ...every(0, 100, (t) => ({
-          area: t >= 80 ? FAR : mid(t),
+          area: t >= 60 ? FAR : mid(t), // apart long enough (40 min) before going dark
           motion: "walking",
           batteryPct: 61,
         })),
@@ -179,4 +180,56 @@ sc(
     label: { expect: "activation_blocked" },
   },
   "06-readiness-blocked.json",
+);
+
+// 7. Brief separation then rejoin.
+sc(
+  {
+    name: "07-brief-separation",
+    description:
+      "Ana steps away for 20 minutes then rejoins: under separation_min at relaxed and standard.",
+    contract: makeContract(),
+    timelines: {
+      ana: every(0, 250, (t) => ({
+        area: t >= 100 && t < 120 ? FAR : mid(t),
+        motion: "walking",
+        batteryPct: 70,
+      })),
+      ...together(250),
+    },
+    durationMin: 250,
+    truth: "normal",
+    label: { expect: "no_alert" },
+  },
+  "07-brief-separation.json",
+);
+
+// 8. Separated only: still reporting, a rung-1 nudge, then she rejoins.
+sc(
+  {
+    name: "08-separated-only",
+    description:
+      "Ana is away from the group for 100 minutes but keeps reporting. Nudge to her only; closes on rejoin.",
+    contract: makeContract(),
+    timelines: {
+      ana: every(0, 250, (t) => ({
+        area: t >= 100 && t < 205 ? FAR : mid(t),
+        motion: "walking",
+        batteryPct: 70,
+      })),
+      ...together(250),
+    },
+    durationMin: 250,
+    truth: "normal",
+    label: {
+      expect: "alert",
+      rung: 1,
+      from: 125,
+      to: 125,
+      onset: 100,
+      maxRung: 1,
+      resolvedBy: "rejoined",
+    },
+  },
+  "08-separated-only.json",
 );

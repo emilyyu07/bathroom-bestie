@@ -16,7 +16,11 @@
     },
     "milestones": [],
     "group": {
-      "members": ["ana", "bea", "cy"],
+      "members": [
+        "ana",
+        "bea",
+        "cy"
+      ],
       "watch": [
         {
           "who": "bea",
@@ -55,7 +59,10 @@
     },
     "preset": "standard",
     "wishes": {
-      "alert_order": ["bea", "cy"],
+      "alert_order": [
+        "bea",
+        "cy"
+      ],
       "offer_911_script": true
     },
     "expires": 480
@@ -287,8 +294,8 @@
         "at": 85,
         "evidence": {
           "area": {
-            "lat": 43.65,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 23,
@@ -300,8 +307,8 @@
         "at": 90,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 22,
@@ -313,8 +320,8 @@
         "at": 95,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 20,
@@ -326,8 +333,8 @@
         "at": 100,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 19,
@@ -339,8 +346,8 @@
         "at": 105,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 17,
@@ -352,8 +359,8 @@
         "at": 110,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 16,
@@ -365,8 +372,8 @@
         "at": 115,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 14,
@@ -378,8 +385,8 @@
         "at": 120,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 13,
@@ -391,8 +398,8 @@
         "at": 125,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 11,
@@ -404,8 +411,8 @@
         "at": 130,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 9,
@@ -417,8 +424,8 @@
         "at": 135,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 8,
@@ -430,8 +437,8 @@
         "at": 140,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 6,
@@ -443,8 +450,8 @@
         "at": 145,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 5,
@@ -456,8 +463,8 @@
         "at": 150,
         "evidence": {
           "area": {
-            "lat": 43.66,
-            "lon": -79.38
+            "lat": 43.653,
+            "lon": -79.383
           },
           "motion": "walking",
           "batteryPct": 3,

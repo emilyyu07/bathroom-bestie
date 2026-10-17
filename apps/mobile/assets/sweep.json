@@ -1,7 +1,7 @@
 {
   "presets": {
     "relaxed": {
-      "falseAlertsPerNormalNight": 0.667,
+      "falseAlertsPerNormalNight": 0,
       "medianTimeToAlertMin": 37,
       "worstTimeToAlertMin": 37,
       "knownMisses": [],
@@ -27,13 +27,25 @@
         {
           "name": "04-false-alarm-confirmed",
           "truth": "normal",
-          "alertsToOthers": 2,
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "07-brief-separation",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "08-separated-only",
+          "truth": "normal",
+          "alertsToOthers": 0,
           "timeToAlert": null
         }
       ]
     },
     "standard": {
-      "falseAlertsPerNormalNight": 0.333,
+      "falseAlertsPerNormalNight": 0.2,
       "medianTimeToAlertMin": 25,
       "worstTimeToAlertMin": 25,
       "knownMisses": [],
@@ -61,11 +73,23 @@
           "truth": "normal",
           "alertsToOthers": 1,
           "timeToAlert": null
+        },
+        {
+          "name": "07-brief-separation",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "08-separated-only",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
         }
       ]
     },
     "cautious": {
-      "falseAlertsPerNormalNight": 1,
+      "falseAlertsPerNormalNight": 0.6,
       "medianTimeToAlertMin": 15,
       "worstTimeToAlertMin": 15,
       "knownMisses": [],
@@ -92,6 +116,18 @@
           "name": "04-false-alarm-confirmed",
           "truth": "normal",
           "alertsToOthers": 3,
+          "timeToAlert": null
+        },
+        {
+          "name": "07-brief-separation",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "08-separated-only",
+          "truth": "normal",
+          "alertsToOthers": 0,
           "timeToAlert": null
         }
       ]

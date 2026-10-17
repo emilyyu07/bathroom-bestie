@@ -12,12 +12,15 @@ export interface PersonState {
   home: boolean;
   /** First minute N dropped below the floor in the current dip; null when above it. */
   lowSince: Minute | null;
+  /** Since when she has been apart from every fresh peer. Frozen while she is silent; null if together. */
+  apartSince: Minute | null;
   cooldownUntil: Minute | null;
   /** Last accepted worry time per friend (rate limit). */
   worryAt: Record<string, Minute>;
 }
 
-export type IncidentKind = "low_confidence" | "unexplained_stop" | "evidence_lost" | "friend_worry";
+export type IncidentKind =
+  "low_confidence" | "unexplained_stop" | "evidence_lost" | "friend_worry" | "separation";
 
 /** self -> watcher -> next -> group are the automatic steps; friend = a human took over. */
 export type IncidentStep = "self" | "watcher" | "next" | "group" | "friend";
@@ -34,7 +37,7 @@ export interface Incident {
   raisedBy?: string;
   reason?: string;
   resolvedAt?: Minute;
-  resolution?: "evidence_returned" | "confirmed" | "home";
+  resolution?: "evidence_returned" | "confirmed" | "home" | "rejoined";
   confirmedBy?: string;
 }
 
@@ -79,6 +82,7 @@ export const initialState = (contract: Contract): EngineState => ({
         permissionLost: false,
         home: false,
         lowSince: null,
+        apartSince: null,
         cooldownUntil: null,
         worryAt: {},
       } satisfies PersonState,

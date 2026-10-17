@@ -1,0 +1,123 @@
+import { describe, expect, it } from "vitest";
+import { makeContract, type EvidenceReport } from "@bathroombestie/schema";
+import { initialState, separatedFor } from "../src";
+import { darkAna, ev, run } from "./helpers";
+
+const A = { lat: 43.65, lon: -79.38 };
+const FAR = { lat: 43.66, lon: -79.38 };
+const rungs = (a: { rung: number; t: number }[]) => a.map((x) => `${x.rung}@${x.t}`);
+
+/** bea and cy stay at A and report every 5 min; ana's reports come from `ana(t)`. */
+const withAna = (ana: (t: number) => EvidenceReport[]) => (t: number) => [
+  ...(t % 5 === 0 ? [ev("bea", t, { area: A }), ev("cy", t, { area: A })] : []),
+  ...ana(t),
+];
+
+describe("group cohesion", () => {
+  it("separated = apart from every peer for separation_min: nudges her at rung 1 (standard: 25 min)", () => {
+    const { alerts } = run({ to: 200, evidence: darkAna(1000, 61, 0) });
+    expect(alerts).toHaveLength(1); // alone it never climbs
+    expect(alerts[0]).toMatchObject({ rung: 1, kind: "separation", personId: "ana", to: ["ana"] });
+    expect(alerts[0]!.t).toBe(25);
+    expect(alerts[0]!.message).toContain("25 min");
+    expect(alerts[0]!.factors).toContain("Apart from the group for 25 min");
+  });
+
+  it("scales with the preset's separation_min", () => {
+    const first = (preset: "relaxed" | "standard" | "cautious") => {
+      const base = makeContract();
+      const mins = { relaxed: 40, standard: 25, cautious: 15 }[preset];
+      const c = makeContract({ thresholds: { ...base.thresholds, separation_min: mins } });
+      return run({ contract: c, to: 100, evidence: darkAna(1000, 61, 0) }).alerts[0]!.t;
+    };
+    expect([first("relaxed"), first("standard"), first("cautious")]).toEqual([40, 25, 15]);
+  });
+
+  it("a member who rejoins before separation_min is never flagged", () => {
+    const { alerts, state } = run({
+      to: 200,
+      evidence: withAna((t) =>
+        t % 5 === 0 ? [ev("ana", t, { area: t >= 5 && t <= 20 ? FAR : A })] : [],
+      ),
+    });
+    expect(alerts).toEqual([]);
+    expect(state.people.ana!.apartSince).toBeNull();
+  });
+
+  it("rejoining closes the nudge as 'rejoined'", () => {
+    const { state, alerts } = run({
+      to: 120,
+      evidence: withAna((t) =>
+        t % 5 === 0 ? [ev("ana", t, { area: t >= 5 && t < 60 ? FAR : A })] : [],
+      ),
+    });
+    expect(rungs(alerts)).toEqual(["1@30"]);
+    expect(state.incidents[0]).toMatchObject({
+      status: "resolved",
+      resolution: "rejoined",
+      resolvedAt: 60,
+    });
+  });
+
+  it("separation plus silence escalates: the nudge upgrades in place to the unexplained ladder", () => {
+    const { alerts, state } = run({ to: 120, evidence: darkAna(60, 61, 0) });
+    expect(rungs(alerts)).toEqual(["1@25", "2@85", "3@90", "3@95"]);
+    expect(state.incidents).toHaveLength(1);
+    expect(state.incidents[0]!.kind).toBe("unexplained_stop");
+  });
+
+  it("freezes the timer while she is silent, so time-apart-before-going-dark is preserved", () => {
+    const { state, contract } = run({ to: 100, evidence: darkAna(60, 61, 20) });
+    expect(state.people.ana!.apartSince).toBe(20);
+    expect(separatedFor(contract, state, "ana", 100)).toBe(40); // up to her last report at 60
+  });
+
+  it("silence after only a brief separation is NOT 'unexplained' (duration rule)", () => {
+    // Apart only from t=50 (10 min < 25) when she goes dark at 60.
+    const { alerts } = run({ to: 160, evidence: darkAna(60, 61, 50) });
+    expect(alerts.some((a) => a.kind === "unexplained_stop")).toBe(false);
+    const first = alerts.find((a) => a.rung >= 2);
+    expect(first?.kind).toBe("low_confidence"); // the score path still catches it, just later
+    expect(first!.t).toBeGreaterThan(85);
+  });
+
+  it("a one-person group is never separated", () => {
+    const c = makeContract({
+      group: { members: ["ana"], watch: [] },
+      wishes: { alert_order: [], offer_911_script: false },
+    });
+    const { alerts, state } = run({
+      contract: c,
+      to: 200,
+      evidence: (t) => (t % 5 === 0 ? [ev("ana", t, { area: FAR })] : []),
+    });
+    expect(alerts).toEqual([]);
+    expect(state.people.ana!.apartSince).toBeNull();
+  });
+
+  it("ignores stale peers: if nobody else is reporting, she is not 'separated'", () => {
+    const { alerts } = run({
+      to: 120,
+      evidence: (t) => (t % 5 === 0 ? [ev("ana", t, { area: FAR })] : []), // bea and cy never report
+    });
+    expect(alerts.filter((a) => a.personId === "ana")).toEqual([]);
+  });
+
+  it("does not run for people who got home", () => {
+    const { alerts, state } = run({
+      to: 120,
+      evidence: withAna((t) =>
+        t % 5 === 0 && t <= 20 ? [ev("ana", t, { area: FAR, homeArrived: t === 20 })] : [],
+      ),
+    });
+    expect(alerts).toEqual([]);
+    expect(state.people.ana!.apartSince).toBeNull();
+  });
+
+  it("states cached before cohesion existed still evaluate", () => {
+    const c = makeContract();
+    const s = initialState(c);
+    for (const p of Object.values(s.people)) delete (p as Partial<typeof p>).apartSince;
+    expect(() => separatedFor(c, s, "ana", 10)).not.toThrow();
+  });
+});

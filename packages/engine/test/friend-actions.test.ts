@@ -27,7 +27,7 @@ describe("friend confirm", () => {
     it(`resolves at ${label}, records who, starts cooldown`, () => {
       const { state, alerts } = run({
         to: t + 25,
-        evidence: darkAna(60),
+        evidence: darkAna(60, 61, 30),
         actions: [confirm(t, "cy")],
       });
       const inc = state.incidents[0]!;
@@ -43,7 +43,7 @@ describe("friend confirm", () => {
   it("resolves a rung-4 incident", () => {
     const { state } = run({
       to: 120,
-      evidence: darkAna(60),
+      evidence: darkAna(60, 61, 30),
       actions: [worry(88, "bea"), confirm(100, "cy")],
     });
     expect(state.incidents[0]!.rung).toBe(4);

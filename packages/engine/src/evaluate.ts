@@ -7,7 +7,8 @@ import {
   type FriendAction,
 } from "@bathroombestie/schema";
 import { confidenceOfNormal } from "./confidence";
-import { classifySilence, isApart, silentMinutes } from "./signals";
+import { separatedFor, updateApart } from "./cohesion";
+import { classifySilence, silentMinutes } from "./signals";
 import {
   COOLDOWN_MIN,
   WORRY_RATE_LIMIT_MIN,
@@ -59,6 +60,7 @@ const nextAfter = (contract: Contract, target: string, watcher: string | null): 
 export function evaluate(input: EvaluateInput): EvaluateResult {
   const { contract, now } = input;
   const state: EngineState = structuredClone(input.state);
+  for (const person of Object.values(state.people)) person.apartSince ??= null; // pre-cohesion caches
   const alerts: Alert[] = [];
   const members = new Set(contract.group.members);
 
@@ -110,8 +112,9 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
       out.push(fill(FACTOR_TEMPLATES.noUpdate, { minutes: silent }));
     if (p.lastBattery !== null && cls === "unexplained")
       out.push(fill(FACTOR_TEMPLATES.battery, { battery: Math.round(p.lastBattery) }));
-    if (isApart(contract, state, id) && contract.group.members.length > 1)
-      out.push(FACTOR_TEMPLATES.apart);
+    const apartMin = separatedFor(contract, state, id, now);
+    if (apartMin >= contract.thresholds.separation_min)
+      out.push(fill(FACTOR_TEMPLATES.apartFor, { minutes: apartMin }));
     const corridor = c.penalties.find((x) => x.stream === "corridor")!;
     if (corridor.penalty > 0)
       out.push(fill(FACTOR_TEMPLATES.outsideArea, { minutes: corridor.minutes }));
@@ -138,11 +141,20 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     const f = factorsFor(id);
     const others = contract.group.members.filter((m) => m !== id);
     if (inc.step === "self") {
-      const tpl = inc.kind === "evidence_lost" ? TEMPLATES.evidenceLost : TEMPLATES.nudge;
+      const tpl =
+        inc.kind === "evidence_lost"
+          ? TEMPLATES.evidenceLost
+          : inc.kind === "separation"
+            ? TEMPLATES.separation
+            : TEMPLATES.nudge;
       emit(
         inc,
-        inc.kind === "evidence_lost" ? "evidence_lost" : inc.kind,
-        fill(tpl, { name: id, minutes }),
+        inc.kind,
+        // A separation nudge reports time apart; every other nudge reports time without an update.
+        fill(tpl, {
+          name: id,
+          minutes: inc.kind === "separation" ? separatedFor(contract, state, id, now) : minutes,
+        }),
         [id],
         f,
       );
@@ -280,6 +292,7 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
   const active = now >= contract.window.start && now <= contract.expires;
   for (const id of contract.group.members) {
     const p = state.people[id]!;
+    updateApart(contract, state, id, now);
     const open = openFor(id);
     if (p.home) {
       if (open) resolve(open, "home");
@@ -313,6 +326,11 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     else if (cls === "unexplained") concern = "unexplained_stop";
     else if (p.lowSince !== null && now - p.lowSince >= th.score_floor_min)
       concern = "low_confidence";
+    else if (
+      silentMinutes(contract, state, id, now) < th.silence_min && // only nudge her while she is reachable
+      separatedFor(contract, state, id, now) >= th.separation_min
+    )
+      concern = "separation";
 
     if (!open) {
       if (concern && (p.cooldownUntil === null || now >= p.cooldownUntil)) {
@@ -323,10 +341,19 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
 
     if (open.kind === "friend_worry") {
       // Human reports end by human action or arriving home; normal evidence does not close them.
-    } else if (!concern) {
+    } else if (concern === "separation" && open.kind !== "separation") {
+      // The stronger concern has passed and only the separation remains: close it, don't keep climbing.
       resolve(open, "evidence_returned");
       continue;
+    } else if (!concern) {
+      resolve(open, open.kind === "separation" ? "rejoined" : "evidence_returned");
+      continue;
+    } else if (open.kind === "separation" && concern !== "separation") {
+      // Apart AND now silent/low-confidence: upgrade in place; the ack timeout counts from here.
+      open.kind = concern;
+      open.rungSince = now;
     }
+    if (open.kind === "separation") continue; // a separation nudge alone never escalates
     if (open.kind === "evidence_lost") continue; // notify, not alarm: never escalates
 
     // Escalate on ack timeout. "Ack" = a friend confirm/worry, handled above.

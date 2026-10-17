@@ -5,10 +5,11 @@ const rungs = (a: { rung: number; t: number }[]) => a.map((x) => `${x.rung}@${x.
 
 describe("ladder", () => {
   it("escalates 1 -> 2 -> 3(next) -> 3(group) on ack timeouts when apart and silent", () => {
-    const { alerts } = run({ to: 120, evidence: darkAna(60) });
-    expect(rungs(alerts)).toEqual(["1@80", "2@85", "3@90", "3@95"]);
-    expect(alerts[0]!.to).toEqual(["ana"]);
-    expect(alerts[1]!.to).toEqual(["bea"]);
+    const { alerts } = run({ to: 120, evidence: darkAna(60, 61, 30) });
+    // apart from 30 -> separation nudge at 55; dark after 60 -> unexplained at 80 upgrades it; rung 2 at 85.
+    expect(rungs(alerts)).toEqual(["1@55", "2@85", "3@90", "3@95"]);
+    expect(alerts[0]).toMatchObject({ kind: "separation", to: ["ana"] });
+    expect(alerts[1]).toMatchObject({ kind: "unexplained_stop", to: ["bea"] });
     expect(alerts[2]!.to).toEqual(["cy"]);
     expect(alerts[3]!.to).toEqual(["bea", "cy"]);
     expect(alerts[1]!.factors.length).toBeLessThanOrEqual(3);
@@ -24,9 +25,9 @@ describe("ladder", () => {
     const back = (t: number) => (t >= 92 && t < 200 ? [ev("ana", t, { motion: "walking" })] : []);
     const { alerts, state } = run({
       to: 200,
-      evidence: (t) => [...darkAna(60)(t), ...back(t)],
+      evidence: (t) => [...darkAna(60, 61, 30)(t), ...back(t)],
     });
-    expect(rungs(alerts)).toEqual(["1@80", "2@85", "3@90"]);
+    expect(rungs(alerts)).toEqual(["1@55", "2@85", "3@90"]);
     const inc = state.incidents[0]!;
     expect(inc.status).toBe("resolved");
     expect(inc.resolution).toBe("evidence_returned");
@@ -35,9 +36,11 @@ describe("ladder", () => {
   });
 
   it("does not reopen during cooldown", () => {
-    // back at 82 (resolves rung 1), goes dark again at 83: would re-trigger at 103 < 82+30.
-    const ev2 = (t: number) => (t >= 82 && t <= 83 ? [ev("ana", t)] : []);
-    const { state } = run({ to: 109, evidence: (t) => [...darkAna(60)(t), ...ev2(t)] });
+    // Still apart but reporting again at 82 (the unexplained stop ends; resolves at rung 1), then
+    // dark again after 83: unexplained would re-trigger at 103 < 82 + 30, so the cooldown holds it.
+    const FAR = { lat: 43.66, lon: -79.38 };
+    const ev2 = (t: number) => (t >= 82 && t <= 83 ? [ev("ana", t, { area: FAR })] : []);
+    const { state } = run({ to: 109, evidence: (t) => [...darkAna(60, 61, 30)(t), ...ev2(t)] });
     expect(state.incidents).toHaveLength(1);
     expect(state.incidents[0]!.resolvedAt).toBe(82);
   });
