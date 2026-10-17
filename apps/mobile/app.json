@@ -20,7 +20,7 @@
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFF3C4"
+        "backgroundColor": "#FFF4D6"
       }
     },
     "plugins": [
@@ -33,7 +33,8 @@
       ],
       "expo-notifications",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      "./plugins/withVectorAdaptiveIcon"
     ],
     "icon": "./assets/icon.png",
     "backgroundColor": "#FFF7E1",

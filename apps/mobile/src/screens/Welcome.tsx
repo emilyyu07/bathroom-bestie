@@ -8,8 +8,8 @@ export function Welcome({ onPlan, onJoin }: { onPlan: () => void; onJoin: () => 
     <Screen>
       <View style={{ alignItems: "center", gap: space.sm, marginTop: space.lg }}>
         <Image
-          source={require("../../assets/splash-icon.png")}
-          style={{ width: 168, height: 168 }}
+          source={require("../../assets/logo.png")}
+          style={{ width: 120, height: 120 }}
           accessibilityIgnoresInvertColors
           accessible={false}
         />
