@@ -8,3 +8,4 @@ export * from "./scenario";
 export * from "./jsonSchema";
 export * from "./draft";
 export * from "./defaults";
+export * from "./normalize";

@@ -84,3 +84,43 @@ describe("preflight", () => {
     expect(preflight(good, c)).toEqual(preflight(good, c));
   });
 });
+
+describe("preflight: home milestone makes the geofence blocking", () => {
+  const withHome = makeContract({
+    milestones: [{ id: "home", kind: "home", by: 300, who: ["ana"] }],
+  });
+  const noGeofence = { ...good, homeGeofenceSet: false };
+
+  it("is a warning when the contract has no home milestone", () => {
+    const r = preflight(noGeofence, c);
+    expect(r.state).toBe("ready_with_warnings");
+    expect(r.checks.find((x) => x.id === "home_geofence")).toMatchObject({
+      severity: "warning",
+      status: "fail",
+    });
+  });
+  it("blocks activation when the contract has a home milestone and no geofence", () => {
+    const r = preflight(noGeofence, withHome);
+    expect(r.state).toBe("not_ready");
+    expect(r.checks.find((x) => x.id === "home_geofence")).toMatchObject({
+      severity: "blocking",
+      status: "fail",
+    });
+  });
+  it("is ready when the geofence is set", () => {
+    expect(preflight(good, withHome).state).toBe("ready");
+  });
+  it("an area milestone alone does not need a geofence", () => {
+    const area = makeContract({
+      milestones: [
+        {
+          id: "bar",
+          kind: "area",
+          by: 100,
+          within: { center: { lat: 43.65, lon: -79.38 }, radius_m: 300 },
+        },
+      ],
+    });
+    expect(preflight(noGeofence, area).state).toBe("ready_with_warnings");
+  });
+});

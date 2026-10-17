@@ -2,13 +2,25 @@ import { z } from "zod";
 import { Circle, Minute, PersonId } from "./common";
 import { PresetName } from "./preset";
 
-export const Milestone = z.object({
+const MilestoneBase = {
   id: z.string(),
   /** Deadline (minute). */
   by: Minute,
-  /** Where the person should be by the deadline. */
-  within: Circle,
-});
+  /** Who it applies to. Omitted = every member; compile writes ["me"] so friends are not held to it. */
+  who: z.array(PersonId).optional(),
+};
+
+/**
+ * A promise she made about the night.
+ *  - area: be inside `within` by `by`.
+ *  - home: the phone's home geofence must have fired by `by`. Needs a device-side geofence, so a
+ *    contract with a home milestone makes the pre-flight geofence check blocking.
+ */
+export const Milestone = z.discriminatedUnion("kind", [
+  z.object({ ...MilestoneBase, kind: z.literal("area"), within: Circle }),
+  z.object({ ...MilestoneBase, kind: z.literal("home") }),
+]);
+export type Milestone = z.infer<typeof Milestone>;
 
 export const WatchSlot = z.object({ who: PersonId, from: Minute, to: Minute });
 
@@ -20,6 +32,8 @@ export const Thresholds = z.object({
   score_floor_min: z.number().positive(),
   watch_slot_min: z.number().positive().default(90),
   ack_timeout_min: z.number().positive(),
+  milestone_grace_min: z.number().nonnegative(),
+  exit_alone_min: z.number().positive(),
 });
 
 const Stream = z.object({ w: z.number().nonnegative(), tau_min: z.number().positive() });

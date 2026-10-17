@@ -10,6 +10,10 @@ export const SensitivityPreset = z.object({
   score_floor: z.number().min(0).max(1),
   score_floor_min: z.number().positive(),
   ack_timeout_min: z.number().positive(),
+  /** How long past a milestone deadline before it counts as missed. */
+  milestone_grace_min: z.number().nonnegative(),
+  /** Minutes she may be away from the group before getting home / rejoining is overdue. */
+  exit_alone_min: z.number().positive(),
 });
 export type SensitivityPreset = z.infer<typeof SensitivityPreset>;
 
@@ -22,6 +26,8 @@ export const PRESETS: Record<PresetName, SensitivityPreset> = {
     score_floor: 0.4,
     score_floor_min: 15,
     ack_timeout_min: 7,
+    milestone_grace_min: 20,
+    exit_alone_min: 60,
   },
   standard: {
     name: "standard",
@@ -30,6 +36,8 @@ export const PRESETS: Record<PresetName, SensitivityPreset> = {
     score_floor: 0.5,
     score_floor_min: 10,
     ack_timeout_min: 5,
+    milestone_grace_min: 10,
+    exit_alone_min: 45,
   },
   cautious: {
     name: "cautious",
@@ -38,6 +46,8 @@ export const PRESETS: Record<PresetName, SensitivityPreset> = {
     score_floor: 0.6,
     score_floor_min: 6,
     ack_timeout_min: 3,
+    milestone_grace_min: 5,
+    exit_alone_min: 30,
   },
 };
 export const PRESET_ORDER: PresetName[] = ["relaxed", "standard", "cautious"];

@@ -37,7 +37,9 @@
       "score_floor": 0.5,
       "score_floor_min": 10,
       "watch_slot_min": 90,
-      "ack_timeout_min": 5
+      "ack_timeout_min": 5,
+      "milestone_grace_min": 10,
+      "exit_alone_min": 45
     },
     "confidence": {
       "corridor": {
@@ -51,6 +53,11 @@
       "freshness": {
         "w": 1,
         "tau_min": 10
+      },
+      "separation": {
+        "w": 0.4,
+        "tau_min": 60,
+        "cap": 0.4
       }
     },
     "preset": "standard",
