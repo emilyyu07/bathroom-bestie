@@ -160,3 +160,20 @@ describe("regression: going quiet while apart is not a rejoin", () => {
     expect(alerts.find((a) => a.rung >= 2)!.t).toBe(92);
   });
 });
+
+describe("rejoining starts no cooldown", () => {
+  it("a second wander-off right after rejoining is nudged again once the timer completes", () => {
+    // Apart 5-40 (nudge at 30), rejoin at 45, apart again from 50 (nudge at 75).
+    const apart = (t: number) => (t >= 5 && t < 45) || t >= 50;
+    const { alerts, state } = run({
+      to: 120,
+      evidence: withAna((t) => (t % 5 === 0 ? [ev("ana", t, { area: apart(t) ? FAR : A })] : [])),
+    });
+    expect(alerts.map((a) => `${a.rung}@${a.t}:${a.kind}`)).toEqual([
+      "1@30:separation",
+      "1@75:separation",
+    ]);
+    expect(state.incidents[0]).toMatchObject({ resolution: "rejoined", resolvedAt: 45 });
+    expect(state.people.ana!.cooldownUntil).toBeNull();
+  });
+});

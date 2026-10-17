@@ -210,7 +210,8 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     inc.resolvedAt = now;
     inc.resolution = how;
     if (by) inc.confirmedBy = by;
-    state.people[inc.personId]!.cooldownUntil = now + COOLDOWN_MIN;
+    // Rejoining closes a nudge to her only; it must not blind the engine to a second wander-off.
+    if (how !== "rejoined") state.people[inc.personId]!.cooldownUntil = now + COOLDOWN_MIN;
   };
 
   // 2. Friend actions (human reports) in time order.

@@ -40,7 +40,8 @@ confirm or the home event.
 Long separation also feeds the score: a fourth stream, `confidence.separation` (w 0.4, tau 60 min), costs nothing until
 she has been apart longer than tau. Its penalty is **capped** (`cap` 0.4, so N stays above 0.67) so separation alone can
 never cross any preset's score floor; it only tips the score when she is also quiet or out of the area. If the nudge is
-open when she goes quiet while apart, it is held open (not resolved), so no cooldown delays the stronger concern.
+open when she goes quiet while apart, it is held open (not resolved), so no cooldown delays the stronger concern. Closing a nudge as `rejoined` starts **no** cooldown (a second
+wander-off is nudged again once its own timer completes); every other resolution still starts the 30 min cooldown.
 
 ## Decisions to confirm
 
