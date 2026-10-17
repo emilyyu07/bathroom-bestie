@@ -34,6 +34,9 @@ export interface Store {
   getEngine(contractId: string): Promise<EngineRow | null>;
   saveEngine(contractId: string, row: EngineRow): Promise<void>;
   addAlerts(alerts: Alert[]): Promise<void>;
+  /** Records that `personId` agreed to watch; repeat calls keep the first time. */
+  acceptWatcher(contractId: string, personId: string, t: number): Promise<void>;
+  acceptedWatchers(contractId: string): Promise<string[]>;
   listAlerts(contractId?: string): Promise<Alert[]>;
 }
 
@@ -44,6 +47,7 @@ export class MemoryStore implements Store {
   actions: { seq: number; contractId: string; a: FriendAction }[] = [];
   engine = new Map<string, EngineRow>();
   alerts: Alert[] = [];
+  watchers = new Map<string, Map<string, number>>();
   private seq = 0;
 
   async saveContract(c: Contract) {
@@ -87,6 +91,14 @@ export class MemoryStore implements Store {
   }
   async addAlerts(alerts: Alert[]) {
     this.alerts.push(...alerts);
+  }
+  async acceptWatcher(contractId: string, personId: string, t: number) {
+    const m = this.watchers.get(contractId) ?? new Map<string, number>();
+    if (!m.has(personId)) m.set(personId, t);
+    this.watchers.set(contractId, m);
+  }
+  async acceptedWatchers(contractId: string) {
+    return [...(this.watchers.get(contractId)?.keys() ?? [])];
   }
   async listAlerts(contractId?: string) {
     return this.alerts.filter((a) => !contractId || a.contractId === contractId);

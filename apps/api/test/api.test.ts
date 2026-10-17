@@ -82,6 +82,26 @@ describe("api", () => {
     expect(plain.terms.join(" ")).not.toContain("home");
   });
 
+  it("friends accept watching; pre-flight's watcher list reflects it", async () => {
+    const { contract } = await compile(); // members me, bea, cy
+    const list = async () =>
+      (await app.inject({ method: "GET", url: `/contracts/${contract.id}/watchers` })).json();
+    expect((await list()).watchers).toEqual([
+      { id: "bea", accepted: false, reachable: false },
+      { id: "cy", accepted: false, reachable: false },
+    ]);
+    const accept = (who: string, id = contract.id) =>
+      app.inject({ method: "POST", url: `/contracts/${id}/watchers/${who}/accept` });
+    expect((await accept("bea")).statusCode).toBe(202);
+    expect((await accept("bea")).statusCode).toBe(202); // idempotent
+    expect((await accept("me")).statusCode).toBe(403); // the owner doesn't watch herself
+    expect((await accept("zed")).statusCode).toBe(403);
+    expect((await accept("bea", "nope")).statusCode).toBe(404);
+    expect((await list()).watchers[0]).toEqual({ id: "bea", accepted: true, reachable: true });
+    const health = await app.inject({ method: "GET", url: "/health" });
+    expect(health.json()).toEqual({ ok: true });
+  });
+
   it("rejects bad input with 400", async () => {
     const r = await app.inject({ method: "POST", url: "/contracts/compile", payload: {} });
     expect(r.statusCode).toBe(400);

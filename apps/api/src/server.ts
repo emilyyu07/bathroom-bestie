@@ -89,6 +89,34 @@ export function buildServer({ store, clock, compiler }: Deps) {
     return { contract, terms: termsOf(contract) };
   });
 
+  app.get("/health", async () => ({ ok: true })); // pre-flight times this round trip
+
+  // A friend agrees to watch. The owner (first member) can't watch her own night.
+  app.post<{ Params: { id: string; who: string } }>(
+    "/contracts/:id/watchers/:who/accept",
+    async (req, reply) => {
+      const stored = await store.getContract(req.params.id);
+      if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+      const [owner, ...friends] = stored.contract.group.members;
+      if (req.params.who === owner || !friends.includes(req.params.who))
+        return reply.code(403).send({ error: "not_a_watcher" });
+      await store.acceptWatcher(stored.contract.id, req.params.who, clock.nowMinute());
+      return reply.code(202).send({ ok: true });
+    },
+  );
+
+  // Pre-flight's watcher list. "Reachable" is "accepted" until push delivery exists.
+  app.get<{ Params: { id: string } }>("/contracts/:id/watchers", async (req, reply) => {
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    const accepted = new Set(await store.acceptedWatchers(stored.contract.id));
+    return {
+      watchers: stored.contract.group.members
+        .slice(1)
+        .map((id) => ({ id, accepted: accepted.has(id), reachable: accepted.has(id) })),
+    };
+  });
+
   app.post("/preflight", async (req, reply) => {
     const body = PreflightBody.parse(req.body);
     const stored = await store.getContract(body.contractId);

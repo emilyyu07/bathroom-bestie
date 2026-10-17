@@ -89,7 +89,7 @@ describe.skipIf(!url)("postgres integration", () => {
     await pool?.end();
   });
   beforeEach(async () => {
-    await pool.query("TRUNCATE engine_state, incidents, actions, evidence, contracts");
+    await pool.query("TRUNCATE watchers, engine_state, incidents, actions, evidence, contracts");
     store = new PgStore(pool);
   });
 
@@ -161,6 +161,14 @@ describe.skipIf(!url)("postgres integration", () => {
         "INSERT INTO contracts (id, body, status) VALUES ('broken', '{\"id\":\"broken\"}', 'active')",
       );
       await expect(store.listActive()).rejects.toThrow();
+    });
+
+    it("records watcher acceptance once", async () => {
+      const { contract } = await compile();
+      await store.acceptWatcher(contract.id, "cy", 10);
+      await store.acceptWatcher(contract.id, "bea", 11);
+      await store.acceptWatcher(contract.id, "cy", 12);
+      expect(await store.acceptedWatchers(contract.id)).toEqual(["cy", "bea"]);
     });
 
     it("stores only the rounded area", async () => {

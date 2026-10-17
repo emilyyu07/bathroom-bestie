@@ -25,7 +25,12 @@ export default function App() {
         />
       )}
       {screen === "preflight" && (
-        <Preflight contractId={contractId} onActive={() => setScreen("status")} />
+        <Preflight
+          contractId={contractId}
+          me="me"
+          confirmed={contractId !== ""}
+          onActive={() => setScreen("status")}
+        />
       )}
       {screen === "status" && <Status />}
       {screen === "watcher" && <Watcher contractId={contractId} me="bea" target="me" />}
