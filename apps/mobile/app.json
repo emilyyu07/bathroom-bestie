@@ -3,7 +3,7 @@
     "name": "BathroomBestie",
     "slug": "bathroombestie",
     "version": "0.0.0",
-    "platforms": ["android", "web"],
+    "platforms": ["android", "ios", "web"],
     "android": {
       "package": "app.bathroombestie.mobile",
       "permissions": [
@@ -28,7 +28,8 @@
         "expo-location",
         {
           "isAndroidBackgroundLocationEnabled": true,
-          "isAndroidForegroundServiceEnabled": true
+          "isAndroidForegroundServiceEnabled": true,
+          "locationWhenInUsePermissionText": "BathroomBestie uses your rough location during a night out so your friends can be told if you seem to be in trouble."
         }
       ],
       "expo-notifications",
@@ -46,6 +47,13 @@
     "web": {
       "favicon": "./assets/icon.png",
       "backgroundColor": "#FFF7E1"
+    },
+    "ios": {
+      "bundleIdentifier": "app.bathroombestie.mobile",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "BathroomBestie uses your rough location during a night out so your friends can be told if you seem to be in trouble."
+      }
     }
   }
 }

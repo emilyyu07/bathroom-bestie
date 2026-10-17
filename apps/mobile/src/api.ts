@@ -1,9 +1,11 @@
 import { Platform } from "react-native";
 
-// The Android emulator reaches the host at 10.0.2.2; a browser (expo start --web) uses localhost.
+// Where the API is, per platform: the Android emulator reaches the host at 10.0.2.2; a browser and
+// the iOS Simulator (which shares the host's network) use localhost. EXPO_PUBLIC_API_URL overrides
+// all of them (e.g. the host's LAN address when the API runs on another machine).
 export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ??
-  (Platform.OS === "web" ? "http://localhost:3000" : "http://10.0.2.2:3000");
+  (Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://localhost:3000");
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
   const r = await fetch(`${API_URL}${path}`, {

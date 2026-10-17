@@ -1,3 +1,4 @@
+import * as Location from "expo-location";
 import { useState } from "react";
 import { Platform, View } from "react-native";
 import { get, post } from "../api";
@@ -49,7 +50,10 @@ export function Join({
     if (!night) return;
     try {
       // Her friends' phones report too (the group checks compare her with them), so ask now.
+      // Android also asks for background location and notifications; on iOS a friend's phone reports
+      // while the app is open, so "while using" is enough.
       if (Platform.OS === "android") await requestPermissions();
+      else await Location.requestForegroundPermissionsAsync().catch(() => undefined);
       await post(
         `/contracts/${encodeURIComponent(night.contract.id)}/watchers/${encodeURIComponent(personId)}/accept`,
         {},

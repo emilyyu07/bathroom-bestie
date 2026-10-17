@@ -6,6 +6,14 @@ import { nowMinute, post } from "./api";
 const round = (n: number) => Math.round(n * 1000) / 1000; // ~100 m, before it ever leaves the phone
 
 /**
+ * Battery as a whole percent the API accepts (0-100). An unknown level (-1: the iOS Simulator, web)
+ * reports 100, never 0: 0 would read as a dying battery and change how the engine treats her
+ * silence, so unknown must not look like low.
+ */
+export const batteryPercent = (level: number): number =>
+  level < 0 ? 100 : Math.min(100, Math.round(level * 100));
+
+/**
  * Coarse location, battery and motion reports. On Android the night is reported from a
  * foreground service (background.ts); the timer below is the fallback where that can't run (web).
  *
@@ -43,7 +51,7 @@ export async function reportPosition(
     t: nowMinute(),
     area: { lat: round(pos?.coords.latitude ?? 0), lon: round(pos?.coords.longitude ?? 0) },
     motion: speed > 5 ? "vehicle" : speed > 0.5 ? "walking" : "still",
-    batteryPct: Math.round(level * 100),
+    batteryPct: batteryPercent(level),
     charging: state === Battery.BatteryState.CHARGING,
     permissionOk: pos !== null,
   });
@@ -106,7 +114,7 @@ export async function reportArrivedHome(personId: string, contractId: string): P
     contractId,
     t: nowMinute(),
     motion: "still",
-    batteryPct: Math.round(level * 100),
+    batteryPct: batteryPercent(level),
     charging: state === Battery.BatteryState.CHARGING,
     permissionOk: true,
     homeArrived: true,
