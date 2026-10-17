@@ -6,7 +6,8 @@ import { watcherFor } from "./watchers";
 
 /**
  * Apply one friend action (a human report, invariant 8). Every action is logged with its outcome.
- *  - confirm: resolves the person's open incident from any rung and starts the cooldown
+ *  - confirm: resolves the person's open incident from any rung and starts the cooldown; also
+ *    restarts her exit-alone clock if one is running (even with no incident open yet)
  *  - worry: opens a rung-2 incident for the watcher even when evidence is normal; if the worrier
  *    is the current watcher, goes straight to rung-4 tools. One worry per friend per person per 15 min.
  */
@@ -29,10 +30,15 @@ export function applyAction(ctx: Ctx, a: FriendAction, emit: Emit): void {
   const open = openFor(ctx, a.targetPersonId);
 
   if (a.type === "confirm") {
+    // A friend vouching for her is a human report about now, so it also restarts the exit-alone
+    // clock (if she is on a departure): the next alert is `exit_alone_min` after the confirm, not
+    // a fresh alert the moment the 30-min cooldown ends.
+    const restart = target.exitAloneSince !== null;
+    if (restart) target.exitAloneSince = Math.max(a.t, target.exitAloneSince!);
     if (open) {
       resolveIncident(ctx, open, "confirmed", a.by);
       log("applied");
-    } else log("ignored");
+    } else log(restart ? "applied" : "ignored");
     return;
   }
 

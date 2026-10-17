@@ -209,3 +209,69 @@ describe("exit-alone: she left the group alone and has not got home", () => {
     expect(JSON.stringify(r)).toEqual(JSON.stringify({ state: live.state, alerts: live.alerts }));
   });
 });
+
+describe("a friend's confirm restarts the exit-alone clock", () => {
+  const confirm = (t: number, by = "bea") => ({
+    type: "confirm" as const,
+    by,
+    targetPersonId: "ana",
+    t,
+  });
+
+  it("the next alert comes exit_alone_min after the confirm, not when the cooldown ends", () => {
+    // Never arrives. Rung 2 goes to bea at 151; bea confirms at 153. Without a restart the 30-min
+    // cooldown would end at 183 and the still-overdue clock would alert again at once.
+    const { alerts, state } = run({
+      contract: armed(),
+      to: 205,
+      evidence: night(leavesAt(100)),
+      actions: [confirm(153)],
+    });
+    expect(rungs(anaOnly(alerts))).toEqual([
+      "1@125:separation",
+      "2@151:exit_alone",
+      // confirmed at 153 (resolved); a new quiet separation nudge opens once the cooldown ends (183)
+      "1@183:separation",
+      // restarted at 153: overdue after 153 + 45, so the new exit-alone incident upgrades that nudge at 199
+      "2@204:exit_alone",
+    ]);
+    expect(state.people.ana!.exitAloneSince).toBe(153);
+    expect(state.incidents.find((i) => i.resolution === "confirmed")).toBeDefined();
+  });
+
+  it("applies even before any alert: a friend vouches for her while the clock is running", () => {
+    const { state, alerts } = run({
+      contract: armed(),
+      to: 200,
+      evidence: night(leavesAt(100)),
+      actions: [confirm(120)], // no incident is open yet (the separation nudge comes at 125)
+    });
+    expect(state.actionLog).toEqual([
+      expect.objectContaining({ type: "confirm", by: "bea", outcome: "applied" }),
+    ]);
+    expect(state.people.ana!.exitAloneSince).toBe(120);
+    // overdue after 120 + 45 = 165, so the friend alert is at 171 instead of 151
+    expect(anaOnly(alerts).find((a) => a.rung >= 2)!.t).toBe(171);
+  });
+
+  it("a confirm with nothing to confirm is still ignored", () => {
+    const { state } = run({
+      contract: armed(),
+      to: 60,
+      evidence: night(() => ({ area: A, motion: "walking" })),
+      actions: [confirm(30)],
+    });
+    expect(state.actionLog[0]!.outcome).toBe("ignored");
+    expect(state.people.ana!.exitAloneSince).toBeNull();
+  });
+
+  it("never restarts the clock backwards or for someone not on a departure", () => {
+    const { state } = run({
+      contract: armed(),
+      to: 130,
+      evidence: night(leavesAt(100)),
+      actions: [confirm(90)], // before she left: nothing to restart
+    });
+    expect(state.people.ana!.exitAloneSince).toBe(100);
+  });
+});
