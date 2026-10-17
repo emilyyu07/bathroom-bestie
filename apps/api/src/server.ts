@@ -20,6 +20,8 @@ export interface Deps {
   store: Store;
   clock: Clock;
   compiler: Compiler;
+  /** Compile demo nights (DEMO_THRESHOLDS). Set by DEMO_MODE=1 in main.ts. */
+  demo?: boolean;
 }
 
 const CompileBody = z.object({
@@ -50,7 +52,7 @@ const ActionBody = z.object({
   reason: FriendReason.optional(),
 });
 
-export function buildServer({ store, clock, compiler }: Deps) {
+export function buildServer({ store, clock, compiler, demo = false }: Deps) {
   const app = Fastify();
   // Browser clients in development (mobile via expo --web, the console) run on localhost ports.
   // The native app sends no Origin, so this does not affect it.
@@ -77,7 +79,7 @@ export function buildServer({ store, clock, compiler }: Deps) {
       req.log.warn({ err: e }, "compile failed");
       return reply.code(503).send({ error: "compiler_unavailable" });
     }
-    const contract = buildContract(draft, ctx, body.sentence, body.me);
+    const contract = buildContract(draft, ctx, body.sentence, body.me, demo);
     await store.saveContract(contract);
     return {
       contract,
@@ -93,7 +95,12 @@ export function buildServer({ store, clock, compiler }: Deps) {
     const stored = await store.getContract(req.params.id);
     if (!stored) return reply.code(404).send({ error: "unknown_contract" });
     const prev = stored.contract;
-    const contract = { ...prev, preset, thresholds: thresholdsFor(preset, prev.thresholds) };
+    // A demo night keeps its shortened timers; the preset is only the label then.
+    const contract = {
+      ...prev,
+      preset,
+      thresholds: prev.demo ? prev.thresholds : thresholdsFor(preset, prev.thresholds),
+    };
     if (!(await store.updateDraft(contract)))
       return reply.code(409).send({ error: "already_active" });
     return { contract, terms: termsOf(contract) };
