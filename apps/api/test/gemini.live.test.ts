@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Contract } from "@bathroombestie/schema";
-import { buildContract, GeminiCompiler, safeReadBack } from "../src/compile";
+import { buildContract, GeminiCompiler, modelChain, safeReadBack } from "../src/compile";
 
 /**
  * Calls the real Gemini API (`pnpm test:gemini`, needs GEMINI_API_KEY in .env). Skipped otherwise.
@@ -10,7 +10,7 @@ const key = process.env.GEMINI_LIVE ? process.env.GEMINI_API_KEY : undefined;
 const BANNED = /drug|spiked|intoxicated|drunk|sick|medical|unwell/i;
 
 describe.skipIf(!key)("gemini compile (live)", () => {
-  const g = new GeminiCompiler(key!, process.env.GEMINI_MODEL || undefined);
+  const g = new GeminiCompiler(key!, modelChain(process.env.GEMINI_MODEL));
   const ctx = { now: 1_000_000, area: { lat: 43.65, lon: -79.38 }, localTime: "21:00" };
   const compile = async (s: string) => {
     const d = await g.draft(s, ctx);
