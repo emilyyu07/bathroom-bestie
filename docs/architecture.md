@@ -58,6 +58,11 @@ never cross any preset's score floor; it only tips the score when she is also qu
 open when she goes quiet while apart, it is held open (not resolved), so no cooldown delays the stronger concern. Closing a nudge as `rejoined` starts **no** cooldown (a second
 wander-off is nudged again once its own timer completes); every other resolution still starts the 30 min cooldown.
 
+**Known limit: rounding vs `separation_m`.** Locations are rounded to 0.001° (~111 m north–south, ~80 m east–west), so
+apparent distances are quantized. People really within ~80 m are never flagged apart (tested); between ~80 m and the 150 m
+threshold the flag can be a false positive, and real separations just over 150 m can look closer. Treat `separation_m` as
+good to about one grid cell. Tightening it needs finer coordinates, which would conflict with invariant 5.
+
 ## Decisions to confirm
 
 - Times are integer epoch minutes everywhere.

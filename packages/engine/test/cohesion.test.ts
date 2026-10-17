@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeContract, type EvidenceReport } from "@bathroombestie/schema";
-import { separatedFor } from "../src";
+import { initialState, isApart, separatedFor } from "../src";
 import { darkAna, ev, run } from "./helpers";
 
 const A = { lat: 43.65, lon: -79.38 };
@@ -168,5 +168,45 @@ describe("rejoining starts no cooldown", () => {
     ]);
     expect(state.incidents[0]).toMatchObject({ resolution: "rejoined", resolvedAt: 45 });
     expect(state.people.ana!.cooldownUntil).toBeNull();
+  });
+});
+
+describe("coordinate rounding vs separation_m (150 m)", () => {
+  // Locations are rounded to 0.001 deg (~111 m lat, ~80 m lon at Toronto) before the engine sees
+  // them, so apparent distances are quantized: one cell step is 111 m of latitude but only ~80 m of
+  // longitude. Two people really within ~80 m differ by at most one cell per axis (<= ~137 m apparent),
+  // so they are never "apart". Between ~80 m and 150 m the flag can be a false positive (documented
+  // limit: separation_m is only meaningful to about one grid cell).
+  it("people really within 80 m are never flagged apart, wherever the rounding grid falls", () => {
+    let seed = 7;
+    const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
+    const mPerLat = 111_320;
+    const mPerLon = 111_320 * Math.cos((43.65 * Math.PI) / 180);
+    for (let i = 0; i < 2000; i++) {
+      const lat = 43.6 + rand() * 0.1;
+      const lon = -79.4 + rand() * 0.1;
+      const r = rand() * 79;
+      const th = rand() * 2 * Math.PI;
+      const a = { lat, lon };
+      const b = {
+        lat: lat + (r * Math.sin(th)) / mPerLat,
+        lon: lon + (r * Math.cos(th)) / mPerLon,
+      };
+      const c = makeContract({ group: { members: ["ana", "bea"], watch: [] } });
+      const s = initialState(c);
+      const rep = (id: string, area: { lat: number; lon: number }) =>
+        ev(id, 0, {
+          area: {
+            lat: Math.round(area.lat * 1000) / 1000,
+            lon: Math.round(area.lon * 1000) / 1000,
+          },
+        });
+      for (const e of [rep("ana", a), rep("bea", b)]) {
+        const p = s.people[e.personId]!;
+        p.lastArea = e.area;
+        p.lastReportAt = 0;
+      }
+      expect(isApart(c, s, "ana", 0), `${JSON.stringify([a, b])}`).toBe(false);
+    }
   });
 });
