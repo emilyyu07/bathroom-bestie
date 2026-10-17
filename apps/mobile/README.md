@@ -10,7 +10,11 @@ Background location needs a **development build**, not Expo Go:
     npx expo run:android          # or: eas build --profile development --platform android
     npx expo start --dev-client
 
-Expo Go works for the Plan, Pre-flight and Watcher screens only; the evidence reporter will stop when the app is backgrounded.
+No device? The screens run in a browser against the local API (`pnpm api` first):
+
+    npx expo start --web          # http://localhost:8081
+
+Web is for the UI only: background location, the foreground service, the home geofence and battery settings are Android features and need a device or emulator.
 
 `assets/sweep.json` is copied here by `pnpm sim sweep`. Set `EXPO_PUBLIC_API_URL` to point at the API.
 

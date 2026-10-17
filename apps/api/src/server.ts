@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { z } from "zod";
 import {
@@ -42,6 +43,9 @@ const ActionBody = z.object({
 
 export function buildServer({ store, clock, compiler }: Deps) {
   const app = Fastify();
+  // Browser clients in development (mobile via expo --web, the console) run on localhost ports.
+  // The native app sends no Origin, so this does not affect it.
+  void app.register(cors, { origin: /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/ });
 
   app.setErrorHandler((err, _req, reply) => {
     if (err instanceof z.ZodError)

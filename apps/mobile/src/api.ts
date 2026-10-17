@@ -1,4 +1,9 @@
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:3000"; // Android emulator -> host
+import { Platform } from "react-native";
+
+// The Android emulator reaches the host at 10.0.2.2; a browser (expo start --web) uses localhost.
+export const API_URL =
+  process.env.EXPO_PUBLIC_API_URL ??
+  (Platform.OS === "web" ? "http://localhost:3000" : "http://10.0.2.2:3000");
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
   const r = await fetch(`${API_URL}${path}`, {

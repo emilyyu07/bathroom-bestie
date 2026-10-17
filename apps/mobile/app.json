@@ -3,7 +3,7 @@
     "name": "BathroomBestie",
     "slug": "bathroombestie",
     "version": "0.0.0",
-    "platforms": ["android"],
+    "platforms": ["android", "web"],
     "android": {
       "package": "app.bathroombestie.mobile",
       "permissions": [
