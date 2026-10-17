@@ -34,7 +34,9 @@ describe("scripted demo (a fallback and a development tool)", () => {
     const end = events.at(-1)!;
     expect(end.kind).toBe("end");
     expect(end.text).toContain("exit_alone, resolved (confirmed)");
-    expect(end.text).toContain("it alerts again"); // honest about what the cooldown means
+    // the confirm restarted her clock from t+02:32, so a repeat alert is 45 min later, not at cooldown end
+    expect(end.text).toContain("restarted her exit-alone clock");
+    expect(end.text).toContain("alerts again after t+03:17");
   });
 
   it("short run: she arrives, with no location in the arrival, and nothing alarming happens", async () => {

@@ -58,6 +58,10 @@ confirm or the home event.
 - Wording is fixed templates: "ana left the group N min ago and hasn't arrived home." (watcher), a next-person and a
   whole-group variant, and an informational nudge to her. Factor: "Left the group N min ago; not home yet".
 - State version 5 (`togetherAt`, `exitAloneSince`, `lastMotion`).
+- **A friend's confirm restarts the clock.** "I'm with her" vouches for her now, so it resolves the incident (30-min
+  cooldown) and restarts `exitAloneSince` at the confirm time: if she is still not home, the next alert comes
+  `exit_alone_min` after the confirm (45 at standard), not the moment the cooldown ends. A confirm also applies while the
+  clock is running with no incident open yet; with nothing to confirm it is still ignored.
 
 ## Cohesion (`packages/engine/src/cohesion.ts`)
 

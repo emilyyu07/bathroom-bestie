@@ -153,8 +153,7 @@ const everyone = async (n: Night, ana: "with" | "away" | "none") => {
  * clock catches it: nudge, then a friend, then a friend confirms she is fine.
  */
 export async function runExitAloneNight(say: Say = () => {}): Promise<DemoEvent[]> {
-  // Ends before the 30-min cooldown after the confirm runs out (she is still not home, so it would
-  // alert again then; see the end-of-run line).
+  // Ends well before the restarted clock could fire again (see the end-of-run line).
   const END = 175;
   const events: DemoEvent[] = [];
   const out: Say = (e) => (events.push(e), say(e));
@@ -186,11 +185,13 @@ export async function runExitAloneNight(say: Say = () => {}): Promise<DemoEvent[
   await n.poll("ana");
   const s = await n.state();
   const inc = s.incidents.find((i) => i.personId === "ana");
-  const cooldownEnds = (s.people.ana!.cooldownUntil ?? 0) - 1_000_000;
+  // The confirm restarted her exit-alone clock: the next alert is exit_alone_min after it.
+  const restartedAt = (s.people.ana!.exitAloneSince ?? 0) - 1_000_000;
+  const nextAlert = restartedAt + n.contract.thresholds.exit_alone_min;
   out({
     t: END,
     kind: "end",
-    text: `Incident: ${inc?.kind}, ${inc?.status} (${inc?.resolution}). Cooldown until ${clock(cooldownEnds)}: if she is still not home then, it alerts again.`,
+    text: `Incident: ${inc?.kind}, ${inc?.status} (${inc?.resolution}). The confirm restarted her exit-alone clock: if she is still not home, it alerts again after ${clock(nextAlert)}.`,
   });
   return events;
 }
