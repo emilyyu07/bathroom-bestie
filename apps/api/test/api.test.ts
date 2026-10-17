@@ -102,6 +102,13 @@ describe("api", () => {
     expect(health.json()).toEqual({ ok: true });
   });
 
+  it("returns a contract and its status for the phone", async () => {
+    const { contract } = await compile();
+    const r = await app.inject({ method: "GET", url: `/contracts/${contract.id}` });
+    expect(r.json()).toEqual({ contract, status: "draft" });
+    expect((await app.inject({ method: "GET", url: "/contracts/nope" })).statusCode).toBe(404);
+  });
+
   it("rejects bad input with 400", async () => {
     const r = await app.inject({ method: "POST", url: "/contracts/compile", payload: {} });
     expect(r.statusCode).toBe(400);

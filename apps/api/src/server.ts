@@ -91,6 +91,13 @@ export function buildServer({ store, clock, compiler }: Deps) {
 
   app.get("/health", async () => ({ ok: true })); // pre-flight times this round trip
 
+  // The phone's view of a night (status screen): the contract and whether it is running.
+  app.get<{ Params: { id: string } }>("/contracts/:id", async (req, reply) => {
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    return { contract: stored.contract, status: stored.status };
+  });
+
   // A friend agrees to watch. The owner (first member) can't watch her own night.
   app.post<{ Params: { id: string; who: string } }>(
     "/contracts/:id/watchers/:who/accept",
