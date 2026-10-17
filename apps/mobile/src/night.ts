@@ -18,7 +18,7 @@ export function useNightReporting(
   onEnded: () => void,
 ) {
   useEffect(() => {
-    if (!active || !contractId) return;
+    if (!active || !contractId || !me) return;
     let stop = () => {};
     let cancelled = false;
     const contract = get<{

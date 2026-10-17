@@ -24,7 +24,14 @@ export interface Deps {
 const CompileBody = z.object({
   sentence: z.string().min(3).max(500),
   area: z.object({ lat: z.number(), lon: z.number() }).default({ lat: 43.65, lon: -79.38 }),
-  me: z.string().default("me"),
+  // Her first name, used as her id so alerts read "ana left the group…" (B6). Lower-cased later.
+  me: z
+    .string()
+    .trim()
+    .min(1)
+    .max(30)
+    .regex(/^\p{L}[\p{L}\p{M}' -]*$/u)
+    .default("me"),
   localTime: z
     .string()
     .regex(/^([01]\d|2[0-3]):[0-5]\d$/)

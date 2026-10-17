@@ -109,6 +109,24 @@ describe("api", () => {
     expect((await app.inject({ method: "GET", url: "/contracts/nope" })).statusCode).toBe(404);
   });
 
+  it("her name becomes her id, in the same form as her friends' ids", async () => {
+    const compileAs = (me: unknown) =>
+      app.inject({
+        method: "POST",
+        url: "/contracts/compile",
+        payload: { sentence: "Out with Bea and Cy for 4 hours", me },
+      });
+    const r = await compileAs("  Ana ");
+    expect(r.statusCode).toBe(200);
+    expect(r.json().contract.group.members).toEqual(["ana", "bea", "cy"]);
+    expect(r.json().contract.milestones).toEqual([]);
+    expect((await compileAs("Mary-Jane O'Neil")).json().contract.group.members[0]).toBe(
+      "mary-jane o'neil",
+    );
+    for (const bad of ["", "   ", "<script>", "9lives", "x".repeat(31)])
+      expect((await compileAs(bad)).statusCode).toBe(400);
+  });
+
   it("rejects bad input with 400", async () => {
     const r = await app.inject({ method: "POST", url: "/contracts/compile", payload: {} });
     expect(r.statusCode).toBe(400);

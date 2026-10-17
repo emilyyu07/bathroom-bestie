@@ -114,6 +114,7 @@ export function buildContract(
     "c_" + createHash("sha256").update(`${sentence}|${ctx.now}`).digest("hex").slice(0, 10);
   // Person ids are lower-case everywhere (evidence, actions), whatever case the model used.
   const id_ = (f: string) => f.trim().toLowerCase();
+  me = id_(me); // her name is her id (B6): same form as her friends' ids
   const friends = [...new Set(d.friends.map(id_))].filter((f) => f !== me);
   const watchOrder = d.watch_order.map(id_);
   const order = [

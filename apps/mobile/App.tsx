@@ -11,13 +11,16 @@ export default function App() {
   const [screen, setScreen] = useState<"plan" | "preflight" | "status" | "watcher">("plan");
   const [contractId, setContractId] = useState("");
   const [active, setActive] = useState(false);
+  // Her id: the server's form of the name she typed (B6). Restored from the stored night on reopen.
+  const [me, setMe] = useState("");
   const nightEnded = useCallback(() => setActive(false), []);
-  useNightReporting(contractId, "me", active, nightEnded);
+  useNightReporting(contractId, me, active, nightEnded);
   // Reopened while a night is still being reported in the background: show that night.
   useEffect(() => {
     void runningNight().then((n) => {
       if (!n) return;
       setContractId(n.contractId);
+      setMe(n.personId);
       setActive(true);
       setScreen("status");
     });
@@ -34,6 +37,7 @@ export default function App() {
           onCompiled={(c) => {
             void endNight();
             setContractId(c.id);
+            setMe(c.me);
             setActive(false);
             setScreen("preflight");
           }}
@@ -42,7 +46,7 @@ export default function App() {
       {screen === "preflight" && (
         <Preflight
           contractId={contractId}
-          me="me"
+          me={me}
           confirmed={contractId !== ""}
           onActive={() => {
             setActive(true);
@@ -50,8 +54,11 @@ export default function App() {
           }}
         />
       )}
-      {screen === "status" && <Status contractId={contractId} me="me" active={active} />}
-      {screen === "watcher" && <Watcher contractId={contractId} me="bea" target="me" />}
+      {screen === "status" && <Status contractId={contractId} me={me} active={active} />}
+      {/* This one app also plays her friend Bea for the demo; real friends run their own copy. */}
+      {screen === "watcher" && (
+        <Watcher contractId={contractId} me="bea" target={me || "your friend"} />
+      )}
     </SafeAreaView>
   );
 }
