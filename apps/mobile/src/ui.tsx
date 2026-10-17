@@ -74,10 +74,11 @@ export const Card = ({ children, style }: { children: ReactNode; style?: ViewSty
   </View>
 );
 
-type Tone = "primary" | "secondary" | "worry" | "quiet";
+type Tone = "primary" | "secondary" | "withHer" | "worry" | "quiet";
 const TONES: Record<Tone, { bg: string; pressed: string; fg: string; border?: string }> = {
   // The important actions: dark, bold, unmissable.
   primary: { bg: color.primary, pressed: color.primaryPressed, fg: color.white },
+  withHer: { bg: color.withHer, pressed: color.withHerPressed, fg: color.worry },
   worry: { bg: color.worry, pressed: color.worryPressed, fg: color.white },
   secondary: { bg: color.blush, pressed: color.blushBorder, fg: color.primary },
   quiet: { bg: "transparent", pressed: color.blush, fg: color.muted, border: color.blushBorder },

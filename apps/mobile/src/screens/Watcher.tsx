@@ -79,7 +79,7 @@ export function Watcher({
       <Card>
         <Heading>How's {target}?</Heading>
         <Body muted>If you're with her, let us know. If something feels off, say so.</Body>
-        <Button big title="I'm with her" onPress={() => void send("confirm")} />
+        <Button big tone="withHer" title="I'm with her" onPress={() => void send("confirm")} />
         <Button big tone="worry" title="I'm worried" onPress={() => void send("worry")} />
         <Body muted>Why? (optional)</Body>
         <View style={{ flexDirection: "row", gap: space.sm, flexWrap: "wrap" }}>

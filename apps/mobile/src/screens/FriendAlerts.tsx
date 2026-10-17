@@ -148,7 +148,7 @@ export function FriendAlerts({
           )}
           <View style={{ flexDirection: "row", gap: space.sm }}>
             <View style={{ flex: 1 }}>
-              <Button title="I'm with her" onPress={() => void act(a, "confirm")} />
+              <Button tone="withHer" title="I'm with her" onPress={() => void act(a, "confirm")} />
             </View>
             <View style={{ flex: 1 }}>
               <Button tone="worry" title="I'm worried" onPress={() => void act(a, "worry")} />

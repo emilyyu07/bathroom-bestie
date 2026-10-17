@@ -10,6 +10,8 @@ export const color = {
   butter: "#FFE38A", // selected chips, small highlights
   primary: "#C2185B", // deep raspberry: the important buttons (white text 5.9:1)
   primaryPressed: "#9C1149",
+  withHer: "#F48FB1", // "I'm with her": soft pink, the logo's right circle (deep-berry text 4.8:1)
+  withHerPressed: "#F9B4CC", // lighter when pressed, so the text keeps its contrast
   worry: "#7A0E3A", // "I'm worried": very dark pink, the logo's overlap (white 10.8:1)
   worryPressed: "#5C0A2B",
   honey: "#9A5B00", // the "!" on pre-flight tips
