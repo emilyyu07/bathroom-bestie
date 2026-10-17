@@ -18,12 +18,18 @@
       {
         "id": "home",
         "by": 240,
-        "who": ["ana"],
+        "who": [
+          "ana"
+        ],
         "kind": "home"
       }
     ],
     "group": {
-      "members": ["ana", "bea", "cy"],
+      "members": [
+        "ana",
+        "bea",
+        "cy"
+      ],
       "watch": [
         {
           "who": "bea",
@@ -70,7 +76,10 @@
     },
     "preset": "standard",
     "wishes": {
-      "alert_order": ["bea", "cy"],
+      "alert_order": [
+        "bea",
+        "cy"
+      ],
       "offer_911_script": true
     },
     "expires": 480

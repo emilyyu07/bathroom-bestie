@@ -318,3 +318,61 @@ sc(
   },
   "11-home-missed-and-quiet.json",
 );
+
+// Exit-alone scenarios: a home milestone arms it; she leaves the group alone at 150, moving.
+const homeBy330 = () =>
+  makeContract({
+    milestones: [{ id: "home", kind: "home", by: 330, who: ["ana"] }],
+    expires: 480,
+  });
+
+// 12. Leaves alone and gets home in 39 minutes: fine at standard, a false alarm at cautious (30 min).
+sc(
+  {
+    name: "12-exit-alone-arrives",
+    description:
+      "Ana leaves the group alone at 150 and arrives home at 189 (39 min). Quiet at standard; cautious (30 min) alerts a friend first.",
+    contract: homeBy330(),
+    timelines: {
+      ana: [
+        ...every(0, 147, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
+        ...every(150, 186, () => ({ area: FAR, motion: "walking", batteryPct: 60 })),
+        arrival(189, 55),
+      ],
+      ...together(300),
+    },
+    durationMin: 300,
+    truth: "normal",
+    label: {
+      expect: "alert",
+      rung: 1,
+      from: 175,
+      to: 177,
+      onset: 150,
+      maxRung: 1,
+      resolvedBy: "home",
+    },
+  },
+  "12-exit-alone-arrives.json",
+);
+
+// 13. Leaves alone, keeps reporting, never gets home. Only the exit-alone clock catches it.
+sc(
+  {
+    name: "13-exit-alone-never-arrives",
+    description:
+      "Ana leaves the group alone at 150, keeps reporting while moving, and never arrives home or rejoins.",
+    contract: homeBy330(),
+    timelines: {
+      ana: [
+        ...every(0, 147, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
+        ...every(150, 300, () => ({ area: FAR, motion: "walking", batteryPct: 60 })),
+      ],
+      ...together(300),
+    },
+    durationMin: 300,
+    truth: "concerning",
+    label: { expect: "alert", rung: 2, from: 199, to: 203, onset: 150 },
+  },
+  "13-exit-alone-never-arrives.json",
+);

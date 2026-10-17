@@ -43,6 +43,22 @@ confirm or the home event.
   (`ENGINE_STATE_VERSION`) is checked by `evaluate`; the API runner rebuilds a stale cache instead of trusting it.
   Bump the version whenever state or incident semantics change.
 
+## Exit-alone (`cohesion.ts`, `concerns.ts`)
+
+"She left the group alone and nobody has confirmed she got home." The longer clock behind the separation nudge.
+
+- **Starts** at the tick she goes from _with somebody_ (a fresh peer within `separation_m`) to _apart from every fresh
+  peer_, while her last report was **moving** (`walking` / `vehicle`), and **only if a home milestone applies to her**.
+  So it never starts for someone who was never with the group, who is apart but still (the group left her, or a stuck
+  fix), who left with a friend, or who has no home milestone.
+- **Deadline** = start + `exit_alone_min` (60 / 45 / 30 at relaxed / standard / cautious). **Hard** from the start (decided):
+  an `exit_alone` incident climbs the ladder; an open separation nudge upgrades in place.
+- **Clears** when she gets home or rejoins; **freezes** while her phone is quiet (like `apartSince`). Leaving again starts
+  a fresh clock.
+- Wording is fixed templates: "ana left the group N min ago and hasn't arrived home." (watcher), a next-person and a
+  whole-group variant, and an informational nudge to her. Factor: "Left the group N min ago; not home yet".
+- State version 5 (`togetherAt`, `exitAloneSince`, `lastMotion`).
+
 ## Cohesion (`packages/engine/src/cohesion.ts`)
 
 `updateApart` runs for every member each tick and maintains `PersonState.apartSince`.

@@ -23,6 +23,7 @@ export function ingest(contract: Contract, state: EngineState, e: EvidenceReport
   p.permissionLost = false;
   const area = e.area;
   if (!area) return; // unreachable through the schema: only an arrival may omit it
+  p.lastMotion = e.motion;
   const moved =
     e.motion !== "still" ||
     (p.lastArea !== null && (p.lastArea.lat !== area.lat || p.lastArea.lon !== area.lon));

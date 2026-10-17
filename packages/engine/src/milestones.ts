@@ -17,3 +17,7 @@ export const overdue = (contract: Contract, p: PersonState, id: string, now: num
   applicable(contract, id)
     .filter((m) => !isMet(p, m) && now > m.by + contract.thresholds.milestone_grace_min)
     .sort((a, b) => a.by - b.by || a.id.localeCompare(b.id));
+
+/** Home tracking (exit-alone, the home deadline) is armed per person by a home milestone that applies to her. */
+export const tracksHome = (contract: Contract, id: string): boolean =>
+  applicable(contract, id).some((m) => m.kind === "home");

@@ -185,13 +185,15 @@ describe("area milestone", () => {
 
 describe("two nudges about her", () => {
   it("the separation nudge keeps the floor; the late-nudge opens right after she rejoins (no cooldown)", () => {
+    // Apart 215-254 (39 min: past the 25-min separation nudge, short of the 45-min exit-alone clock),
+    // so her 240 deadline (overdue from 251) passes while she is still apart.
     const c = contractWith([home(240, ["ana"])]);
     const { alerts } = run({
       contract: c,
       to: 300,
       evidence: (t) => {
         if (t % 5 !== 0 || t > 300) return [];
-        const apart = t >= 20 && t < 270;
+        const apart = t >= 215 && t < 255;
         return [
           ev("bea", t, { area: A }),
           ev("cy", t, { area: A }),
@@ -200,8 +202,8 @@ describe("two nudges about her", () => {
       },
     });
     expect(rungs(anaAlerts(alerts))).toEqual([
-      "1@45:separation", // apart since 20, 25 min on standard
-      "1@271:missed_milestone", // she rejoined at 270; still overdue; opens the next tick
+      "1@240:separation", // apart since 215, 25 min on standard; the 251 late-nudge waits behind it
+      "1@256:missed_milestone", // she rejoined at 255; still overdue; opens the next tick
     ]);
   });
 });

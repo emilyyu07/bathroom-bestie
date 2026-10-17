@@ -12,6 +12,7 @@ export const SEVERITY: Record<IncidentKind, Severity> = {
   friend_worry: "hard",
   separation: "advisory",
   missed_milestone: "advisory",
+  exit_alone: "hard",
   evidence_lost: "notice",
 };
 
@@ -53,6 +54,18 @@ const lowConfidence: Detector = ({ contract, state, now }, id) => {
 };
 
 /**
+ * She left the group alone, is still apart, and has neither got home nor rejoined within
+ * `exit_alone_min`. Nobody has confirmed she is safe, so this is hard from the start (decided).
+ * Armed only for people a home milestone applies to (the clock is never started otherwise).
+ */
+const exitAloneOverdue: Detector = ({ contract, state, now }, id) => {
+  const since = state.people[id]!.exitAloneSince;
+  return since !== null && now > since + contract.thresholds.exit_alone_min
+    ? concern("exit_alone")
+    : null;
+};
+
+/**
  * Past a deadline she set. Advisory (a nudge to her) while she is still reporting; hard once her
  * phone has also gone quiet: late AND silent are two independent signals, so it climbs the ladder
  * without waiting for the score path (and covers the case where she was last seen with the group).
@@ -77,6 +90,7 @@ export const DETECTORS: Detector[] = [
   batteryDeath,
   unexplainedStop,
   lowConfidence,
+  exitAloneOverdue,
   missedMilestone,
   separation,
 ];
