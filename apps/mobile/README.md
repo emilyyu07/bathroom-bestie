@@ -47,7 +47,8 @@ Checks that need no device (also `pnpm mobile:check` from the repo root):
     npx expo-doctor
     npx expo export --platform android --output-dir /tmp/bb-export   # bundles the JS like a build
 
-These pass; the app has not yet been launched on a device or emulator. See TODOs in `src/evidenceReporter.ts` (foreground service, home geofence region events).
+These pass, and the app runs on the Android 15 emulator (planner and friend flows, background
+reporting, home geofence). It has not been run on a physical phone.
 
 Each phone is either the planner or one friend of one night (`src/identity.ts`; auth is out of
 scope). On first launch: "Plan a night" or "Join a friend's night". The planner's Pre-flight shows

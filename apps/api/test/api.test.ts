@@ -127,6 +127,29 @@ describe("api", () => {
       expect((await compileAs(bad)).statusCode).toBe(400);
   });
 
+  it("a read-back that promises check-ins is replaced by the terms", async () => {
+    const stub: Compiler = {
+      async draft() {
+        return {
+          friends: ["Bea"],
+          hours: 3,
+          radius_m: 1000,
+          preset: "standard",
+          watch_order: ["Bea"],
+          offer_911_script: true,
+          read_back: "Bea is your check-in contact for tonight.",
+        };
+      },
+    };
+    const r = await buildServer({ store, clock, compiler: stub }).inject({
+      method: "POST",
+      url: "/contracts/compile",
+      payload: { sentence: "Out with Bea" },
+    });
+    expect(r.json().readBack).not.toMatch(/check/i);
+    expect(r.json().readBack).toContain("Watching: bea");
+  });
+
   it("rejects bad input with 400", async () => {
     const r = await app.inject({ method: "POST", url: "/contracts/compile", payload: {} });
     expect(r.statusCode).toBe(400);

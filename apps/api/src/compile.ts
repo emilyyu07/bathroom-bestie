@@ -88,6 +88,7 @@ export class GeminiCompiler implements Compiler {
           "Turn this description of a night out into a plan. Only use what she said; do not add concerns about health. " +
           "Use preset standard unless she asks to be more careful (cautious) or more relaxed (relaxed). " +
           "Set offer_911_script to true unless she explicitly says not to offer it. " +
+          "Call her friends watchers; never say check in, check-in or check-in contacts (there are no check-ins). " +
           "Set home_by_hours only if she says when she will be home or back, as hours from now; otherwise omit it. " +
           (ctx?.localTime ? `Her local time now is ${ctx.localTime}. ` : "") +
           `Description: ${JSON.stringify(sentence)}`,
@@ -165,6 +166,11 @@ export const termsOf = (c: Contract): string[] => {
 /** Invariant 6 words. The model's read-back is shown to her, so it is held to the same rule. */
 const BANNED = ["drug", "spiked", "intoxicated", "drunk", "sick", "medical", "unwell"];
 
+/** The product has no check-ins (CLAUDE.md), so the read-back must not promise one. */
+const CHECK_IN = /check[\s-]?ins?\b/i;
+
 /** The model's read-back, or a deterministic one built from the terms if it strays. */
 export const safeReadBack = (readBack: string, c: Contract): string =>
-  BANNED.some((w) => readBack.toLowerCase().includes(w)) ? termsOf(c).join(". ") + "." : readBack;
+  BANNED.some((w) => readBack.toLowerCase().includes(w)) || CHECK_IN.test(readBack)
+    ? termsOf(c).join(". ") + "."
+    : readBack;

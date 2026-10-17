@@ -132,10 +132,11 @@ async function currentPosition(): Promise<Location.LocationObject | null> {
 export function startEvidenceReporter(opts: {
   personId: string;
   contractId: string;
-  everyMs?: number;
+  /** From the contract (`thresholds.report_every_min`); there is no default in code. */
+  everyMs: number;
 }) {
   const send = () => sendEvidenceOnce(opts.personId, opts.contractId);
   void send().catch(() => undefined);
-  const h = setInterval(() => void send().catch(() => undefined), opts.everyMs ?? 5 * 60_000);
+  const h = setInterval(() => void send().catch(() => undefined), opts.everyMs);
   return () => clearInterval(h);
 }

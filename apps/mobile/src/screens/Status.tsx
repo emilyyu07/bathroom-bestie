@@ -37,10 +37,12 @@ export function Status({
       setNow(nowMinute());
       const [c, a] = await Promise.all([
         get<{ contract: Contract }>(`/contracts/${contractId}`),
-        get<{ alerts: Alert[] }>(`/incidents?contractId=${contractId}`),
+        get<{ alerts: Alert[] }>(
+          `/incidents?contractId=${encodeURIComponent(contractId)}&to=${encodeURIComponent(me)}`,
+        ),
       ]);
       setContract(c.contract);
-      setAlerts(a.alerts.filter((x) => x.to.includes(me)).sort((x, y) => y.t - x.t));
+      setAlerts([...a.alerts].sort((x, y) => y.t - x.t)); // the server filters by `to`
     };
     void load().catch(() => undefined);
     const h = setInterval(() => void load().catch(() => undefined), 30_000);
