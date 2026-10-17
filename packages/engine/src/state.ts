@@ -85,7 +85,7 @@ export interface SoftNote {
 }
 
 /** Bump whenever PersonState/Incident/EngineState semantics change; stale caches are rebuilt from the logs. */
-export const ENGINE_STATE_VERSION = 5;
+export const ENGINE_STATE_VERSION = 6;
 
 export interface EngineState {
   version: number;

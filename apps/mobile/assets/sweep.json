@@ -71,11 +71,17 @@
           "truth": "concerning",
           "alertsToOthers": 3,
           "timeToAlert": 68
+        },
+        {
+          "name": "14-solo-reporter",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
         }
       ]
     },
     "standard": {
-      "falseAlertsPerNormalNight": 0.125,
+      "falseAlertsPerNormalNight": 0.111,
       "medianTimeToAlertMin": 23,
       "worstTimeToAlertMin": 51,
       "knownMisses": [],
@@ -145,11 +151,17 @@
           "truth": "concerning",
           "alertsToOthers": 3,
           "timeToAlert": 51
+        },
+        {
+          "name": "14-solo-reporter",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
         }
       ]
     },
     "cautious": {
-      "falseAlertsPerNormalNight": 0.625,
+      "falseAlertsPerNormalNight": 0.556,
       "medianTimeToAlertMin": 13,
       "worstTimeToAlertMin": 34,
       "knownMisses": [],
@@ -219,6 +231,12 @@
           "truth": "concerning",
           "alertsToOthers": 3,
           "timeToAlert": 34
+        },
+        {
+          "name": "14-solo-reporter",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
         }
       ]
     }
