@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck, lint, tests, scenarios
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # pnpm's version comes from "packageManager" in package.json, so CI and laptops agree.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm sim run # exits nonzero if a scenario regresses
+      - name: Generated files are up to date
+        # Scenario JSON, sweep and replay are committed. If a change to the engine or the generator
+        # moves them and nobody regenerated, fail here instead of shipping stale numbers to the apps.
+        run: |
+          pnpm --filter @bathroombestie/sim generate
+          pnpm sim sweep
+          pnpm sim replay
+          pnpm exec prettier --write packages/sim
+          git diff --exit-code
+
+  database:
+    name: Postgres integration (TimescaleDB)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: timescale/timescaledb:latest-pg16
+        env:
+          POSTGRES_USER: bathroombestie
+          POSTGRES_PASSWORD: bathroombestie
+          POSTGRES_DB: bathroombestie
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bathroombestie"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The test creates and migrates its own `_test` database, so nothing else needs setting up.
+      DATABASE_URL_TEST: postgres://bathroombestie:bathroombestie@localhost:5432/bathroombestie_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:db
