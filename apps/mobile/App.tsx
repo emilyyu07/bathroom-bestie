@@ -21,6 +21,8 @@ export default function App() {
   const [me, setMe] = useState("");
   const [role, setRole] = useState<Identity["role"] | null>(null);
   const [planner, setPlanner] = useState("");
+  // She tapped "The plan looks right" for this contract (the planner identity is saved on that tap).
+  const [confirmed, setConfirmed] = useState(false);
   const nightEnded = useCallback(() => setActive(false), []);
   // Both roles report once the night is active: the group checks compare her with her friends.
   useNightReporting(contractId, me, active, nightEnded);
@@ -51,6 +53,7 @@ export default function App() {
       setContractId(id.contractId);
       setMe(id.personId);
       setActive(!!n && n.contractId === id.contractId);
+      setConfirmed(id.role === "planner"); // saved only when she confirmed the plan
       if (id.role === "friend") {
         const c = await get<{ contract: { group: { members: string[] } } }>(
           `/contracts/${encodeURIComponent(id.contractId)}`,
@@ -69,6 +72,7 @@ export default function App() {
     setContractId("");
     setMe("");
     setActive(false);
+    setConfirmed(false);
     setScreen("welcome");
   };
 
@@ -110,6 +114,7 @@ export default function App() {
           onCompiled={(c) => {
             void endNight();
             void saveIdentity({ role: "planner", contractId: c.id, personId: c.me });
+            setConfirmed(true);
             setContractId(c.id);
             setMe(c.me);
             setActive(false);
@@ -121,7 +126,7 @@ export default function App() {
         <Preflight
           contractId={contractId}
           me={me}
-          confirmed={contractId !== ""}
+          confirmed={confirmed}
           onActive={() => {
             setActive(true);
             setScreen("status");

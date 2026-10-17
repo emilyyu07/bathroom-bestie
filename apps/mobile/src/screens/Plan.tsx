@@ -100,7 +100,15 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
           </View>
         ))}
       {error && <Text style={{ color: "#b91c1c" }}>{error}</Text>}
-      {id && me && <Button title="Continue to pre-flight" onPress={() => onCompiled({ id, me })} />}
+      {id && me && (
+        // Pre-flight's "Night plan confirmed" check means this tap: she read the plan back.
+        <View style={{ gap: 4 }}>
+          <Text style={{ color: "#555" }}>
+            Check the read-back and terms above. Change the sentence or setting if anything is off.
+          </Text>
+          <Button title="The plan looks right" onPress={() => onCompiled({ id, me })} />
+        </View>
+      )}
     </View>
   );
 }
