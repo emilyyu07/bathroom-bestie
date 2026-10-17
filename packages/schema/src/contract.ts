@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Circle, Minute, PersonId } from "./common";
+import { Circle, DEFAULT_REPORT_EVERY_MIN, Minute, PersonId } from "./common";
 import { PresetName } from "./preset";
 
 const MilestoneBase = {
@@ -44,6 +44,8 @@ export const Thresholds = z.object({
   ack_timeout_min: z.number().positive(),
   milestone_grace_min: z.number().nonnegative(),
   exit_alone_min: z.number().positive(),
+  /** How often her phone reports while a night is active. Read by the app; used by the sim and checks. */
+  report_every_min: z.number().int().positive().default(DEFAULT_REPORT_EVERY_MIN),
 });
 
 const Stream = z.object({ w: z.number().nonnegative(), tau_min: z.number().positive() });
@@ -93,6 +95,11 @@ export const Contract = z
       message:
         "expires must cover the end of the window and every milestone deadline plus its grace, or the engine stops watching before the deadline can be judged",
     },
-  );
+  )
+  .refine((c) => c.thresholds.silence_min >= 2 * c.thresholds.report_every_min, {
+    path: ["thresholds", "silence_min"],
+    message:
+      "silence_min must be at least two report intervals, or a single late report would count as silence",
+  });
 export type Contract = z.infer<typeof Contract>;
 export type Thresholds = z.infer<typeof Thresholds>;

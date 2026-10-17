@@ -102,6 +102,12 @@ good to about one grid cell. Tightening it needs finer coordinates, which would 
 - **No "I'm fine" button (agreed by both owners).** The product has no check-ins. Opening the app already sends an
   evidence report immediately, which clears silence and low-score nudges. Nudges the app cannot clear (separation, and later
   missed milestone) are worded as facts, never as instructions. The mobile Status screen shows "watching" only.
+- **Phones report every 3 minutes (`thresholds.report_every_min`, default 3).** It is contract data (invariant 7), so
+  the app, the simulator and the engine read the same value; a contract check requires `silence_min >= 2 x
+report_every_min`. Cautious's 12-minute silence is then exactly 4 reports. Precisely: silence trips 12 min after the
+  last report (the incident turns hard), a friend is alerted at 15 (the 3-min ack), and a report arriving by minute 15
+  cancels it first, so a friend hears only after **five consecutive missed reports**. Detection timing is measured from
+  the last report and does not depend on the cadence (tested at 1, 2, 3 and 5 min).
 
 ## Decisions to confirm
 

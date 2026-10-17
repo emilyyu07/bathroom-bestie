@@ -23,6 +23,7 @@ describe("schema", () => {
 
 import {
   Contract,
+  DEFAULT_REPORT_EVERY_MIN,
   Milestone,
   PRESETS,
   PRESET_ORDER,
@@ -130,5 +131,44 @@ describe("milestone guards", () => {
   it("normalizeContract enforces the same guard on stored contracts", () => {
     const raw = JSON.parse(JSON.stringify({ ...c, expires: 100 }));
     expect(() => normalizeContract(raw)).toThrow();
+  });
+});
+
+describe("report cadence", () => {
+  const c = makeContract();
+
+  it("defaults to 3 minutes and flows through thresholdsFor", () => {
+    expect(DEFAULT_REPORT_EVERY_MIN).toBe(3);
+    expect(thresholdsFor("cautious").report_every_min).toBe(3);
+    expect(c.thresholds.report_every_min).toBe(3);
+  });
+  it("is kept when thresholds are rebuilt for another preset (the app's preset endpoint does this)", () => {
+    const slow = { ...c.thresholds, report_every_min: 4 };
+    expect(thresholdsFor("relaxed", slow).report_every_min).toBe(4);
+  });
+  it("is filled in for a contract stored before the field existed", () => {
+    const raw = JSON.parse(JSON.stringify(c));
+    delete raw.thresholds.report_every_min;
+    expect(normalizeContract(raw).thresholds.report_every_min).toBe(3);
+  });
+  it("must be a positive whole number of minutes", () => {
+    for (const bad of [0, -3, 2.5]) {
+      const t = { ...c.thresholds, report_every_min: bad };
+      expect(Contract.safeParse({ ...c, thresholds: t }).success).toBe(false);
+    }
+  });
+  it("every preset's silence_min covers at least two reports at the default cadence", () => {
+    for (const p of PRESET_ORDER) {
+      expect(PRESETS[p].silence_min).toBeGreaterThanOrEqual(2 * DEFAULT_REPORT_EVERY_MIN);
+    }
+    expect(PRESETS.cautious.silence_min / DEFAULT_REPORT_EVERY_MIN).toBe(4); // 12 min = 4 reports
+  });
+  it("rejects a silence_min shorter than two report intervals", () => {
+    const cautious = makeContract({ preset: "cautious", thresholds: thresholdsFor("cautious") });
+    expect(Contract.safeParse(cautious).success).toBe(true); // 12 >= 2 x 3
+    const t = { ...cautious.thresholds, report_every_min: 7 }; // 12 < 14
+    const r = Contract.safeParse({ ...cautious, thresholds: t });
+    expect(r.success).toBe(false);
+    expect(!r.success && r.error.issues[0]?.path).toEqual(["thresholds", "silence_min"]);
   });
 });
