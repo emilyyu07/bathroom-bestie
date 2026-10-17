@@ -27,7 +27,12 @@ export function Join({
   const find = async () => {
     setError(null);
     try {
-      setNight(await get<Night>(`/contracts/${encodeURIComponent(code.trim())}`));
+      // Either the short code she reads out (6 hex digits) or the full night code she shares.
+      const typed = code.trim();
+      const id = /^[0-9a-f]{6}$/i.test(typed)
+        ? (await get<{ contractId: string }>(`/join/${typed}`)).contractId
+        : typed;
+      setNight(await get<Night>(`/contracts/${encodeURIComponent(id)}`));
     } catch (e) {
       setNight(null);
       setError(
@@ -58,11 +63,11 @@ export function Join({
   const [planner, ...friends] = night?.contract.group.members ?? [];
   return (
     <View style={{ padding: 16, gap: 12 }}>
-      <Text>Enter the night code she shared with you.</Text>
+      <Text>Enter the join code she gave you (6 characters), or the full night code.</Text>
       <TextInput
         value={code}
         onChangeText={setCode}
-        placeholder="c_1a2b3c4d5e"
+        placeholder="9F3A1B"
         autoCapitalize="none"
         autoCorrect={false}
         style={{ borderWidth: 1, padding: 8 }}

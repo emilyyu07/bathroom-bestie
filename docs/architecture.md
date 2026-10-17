@@ -129,6 +129,10 @@ good to about one grid cell. Tightening it needs finer coordinates, which would 
 
 ## Decision log
 
+- **Friends can join with a 6-character code as well as the full night code.** Compile returns `joinCode` (first 6 hex
+  digits of the contract id, upper-case); `GET /join/:code` returns the owner and the friend names (with who has accepted).
+  Not a secret: with no auth, anyone with the code can see the member names and claim one; a prefix collision answers
+  409 rather than guessing.
 - **No "I'm fine" button (agreed by both owners).** The product has no check-ins. Opening the app already sends an
   evidence report immediately, which clears silence and low-score nudges. Nudges the app cannot clear (separation, and later
   missed milestone) are worded as facts, never as instructions. The mobile Status screen shows "watching" only.

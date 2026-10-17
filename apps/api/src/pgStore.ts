@@ -26,6 +26,18 @@ export class PgStore implements Store {
       ? { contract: normalizeContract(row.body), status: row.status, readiness: row.readiness }
       : null;
   }
+  async findByIdPrefix(prefix: string) {
+    // The caller passes a validated hex prefix, so there is no LIKE wildcard to escape.
+    const r = await this.pool.query(
+      "SELECT body, status, readiness FROM contracts WHERE id LIKE $1 ORDER BY id LIMIT 5",
+      [`${prefix}%`],
+    );
+    return r.rows.map((row) => ({
+      contract: normalizeContract(row.body),
+      status: row.status,
+      readiness: row.readiness,
+    }));
+  }
   async setReadiness(id: string, rep: ReadinessReport) {
     await this.pool.query("UPDATE contracts SET readiness = $2 WHERE id = $1", [id, rep]);
   }

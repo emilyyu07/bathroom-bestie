@@ -13,6 +13,7 @@ import {
 import { preflight } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
 import { buildContract, safeReadBack, termsOf, type Compiler } from "./compile";
+import { idPrefixOfCode, joinCodeOf } from "./join";
 import type { Store } from "./store";
 
 export interface Deps {
@@ -82,6 +83,7 @@ export function buildServer({ store, clock, compiler }: Deps) {
       contract,
       readBack: safeReadBack(draft.read_back, contract),
       terms: termsOf(contract),
+      joinCode: joinCodeOf(contract.id),
     };
   });
 
@@ -104,6 +106,25 @@ export function buildServer({ store, clock, compiler }: Deps) {
     const stored = await store.getContract(req.params.id);
     if (!stored) return reply.code(404).send({ error: "unknown_contract" });
     return { contract: stored.contract, status: stored.status };
+  });
+
+  // A friend typed the code she read out. Returns just enough to pick who they are and accept.
+  app.get<{ Params: { code: string } }>("/join/:code", async (req, reply) => {
+    const prefix = idPrefixOfCode(req.params.code);
+    if (!prefix) return reply.code(400).send({ error: "invalid_code" });
+    const found = await store.findByIdPrefix(prefix);
+    if (found.length === 0) return reply.code(404).send({ error: "unknown_code" });
+    if (found.length > 1) return reply.code(409).send({ error: "ambiguous_code" });
+    const { contract, status } = found[0]!;
+    const accepted = new Set(await store.acceptedWatchers(contract.id));
+    const [owner, ...friends] = contract.group.members;
+    return {
+      contractId: contract.id,
+      owner,
+      status,
+      expires: contract.expires,
+      friends: friends.map((id) => ({ id, accepted: accepted.has(id) })),
+    };
   });
 
   // A friend agrees to watch. The owner (first member) can't watch her own night.

@@ -9,6 +9,7 @@ type Preset = (typeof PRESETS)[number];
 type Compiled = {
   contract: { id: string; preset: Preset; group: { members: string[] } };
   terms: string[];
+  joinCode: string;
 };
 
 /** Her first name is her id (B6), so alerts read "ana left the group…". Remembered on this phone. */
@@ -26,6 +27,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
   const [preset, setPreset] = useState<Preset>("standard");
   const [terms, setTerms] = useState<string[]>([]);
   const [id, setId] = useState<string | null>(null);
+  const [joinCode, setJoinCode] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +75,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
             void AsyncStorage.setItem(NAME_KEY, name.trim()).catch(() => undefined);
             setReadBack(r.readBack);
             setId(r.contract.id);
+            setJoinCode(r.joinCode);
             setMe(r.contract.group.members[0]!); // the server's form of her name
             setPreset(r.contract.preset);
             setTerms(r.terms);
@@ -89,6 +92,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
         }}
       />
       {readBack && <Text>{readBack}</Text>}
+      {joinCode && <Text>Friends join with the code {joinCode}</Text>}
       {terms.map((t) => (
         <Text key={t}>{t}</Text>
       ))}

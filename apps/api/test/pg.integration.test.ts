@@ -1,5 +1,6 @@
 import pg from "pg";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { makeContract } from "@bathroombestie/schema";
 import type { Alert, ReadinessSnapshot, ScenarioFile } from "@bathroombestie/schema";
 import { loadScenarios } from "@bathroombestie/sim/src/scenarios";
 import { runScenario } from "@bathroombestie/sim/src/runner";
@@ -91,6 +92,13 @@ describe.skipIf(!url)("postgres integration", () => {
   beforeEach(async () => {
     await pool.query("TRUNCATE watchers, engine_state, incidents, actions, evidence, contracts");
     store = new PgStore(pool);
+  });
+
+  it("finds a night by join-code prefix, and by nothing else", async () => {
+    const c = makeContract({ id: "c_abc123def0" });
+    await store.saveContract(c);
+    expect((await store.findByIdPrefix("c_abc123")).map((x) => x.contract.id)).toEqual([c.id]);
+    expect(await store.findByIdPrefix("c_abc124")).toEqual([]);
   });
 
   describe("http flow on PgStore", () => {
