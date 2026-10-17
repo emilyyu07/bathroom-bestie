@@ -1,0 +1,100 @@
+{
+  "presets": {
+    "relaxed": {
+      "falseAlertsPerNormalNight": 0.667,
+      "medianTimeToAlertMin": 37,
+      "worstTimeToAlertMin": 37,
+      "knownMisses": [],
+      "scenarios": [
+        {
+          "name": "01-normal-night",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "02-battery-dies",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "03-separated-then-silent",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 37
+        },
+        {
+          "name": "04-false-alarm-confirmed",
+          "truth": "normal",
+          "alertsToOthers": 2,
+          "timeToAlert": null
+        }
+      ]
+    },
+    "standard": {
+      "falseAlertsPerNormalNight": 0.333,
+      "medianTimeToAlertMin": 25,
+      "worstTimeToAlertMin": 25,
+      "knownMisses": [],
+      "scenarios": [
+        {
+          "name": "01-normal-night",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "02-battery-dies",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "03-separated-then-silent",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 25
+        },
+        {
+          "name": "04-false-alarm-confirmed",
+          "truth": "normal",
+          "alertsToOthers": 1,
+          "timeToAlert": null
+        }
+      ]
+    },
+    "cautious": {
+      "falseAlertsPerNormalNight": 1,
+      "medianTimeToAlertMin": 15,
+      "worstTimeToAlertMin": 15,
+      "knownMisses": [],
+      "scenarios": [
+        {
+          "name": "01-normal-night",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "02-battery-dies",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "03-separated-then-silent",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 15
+        },
+        {
+          "name": "04-false-alarm-confirmed",
+          "truth": "normal",
+          "alertsToOthers": 3,
+          "timeToAlert": null
+        }
+      ]
+    }
+  }
+}
