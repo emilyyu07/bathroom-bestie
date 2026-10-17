@@ -1,4 +1,4 @@
-import type { Contract, Minute } from "@bathroombestie/schema";
+import type { Contract, Minute, Motion } from "@bathroombestie/schema";
 
 export interface PersonState {
   lastReportAt: Minute | null;
@@ -16,6 +16,15 @@ export interface PersonState {
   apartSince: Minute | null;
   /** Area milestones she has reached: id -> report time (even if late). A home milestone is met when `home` is true. */
   milestoneMet: Record<string, Minute>;
+  /** Last time she was within `separation_m` of a fresh peer. Null if she has never been with anyone. */
+  togetherAt: Minute | null;
+  /**
+   * When she left the group alone while moving, if she has not since got home or rejoined. Only set
+   * for people a home milestone applies to; frozen while she is quiet (like `apartSince`).
+   */
+  exitAloneSince: Minute | null;
+  /** Motion in her last located report (an arrival or a report without permission does not change it). */
+  lastMotion: Motion | null;
   cooldownUntil: Minute | null;
   /** Last accepted worry time per friend (rate limit). */
   worryAt: Record<string, Minute>;
@@ -27,7 +36,8 @@ export type IncidentKind =
   | "evidence_lost"
   | "friend_worry"
   | "separation"
-  | "missed_milestone";
+  | "missed_milestone"
+  | "exit_alone";
 
 /**
  * How an incident behaves on the ladder. Stored ON the incident (not looked up by kind) so the same
@@ -75,7 +85,7 @@ export interface SoftNote {
 }
 
 /** Bump whenever PersonState/Incident/EngineState semantics change; stale caches are rebuilt from the logs. */
-export const ENGINE_STATE_VERSION = 4;
+export const ENGINE_STATE_VERSION = 5;
 
 export interface EngineState {
   version: number;
@@ -107,6 +117,9 @@ export const initialState = (contract: Contract): EngineState => ({
         lowSince: null,
         apartSince: null,
         milestoneMet: {},
+        togetherAt: null,
+        exitAloneSince: null,
+        lastMotion: null,
         cooldownUntil: null,
         worryAt: {},
       } satisfies PersonState,

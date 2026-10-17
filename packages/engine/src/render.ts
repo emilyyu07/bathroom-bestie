@@ -15,6 +15,8 @@ export function factorsFor(ctx: Ctx, id: string): string[] {
   const apartMin = separatedFor(contract, state, id, now);
   const c = confidenceOfNormal(contract, p, now, apartMin);
   const out: string[] = [];
+  if (p.exitAloneSince !== null)
+    out.push(fill(FACTOR_TEMPLATES.leftAlone, { minutes: now - p.exitAloneSince }));
   const late = overdue(contract, p, id, now)[0];
   if (late) out.push(fill(FACTOR_TEMPLATES.pastDeadline, { minutes: now - late.by }));
   const silent = silentMinutes(contract, state, id, now);
@@ -73,6 +75,9 @@ export function renderAlert(ctx: Ctx, inc: Incident, seq: number, opts: EmitOpti
       } else if (inc.kind === "missed_milestone" && late) {
         tpl = late.kind === "home" ? TEMPLATES.milestoneHome : TEMPLATES.milestoneArea;
         m = now - late.by; // time past the deadline
+      } else if (inc.kind === "exit_alone") {
+        tpl = TEMPLATES.exitAlone;
+        m = now - (p.exitAloneSince ?? now); // time since she left the group
       }
       message = fill(tpl, { name: id, minutes: m });
       to = [id];
@@ -80,7 +85,12 @@ export function renderAlert(ctx: Ctx, inc: Incident, seq: number, opts: EmitOpti
     }
     case "watcher": {
       const late = overdue(contract, p, id, now)[0];
-      if (inc.kind === "missed_milestone" && late) {
+      if (inc.kind === "exit_alone") {
+        message = fill(TEMPLATES.exitAloneLate, {
+          name: id,
+          minutes: now - (p.exitAloneSince ?? now),
+        });
+      } else if (inc.kind === "missed_milestone" && late) {
         message = fill(TEMPLATES.milestoneLate, {
           name: id,
           minutes: now - late.by,
@@ -96,9 +106,9 @@ export function renderAlert(ctx: Ctx, inc: Incident, seq: number, opts: EmitOpti
     case "next": {
       const next = nextAfter(contract, id, watcher);
       kind = "escalation";
-      message = fill(TEMPLATES.next, {
+      message = fill(inc.kind === "exit_alone" ? TEMPLATES.exitAloneNext : TEMPLATES.next, {
         name: id,
-        minutes,
+        minutes: inc.kind === "exit_alone" ? now - (p.exitAloneSince ?? now) : minutes,
         watcher: watcher ?? "the first watcher",
       });
       to = next ? [next] : others;
@@ -106,7 +116,10 @@ export function renderAlert(ctx: Ctx, inc: Incident, seq: number, opts: EmitOpti
     }
     case "group":
       kind = "escalation";
-      message = fill(TEMPLATES.group, { name: id, minutes });
+      message =
+        inc.kind === "exit_alone"
+          ? fill(TEMPLATES.exitAloneGroup, { name: id, minutes: now - (p.exitAloneSince ?? now) })
+          : fill(TEMPLATES.group, { name: id, minutes });
       to = others;
       break;
     case "friend":

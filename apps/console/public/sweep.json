@@ -2,8 +2,8 @@
   "presets": {
     "relaxed": {
       "falseAlertsPerNormalNight": 0,
-      "medianTimeToAlertMin": 35.5,
-      "worstTimeToAlertMin": 40,
+      "medianTimeToAlertMin": 40,
+      "worstTimeToAlertMin": 68,
       "knownMisses": [],
       "scenarios": [
         {
@@ -59,13 +59,25 @@
           "truth": "concerning",
           "alertsToOthers": 3,
           "timeToAlert": 31
+        },
+        {
+          "name": "12-exit-alone-arrives",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "13-exit-alone-never-arrives",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 68
         }
       ]
     },
     "standard": {
-      "falseAlertsPerNormalNight": 0.143,
-      "medianTimeToAlertMin": 21,
-      "worstTimeToAlertMin": 23,
+      "falseAlertsPerNormalNight": 0.125,
+      "medianTimeToAlertMin": 23,
+      "worstTimeToAlertMin": 51,
       "knownMisses": [],
       "scenarios": [
         {
@@ -121,13 +133,25 @@
           "truth": "concerning",
           "alertsToOthers": 3,
           "timeToAlert": 19
+        },
+        {
+          "name": "12-exit-alone-arrives",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "13-exit-alone-never-arrives",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 51
         }
       ]
     },
     "cautious": {
-      "falseAlertsPerNormalNight": 0.429,
-      "medianTimeToAlertMin": 11,
-      "worstTimeToAlertMin": 13,
+      "falseAlertsPerNormalNight": 0.625,
+      "medianTimeToAlertMin": 13,
+      "worstTimeToAlertMin": 34,
       "knownMisses": [],
       "scenarios": [
         {
@@ -183,6 +207,18 @@
           "truth": "concerning",
           "alertsToOthers": 3,
           "timeToAlert": 9
+        },
+        {
+          "name": "12-exit-alone-arrives",
+          "truth": "normal",
+          "alertsToOthers": 2,
+          "timeToAlert": null
+        },
+        {
+          "name": "13-exit-alone-never-arrives",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 34
         }
       ]
     }

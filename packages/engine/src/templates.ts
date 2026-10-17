@@ -18,6 +18,12 @@ export const TEMPLATES = {
   milestoneArea: "You're {minutes} min past a time you planned to arrive somewhere.",
   milestoneLate:
     "{name} is {minutes} min past a planned arrival time, with no update for {silent} min.",
+  exitAlone: "You've been away from your group for {minutes} min and haven't arrived home.",
+  exitAloneLate: "{name} left the group {minutes} min ago and hasn't arrived home.",
+  exitAloneNext:
+    "Still no word that {name} is home after {minutes} min, and {watcher} hasn't responded. You're next.",
+  exitAloneGroup:
+    "Nobody has responded about {name}, who left the group {minutes} min ago and hasn't arrived home.",
   evidenceLost:
     "BathroomBestie can't see updates from {name}'s phone because a permission was turned off.",
   worry: "{friend} reports: {reasonText}.",
@@ -40,6 +46,7 @@ export const FACTOR_TEMPLATES = {
   outsideArea: "Not seen in the planned area for {minutes} min",
   noMovement: "No movement for {minutes} min",
   battery: "Phone was at {battery}% battery at its last update",
+  leftAlone: "Left the group {minutes} min ago; not home yet",
   pastDeadline: "{minutes} min past a planned arrival time",
   apartFor: "Apart from the group for {minutes} min",
   score: "Confidence of normal is {score}",

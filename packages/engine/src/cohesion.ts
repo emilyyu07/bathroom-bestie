@@ -1,4 +1,5 @@
 import { distanceM, type Contract } from "@bathroombestie/schema";
+import { tracksHome } from "./milestones";
 import type { EngineState } from "./state";
 
 /**
@@ -45,7 +46,31 @@ export const isApart = (
   );
 };
 
-/** Advance `apartSince` for one person. Mutates the (already cloned) state. */
+/** She is within `separation_m` of at least one fresh peer, so she is with somebody. */
+export const isTogether = (
+  contract: Contract,
+  state: EngineState,
+  id: string,
+  now: number,
+): boolean => {
+  const me = state.people[id]?.lastArea;
+  if (!me) return false;
+  return contract.group.members.some(
+    (m) =>
+      m !== id &&
+      isFresh(contract, state, m, now) &&
+      distanceM(me, state.people[m]!.lastArea!) <= contract.thresholds.separation_m,
+  );
+};
+
+/**
+ * Advance `apartSince` (and the exit-alone clock) for one person. Mutates the (already cloned) state.
+ *
+ * Exit-alone starts at the moment she goes from *with somebody* to *apart from everyone*, while
+ * moving, and only for a person a home milestone applies to. A phone that has never been near
+ * anyone (it started apart), or one that is apart but not moving (the group left her, or a stuck
+ * fix), does not start it. Both timers freeze while she is quiet and clear when she is home.
+ */
 export const updateApart = (
   contract: Contract,
   state: EngineState,
@@ -55,11 +80,21 @@ export const updateApart = (
   const p = state.people[id]!;
   if (p.home) {
     p.apartSince = null;
+    p.exitAloneSince = null;
     return;
   }
   if (!isFresh(contract, state, id, now)) return; // frozen while she is quiet
-  if (isApart(contract, state, id, now)) p.apartSince ??= now;
-  else p.apartSince = null;
+  if (isApart(contract, state, id, now)) {
+    if (p.apartSince === null) {
+      p.apartSince = now;
+      const moving = p.lastMotion === "walking" || p.lastMotion === "vehicle";
+      if (p.togetherAt !== null && moving && tracksHome(contract, id)) p.exitAloneSince = now;
+    }
+    return;
+  }
+  p.apartSince = null;
+  p.exitAloneSince = null; // rejoined (or cannot tell): the clock only runs while she is apart
+  if (isTogether(contract, state, id, now)) p.togetherAt = now;
 };
 
 /** Minutes apart; if she has gone quiet, measured up to her last report. 0 if together. */
