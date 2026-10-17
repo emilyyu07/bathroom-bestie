@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, SafeAreaView, View } from "react-native";
 import { Plan } from "./src/screens/Plan";
 import { Preflight } from "./src/screens/Preflight";
@@ -11,7 +11,8 @@ export default function App() {
   const [screen, setScreen] = useState<"plan" | "preflight" | "status" | "watcher">("plan");
   const [contractId, setContractId] = useState("");
   const [active, setActive] = useState(false);
-  useNightReporting(contractId, "me", active);
+  const nightEnded = useCallback(() => setActive(false), []);
+  useNightReporting(contractId, "me", active, nightEnded);
   // Reopened while a night is still being reported in the background: show that night.
   useEffect(() => {
     void runningNight().then((n) => {

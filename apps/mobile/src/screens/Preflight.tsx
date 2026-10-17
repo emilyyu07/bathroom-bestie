@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Linking, Platform, Text, View } from "react-native";
 import { post } from "../api";
+import { clearHome, homeIsSet, setHomeHere } from "../home";
 import { collectSnapshot, requestPermissions } from "../readiness";
 
 interface Report {
@@ -33,6 +34,11 @@ export function Preflight({
 }) {
   const [report, setReport] = useState<Report | null>(null);
   const [running, setRunning] = useState(false);
+  const [home, setHome] = useState<"unset" | "set" | "saving">("unset");
+  const [homeError, setHomeError] = useState<string | null>(null);
+  useEffect(() => {
+    if (Platform.OS === "android") void homeIsSet().then((s) => setHome(s ? "set" : "unset"));
+  }, []);
   const run = async () => {
     setRunning(true);
     try {
@@ -75,6 +81,39 @@ export function Preflight({
             )
           }
         />
+      )}
+      {Platform.OS === "android" && (
+        <View style={{ gap: 4 }}>
+          <Text style={{ color: "#555" }}>
+            {home === "set"
+              ? "Home is set on this phone. Your friends only learn when you've arrived."
+              : "Set your home so BathroomBestie knows when you arrive. It stays on this phone."}
+          </Text>
+          <Button
+            title={
+              home === "saving"
+                ? "Saving…"
+                : home === "set"
+                  ? "Clear home"
+                  : "Set home to where I am now"
+            }
+            disabled={home === "saving"}
+            onPress={async () => {
+              setHomeError(null);
+              const was = home;
+              setHome("saving");
+              try {
+                if (was === "set") await clearHome();
+                else await setHomeHere();
+                setHome(was === "set" ? "unset" : "set");
+              } catch (e) {
+                setHome(was);
+                setHomeError((e as Error).message);
+              }
+            }}
+          />
+          {homeError && <Text style={{ color: "#b91c1c" }}>{homeError}</Text>}
+        </View>
       )}
       {report && <Text style={{ fontSize: 20 }}>{TITLE[report.state]}</Text>}
       {report?.checks.map((c) => (

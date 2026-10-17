@@ -10,7 +10,13 @@ import { sendEvidenceOnce, startEvidenceReporter } from "./evidenceReporter";
  * to the foreground. That fresh report is what clears a nudge ("Open the app so your friends know
  * you're fine"); there is deliberately no check-in button.
  */
-export function useNightReporting(contractId: string, me: string, active: boolean) {
+export function useNightReporting(
+  contractId: string,
+  me: string,
+  active: boolean,
+  /** The background night ended while the app was away (she arrived home, or it expired). */
+  onEnded: () => void,
+) {
   useEffect(() => {
     if (!active || !contractId) return;
     let stop = () => {};
@@ -37,14 +43,19 @@ export function useNightReporting(contractId: string, me: string, active: boolea
         });
     }
     const sub = AppState.addEventListener("change", (s) => {
-      if (s === "active") void sendEvidenceOnce(me, contractId).catch(() => undefined);
+      if (s !== "active") return;
+      void (async () => {
+        // Arrived home (or expired) while away: the night is over, so send nothing from home.
+        if (Platform.OS === "android" && !(await readNight().catch(() => null))) return onEnded();
+        await sendEvidenceOnce(me, contractId);
+      })().catch(() => undefined);
     });
     return () => {
       cancelled = true;
       stop();
       sub.remove();
     };
-  }, [contractId, me, active]);
+  }, [contractId, me, active, onEnded]);
 }
 
 /** Ends the current night's reporting (a new plan replaces it). */
