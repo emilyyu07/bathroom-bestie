@@ -16,6 +16,12 @@ No Android Studio needed: JDK 17 plus Google's command-line tools work. Install
 `JAVA_HOME` and `ANDROID_HOME`, create an AVD with `avdmanager`, start it with `emulator -avd <name>`,
 then `npx expo run:android`. The emulator reaches the local API at 10.0.2.2:3000.
 
+During a night the app reports from an Android foreground service (persistent notification), so
+updates continue with the app closed. It asks for Balanced (Wi-Fi/cell) location, which the
+emulator doesn't have: run Metro with `EXPO_PUBLIC_REPORT_ACCURACY=high npx expo start` there, and
+feed positions with `adb emu geo fix <lon> <lat>` (repeating the same position registers nothing;
+vary it slightly).
+
 No device? The screens run in a browser against the local API (`pnpm api` first):
 
     npx expo start --web          # http://localhost:8081

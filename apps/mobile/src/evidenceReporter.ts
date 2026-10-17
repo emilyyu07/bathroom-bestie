@@ -5,14 +5,14 @@ import { nowMinute, post } from "./api";
 const round = (n: number) => Math.round(n * 1000) / 1000; // ~100 m, before it ever leaves the phone
 
 /**
- * Posts coarse location, battery and motion on a timer while the app is open.
+ * Coarse location, battery and motion reports. On Android the night is reported from a
+ * foreground service (background.ts); the timer below is the fallback where that can't run (web).
  *
- * TODO(android): real background behaviour needs a development build (not Expo Go):
- *  - run this inside a foreground service (expo-location startLocationUpdatesAsync with
- *    foregroundService notification) instead of setInterval;
+ * TODO(android):
  *  - register a geofence region for home (Location.startGeofencingAsync) and send ONLY
  *    `homeArrived: true` on enter. Home coordinates must never be sent to the server;
- *  - handle permission revocation by sending permissionOk:false once, then stop.
+ *  - Android kills the app when location permission is revoked, so the next report (on reopen)
+ *    is the first chance to send permissionOk:false.
  */
 /**
  * Sends one evidence report. Returns false if nothing was sent: with permission but no position
@@ -21,12 +21,22 @@ const round = (n: number) => Math.round(n * 1000) / 1000; // ~100 m, before it e
  */
 export async function sendEvidenceOnce(personId: string, contractId: string): Promise<boolean> {
   const perm = await Location.getForegroundPermissionsAsync();
-  const [pos, level, state] = await Promise.all([
-    perm.granted ? currentPosition() : null,
+  const pos = perm.granted ? await currentPosition() : null;
+  if (perm.granted && !pos) return false;
+  await reportPosition(personId, contractId, pos);
+  return true;
+}
+
+/** Posts one report for a known position (null = no location permission). Rounds before sending. */
+export async function reportPosition(
+  personId: string,
+  contractId: string,
+  pos: Location.LocationObject | null,
+): Promise<void> {
+  const [level, state] = await Promise.all([
     Battery.getBatteryLevelAsync(),
     Battery.getBatteryStateAsync(),
   ]);
-  if (perm.granted && !pos) return false;
   const speed = pos?.coords.speed ?? 0; // m/s
   await post("/evidence", {
     personId,
@@ -36,9 +46,8 @@ export async function sendEvidenceOnce(personId: string, contractId: string): Pr
     motion: speed > 5 ? "vehicle" : speed > 0.5 ? "walking" : "still",
     batteryPct: Math.round(level * 100),
     charging: state === Battery.BatteryState.CHARGING,
-    permissionOk: perm.granted,
+    permissionOk: pos !== null,
   });
-  return true;
 }
 
 /** Last known position, else a fresh fix (bounded so a stuck GPS can't hang the caller). */
