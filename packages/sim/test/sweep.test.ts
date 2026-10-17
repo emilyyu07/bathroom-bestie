@@ -14,7 +14,7 @@ describe("sweep", () => {
 });
 
 // Tiny seeded PRNG so failures reproduce.
-const rng = (seed: number) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+const rng = (seed: number) => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
 
 const firstAlert = (sc: ScenarioFile, p: PresetName): number =>
   runScenario(sc, p).alerts.find((a) => a.rung >= 2)?.t ?? Infinity;
@@ -31,13 +31,23 @@ describe("property: a more cautious preset never alerts later than a more relaxe
       const rep = (id: string, area: typeof A, to: number, b = 80) =>
         Array.from({ length: Math.floor(to / 5) + 1 }, (_, k) => ({
           at: k * 5,
-          evidence: { area, motion: "walking" as const, batteryPct: b, charging: false, permissionOk: true },
+          evidence: {
+            area,
+            motion: "walking" as const,
+            batteryPct: b,
+            charging: false,
+            permissionOk: true,
+          },
         }));
       const sc = {
         name: `rand-${i}`,
         description: "",
         contract: makeContract(),
-        timelines: { ana: rep("ana", apart ? FAR : A, darkFrom, battery), bea: rep("bea", A, 300), cy: rep("cy", A, 300) },
+        timelines: {
+          ana: rep("ana", apart ? FAR : A, darkFrom, battery),
+          bea: rep("bea", A, 300),
+          cy: rep("cy", A, 300),
+        },
         actions: [],
         durationMin: 300,
         truth: "concerning",

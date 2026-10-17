@@ -1,7 +1,16 @@
-import { makeContract, type Contract, type EvidenceReport, type FriendAction } from "@tether/schema";
+import {
+  makeContract,
+  type Contract,
+  type EvidenceReport,
+  type FriendAction,
+} from "@tether/schema";
 import { evaluate, initialState, type EngineState } from "../src";
 
-export const ev = (personId: string, t: number, o: Partial<EvidenceReport> = {}): EvidenceReport => ({
+export const ev = (
+  personId: string,
+  t: number,
+  o: Partial<EvidenceReport> = {},
+): EvidenceReport => ({
   personId,
   contractId: "c1",
   t,
@@ -38,10 +47,15 @@ export const run = (opts: {
 };
 
 /** Everyone reports every 5 min; `ana` goes dark after `darkFrom` at the given battery. */
-export const darkAna = (darkFrom: number, battery = 61) => (t: number) => {
-  const out: EvidenceReport[] = [];
-  if (t % 5 !== 0) return out;
-  out.push(ev("bea", t, { area: { lat: 43.66, lon: -79.38 } }), ev("cy", t, { area: { lat: 43.66, lon: -79.38 } }));
-  if (t <= darkFrom) out.push(ev("ana", t, { batteryPct: battery }));
-  return out;
-};
+export const darkAna =
+  (darkFrom: number, battery = 61) =>
+  (t: number) => {
+    const out: EvidenceReport[] = [];
+    if (t % 5 !== 0) return out;
+    out.push(
+      ev("bea", t, { area: { lat: 43.66, lon: -79.38 } }),
+      ev("cy", t, { area: { lat: 43.66, lon: -79.38 } }),
+    );
+    if (t <= darkFrom) out.push(ev("ana", t, { batteryPct: battery }));
+    return out;
+  };

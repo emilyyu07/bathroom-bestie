@@ -19,7 +19,8 @@ const every = (from: number, to: number, f: (t: number) => Partial<Ev>): Timelin
   return out;
 };
 const mid = (t: number) => (t < 60 ? A : t < 85 ? A : B);
-const groupMotion = (t: number): Ev["motion"] => (t >= 60 && t < 80 ? "still" : t >= 80 && t < 85 ? "walking" : t % 20 === 0 ? "walking" : "still");
+const groupMotion = (t: number): Ev["motion"] =>
+  t >= 60 && t < 80 ? "still" : t >= 80 && t < 85 ? "walking" : t % 20 === 0 ? "walking" : "still";
 
 const sc = (s: unknown, file: string) => {
   const parsed = ScenarioFile.parse(s);
@@ -39,8 +40,21 @@ sc(
     contract: makeContract(),
     timelines: {
       ana: [
-        ...every(0, 255, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: Math.round(80 - t / 8) })),
-        { at: 260, evidence: { ...base, area: { lat: 43.662, lon: -79.395 }, motion: "vehicle", batteryPct: 48, homeArrived: true } },
+        ...every(0, 255, (t) => ({
+          area: mid(t),
+          motion: groupMotion(t),
+          batteryPct: Math.round(80 - t / 8),
+        })),
+        {
+          at: 260,
+          evidence: {
+            ...base,
+            area: { lat: 43.662, lon: -79.395 },
+            motion: "vehicle",
+            batteryPct: 48,
+            homeArrived: true,
+          },
+        },
       ],
       ...together(300),
     },
@@ -58,7 +72,11 @@ sc(
     description: "Ana's battery drains to 3% and her phone goes dark. Soft note only.",
     contract: makeContract(),
     timelines: {
-      ana: every(0, 150, (t) => ({ area: t >= 90 ? FAR : A, motion: "walking", batteryPct: Math.max(3, Math.round(50 - t / 3.2)) })),
+      ana: every(0, 150, (t) => ({
+        area: t >= 90 ? FAR : A,
+        motion: "walking",
+        batteryPct: Math.max(3, Math.round(50 - t / 3.2)),
+      })),
       ...together(300),
     },
     durationMin: 300,
@@ -75,7 +93,11 @@ sc(
     description: "Ana drifts away from the group, then her phone stops updating at 61% battery.",
     contract: makeContract(),
     timelines: {
-      ana: every(0, 140, (t) => ({ area: t >= 100 ? FAR : mid(t), motion: "walking", batteryPct: 61 })),
+      ana: every(0, 140, (t) => ({
+        area: t >= 100 ? FAR : mid(t),
+        motion: "walking",
+        batteryPct: 61,
+      })),
       ...together(260),
     },
     durationMin: 260,
@@ -92,13 +114,28 @@ sc(
     description: "Ana loses signal for 50 minutes while apart; Bea confirms she is with her.",
     contract: makeContract(),
     timelines: {
-      ana: [...every(0, 100, (t) => ({ area: t >= 80 ? FAR : mid(t), motion: "walking", batteryPct: 61 })), ...every(150, 250, () => ({ area: FAR, motion: "walking", batteryPct: 58 }))],
+      ana: [
+        ...every(0, 100, (t) => ({
+          area: t >= 80 ? FAR : mid(t),
+          motion: "walking",
+          batteryPct: 61,
+        })),
+        ...every(150, 250, () => ({ area: FAR, motion: "walking", batteryPct: 58 })),
+      ],
       ...together(260),
     },
     actions: [{ type: "confirm", by: "bea", targetPersonId: "ana", at: 128 }],
     durationMin: 260,
     truth: "normal",
-    label: { expect: "alert", rung: 2, from: 123, to: 127, onset: 100, maxRung: 2, resolvedBy: "confirmed" },
+    label: {
+      expect: "alert",
+      rung: 2,
+      from: 123,
+      to: 127,
+      onset: 100,
+      maxRung: 2,
+      resolvedBy: "confirmed",
+    },
   },
   "04-false-alarm-confirmed.json",
 );

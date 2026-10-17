@@ -1,0 +1,23 @@
+{
+  "name": "@tether/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "migrate": "tsx src/migrate.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@tether/engine": "workspace:*",
+    "@tether/schema": "workspace:*",
+    "fastify": "^5.2.0",
+    "pg": "^8.13.1",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10"
+  }
+}

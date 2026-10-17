@@ -4,7 +4,15 @@
   "private": true,
   "type": "module",
   "main": "src/index.ts",
-  "scripts": { "typecheck": "tsc -p .", "generate": "tsx scripts/generate-scenarios.ts" },
-  "dependencies": { "@tether/engine": "workspace:*", "@tether/schema": "workspace:*" },
-  "devDependencies": { "@types/node": "^22.10.0" }
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "generate": "tsx scripts/generate-scenarios.ts"
+  },
+  "dependencies": {
+    "@tether/engine": "workspace:*",
+    "@tether/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0"
+  }
 }

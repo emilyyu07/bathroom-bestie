@@ -17,11 +17,7 @@ export interface PersonState {
   worryAt: Record<string, Minute>;
 }
 
-export type IncidentKind =
-  | "low_confidence"
-  | "unexplained_stop"
-  | "evidence_lost"
-  | "friend_worry";
+export type IncidentKind = "low_confidence" | "unexplained_stop" | "evidence_lost" | "friend_worry";
 
 /** self -> watcher -> next -> group are the automatic steps; friend = a human took over. */
 export type IncidentStep = "self" | "watcher" | "next" | "group" | "friend";

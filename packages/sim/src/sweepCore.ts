@@ -43,14 +43,18 @@ export function sweepScenarios(scenarios: ScenarioFile[]): SweepResult {
           name: sc.name,
           truth: sc.truth,
           alertsToOthers: r.alerts.filter((a) => a.rung >= 2).length,
-          timeToAlert: sc.truth === "concerning" && first ? first.t - sc.contract.window.start - onset : null,
+          timeToAlert:
+            sc.truth === "concerning" && first ? first.t - sc.contract.window.start - onset : null,
         };
       });
     const normal = rows.filter((r) => r.truth === "normal");
     const concerning = rows.filter((r) => r.truth === "concerning");
     const times = concerning.flatMap((r) => (r.timeToAlert === null ? [] : [r.timeToAlert]));
     presets[preset] = {
-      falseAlertsPerNormalNight: normal.length ? Math.round((normal.reduce((a, r) => a + r.alertsToOthers, 0) / normal.length) * 1000) / 1000 : 0,
+      falseAlertsPerNormalNight: normal.length
+        ? Math.round((normal.reduce((a, r) => a + r.alertsToOthers, 0) / normal.length) * 1000) /
+          1000
+        : 0,
       medianTimeToAlertMin: median(times),
       worstTimeToAlertMin: times.length ? Math.max(...times) : null,
       knownMisses: concerning.filter((r) => r.timeToAlert === null).map((r) => r.name),
@@ -65,6 +69,12 @@ export const toCsv = (r: SweepResult): string =>
     "preset,false_alerts_per_normal_night,median_time_to_alert_min,worst_time_to_alert_min,known_misses",
     ...PRESET_ORDER.map((p) => {
       const s = r.presets[p];
-      return [p, s.falseAlertsPerNormalNight, s.medianTimeToAlertMin ?? "", s.worstTimeToAlertMin ?? "", s.knownMisses.join(";")].join(",");
+      return [
+        p,
+        s.falseAlertsPerNormalNight,
+        s.medianTimeToAlertMin ?? "",
+        s.worstTimeToAlertMin ?? "",
+        s.knownMisses.join(";"),
+      ].join(",");
     }),
   ].join("\n") + "\n";

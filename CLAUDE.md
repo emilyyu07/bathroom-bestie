@@ -3,6 +3,7 @@
 Autonomous safety net for a night out. `docs/scope.md` is the source of truth; flag any conflict with it.
 
 ## Non-negotiable invariants (enforced by tests)
+
 1. Engine is a pure function of (contract, state, evidence, actions, now). Never read the wall clock; `now` is an argument.
 2. Evidence and friend actions are append-only; engine state is derived.
 3. Gemini only at setup (sentence -> contract, read-back). Never in the alert path. Alert text comes from fixed templates.
@@ -14,7 +15,9 @@ Autonomous safety net for a night out. `docs/scope.md` is the source of truth; f
 9. Preflight and sweep are deterministic and pure over their inputs.
 
 ## Never
+
 Detect drugging/intoxication or infer health. Add check-ins, panic buttons, or live GPS sharing.
 
 ## Commands
+
 `pnpm test`, `pnpm sim run`, `pnpm sim sweep`, `pnpm typecheck`, `pnpm lint`.

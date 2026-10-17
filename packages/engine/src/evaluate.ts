@@ -70,7 +70,14 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     .map(({ e }) => e);
   for (const e of ev) ingest(contract, state, e);
 
-  const emit = (inc: Incident, kind: AlertKind, tpl: string, to: string[], factors: string[], extra: Partial<Alert> = {}) => {
+  const emit = (
+    inc: Incident,
+    kind: AlertKind,
+    tpl: string,
+    to: string[],
+    factors: string[],
+    extra: Partial<Alert> = {},
+  ) => {
     const p = state.people[inc.personId]!;
     const seq = alerts.length + state.incidents.length * 100;
     alerts.push({
@@ -83,7 +90,8 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
       t: now,
       to,
       factors: factors.slice(0, 3),
-      lastKnown: p.lastArea && p.lastReportAt !== null ? { area: p.lastArea, t: p.lastReportAt } : null,
+      lastKnown:
+        p.lastArea && p.lastReportAt !== null ? { area: p.lastArea, t: p.lastReportAt } : null,
       raisedBy: inc.raisedBy,
       message: tpl,
       ...extra,
@@ -98,11 +106,15 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     const out: string[] = [];
     const silent = sinceMin(id);
     const cls = classifySilence(contract, state, id, now);
-    if (silent >= contract.thresholds.silence_min / 2) out.push(fill(FACTOR_TEMPLATES.noUpdate, { minutes: silent }));
-    if (p.lastBattery !== null && cls === "unexplained") out.push(fill(FACTOR_TEMPLATES.battery, { battery: Math.round(p.lastBattery) }));
-    if (isApart(contract, state, id) && contract.group.members.length > 1) out.push(FACTOR_TEMPLATES.apart);
+    if (silent >= contract.thresholds.silence_min / 2)
+      out.push(fill(FACTOR_TEMPLATES.noUpdate, { minutes: silent }));
+    if (p.lastBattery !== null && cls === "unexplained")
+      out.push(fill(FACTOR_TEMPLATES.battery, { battery: Math.round(p.lastBattery) }));
+    if (isApart(contract, state, id) && contract.group.members.length > 1)
+      out.push(FACTOR_TEMPLATES.apart);
     const corridor = c.penalties.find((x) => x.stream === "corridor")!;
-    if (corridor.penalty > 0) out.push(fill(FACTOR_TEMPLATES.outsideArea, { minutes: corridor.minutes }));
+    if (corridor.penalty > 0)
+      out.push(fill(FACTOR_TEMPLATES.outsideArea, { minutes: corridor.minutes }));
     const move = c.penalties.find((x) => x.stream === "movement")!;
     if (move.penalty > 0) out.push(fill(FACTOR_TEMPLATES.noMovement, { minutes: move.minutes }));
     out.push(fill(FACTOR_TEMPLATES.score, { score: c.n.toFixed(2) }));
@@ -127,22 +139,42 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     const others = contract.group.members.filter((m) => m !== id);
     if (inc.step === "self") {
       const tpl = inc.kind === "evidence_lost" ? TEMPLATES.evidenceLost : TEMPLATES.nudge;
-      emit(inc, inc.kind === "evidence_lost" ? "evidence_lost" : inc.kind, fill(tpl, { name: id, minutes }), [id], f);
+      emit(
+        inc,
+        inc.kind === "evidence_lost" ? "evidence_lost" : inc.kind,
+        fill(tpl, { name: id, minutes }),
+        [id],
+        f,
+      );
     } else if (inc.step === "watcher") {
       const tpl = inc.kind === "unexplained_stop" ? TEMPLATES.unexplained : TEMPLATES.watcher;
       emit(inc, inc.kind, fill(tpl, { name: id, minutes }), watcher ? [watcher] : others, f);
     } else if (inc.step === "next") {
       const next = nextAfter(contract, id, watcher);
-      emit(inc, "escalation", fill(TEMPLATES.next, { name: id, minutes, watcher: watcher ?? "the first watcher" }), next ? [next] : others, f);
+      emit(
+        inc,
+        "escalation",
+        fill(TEMPLATES.next, { name: id, minutes, watcher: watcher ?? "the first watcher" }),
+        next ? [next] : others,
+        f,
+      );
     } else if (inc.step === "group") {
       emit(inc, "escalation", fill(TEMPLATES.group, { name: id, minutes }), others, f);
     } else {
       const friend = inc.raisedBy!;
-      emit(inc, "friend_worry", fill(TEMPLATES.takeover, { name: id }), [friend], f, { script911: script(inc) });
+      emit(inc, "friend_worry", fill(TEMPLATES.takeover, { name: id }), [friend], f, {
+        script911: script(inc),
+      });
     }
   };
 
-  const openIncident = (id: string, kind: IncidentKind, rung: 1 | 2 | 3 | 4, step: Incident["step"], extra: Partial<Incident> = {}) => {
+  const openIncident = (
+    id: string,
+    kind: IncidentKind,
+    rung: 1 | 2 | 3 | 4,
+    step: Incident["step"],
+    extra: Partial<Incident> = {},
+  ) => {
     const inc: Incident = {
       id: `${id}@${now}`,
       personId: id,
@@ -158,7 +190,8 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     return inc;
   };
 
-  const openFor = (id: string) => state.incidents.find((i) => i.personId === id && i.status === "open");
+  const openFor = (id: string) =>
+    state.incidents.find((i) => i.personId === id && i.status === "open");
 
   const resolve = (inc: Incident, how: NonNullable<Incident["resolution"]>, by?: string) => {
     inc.status = "resolved";
@@ -176,7 +209,14 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     .map(({ a }) => a);
   for (const a of acts) {
     const log = (outcome: "applied" | "rate_limited" | "ignored") =>
-      state.actionLog.push({ t: a.t, type: a.type, by: a.by, targetPersonId: a.targetPersonId, reason: a.reason, outcome });
+      state.actionLog.push({
+        t: a.t,
+        type: a.type,
+        by: a.by,
+        targetPersonId: a.targetPersonId,
+        reason: a.reason,
+        outcome,
+      });
     const target = state.people[a.targetPersonId];
     if (!target || !members.has(a.by) || a.by === a.targetPersonId) {
       log("ignored");
@@ -199,9 +239,7 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     target.worryAt[a.by] = a.t;
     log("applied");
     const byWatcher = watcherFor(contract, a.targetPersonId, a.t) === a.by;
-    const reasonText = a.reason
-      ? fill(REASON_TEXT[a.reason], { name: a.targetPersonId })
-      : "";
+    const reasonText = a.reason ? fill(REASON_TEXT[a.reason], { name: a.targetPersonId }) : "";
     const reason = a.reason;
     if (open) {
       const rung = byWatcher ? 4 : (Math.max(open.rung, 2) as 2 | 3 | 4);
@@ -222,7 +260,13 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
       }
       continue;
     }
-    const inc = openIncident(a.targetPersonId, "friend_worry", byWatcher ? 4 : 2, byWatcher ? "friend" : "watcher", { raisedBy: a.by, reason });
+    const inc = openIncident(
+      a.targetPersonId,
+      "friend_worry",
+      byWatcher ? 4 : 2,
+      byWatcher ? "friend" : "watcher",
+      { raisedBy: a.by, reason },
+    );
     emitRung(inc);
     if (!byWatcher) {
       const al = alerts[alerts.length - 1]!;
@@ -249,15 +293,26 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     if (n < th.score_floor) p.lowSince ??= now;
     else p.lowSince = null;
 
-    if (cls === "battery_death" && !state.notes.some((x) => x.personId === id && x.text.includes("falling"))) {
-      state.notes.push({ t: now, personId: id, text: fill(TEMPLATES.softBatteryDown, { name: id, battery: Math.round(p.lastBattery ?? 0) }) });
+    if (
+      cls === "battery_death" &&
+      !state.notes.some((x) => x.personId === id && x.text.includes("falling"))
+    ) {
+      state.notes.push({
+        t: now,
+        personId: id,
+        text: fill(TEMPLATES.softBatteryDown, {
+          name: id,
+          battery: Math.round(p.lastBattery ?? 0),
+        }),
+      });
     }
 
     let concern: IncidentKind | null = null;
     if (cls === "evidence_lost") concern = "evidence_lost";
     else if (cls === "battery_death") concern = null;
     else if (cls === "unexplained") concern = "unexplained_stop";
-    else if (p.lowSince !== null && now - p.lowSince >= th.score_floor_min) concern = "low_confidence";
+    else if (p.lowSince !== null && now - p.lowSince >= th.score_floor_min)
+      concern = "low_confidence";
 
     if (!open) {
       if (concern && (p.cooldownUntil === null || now >= p.cooldownUntil)) {
@@ -304,7 +359,8 @@ function ingest(contract: Contract, state: EngineState, e: EvidenceReport) {
     e.motion !== "still" ||
     (p.lastArea !== null && (p.lastArea.lat !== e.area.lat || p.lastArea.lon !== e.area.lon));
   p.lastArea = e.area;
-  if (distanceM(e.area, contract.corridor.center) <= contract.corridor.radius_m) p.lastCorridorAt = e.t;
+  if (distanceM(e.area, contract.corridor.center) <= contract.corridor.radius_m)
+    p.lastCorridorAt = e.t;
   if (moved) p.lastMoveAt = e.t;
   if (e.homeArrived) p.home = true;
 }

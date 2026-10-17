@@ -15,7 +15,10 @@ const good: ReadinessSnapshot = {
   contractConfirmed: true,
 };
 const c = makeContract();
-const failed = (s: ReadinessSnapshot) => preflight(s, c).checks.filter((x) => x.status === "fail").map((x) => x.id);
+const failed = (s: ReadinessSnapshot) =>
+  preflight(s, c)
+    .checks.filter((x) => x.status === "fail")
+    .map((x) => x.id);
 
 describe("preflight", () => {
   it("ready when everything passes", () => {
@@ -24,7 +27,10 @@ describe("preflight", () => {
   });
 
   const blocking: [string, ReadinessSnapshot][] = [
-    ["background_location", { ...good, permissions: { ...good.permissions, backgroundLocation: false } }],
+    [
+      "background_location",
+      { ...good, permissions: { ...good.permissions, backgroundLocation: false } },
+    ],
     ["notifications", { ...good, permissions: { ...good.permissions, notifications: false } }],
     ["connectivity", { ...good, connectivityRttMs: 5000 }],
     ["connectivity", { ...good, connectivityRttMs: null }],
@@ -57,10 +63,22 @@ describe("preflight", () => {
   }
 
   it("edge values pass: 4999 ms, 60 s, 40%", () => {
-    expect(preflight({ ...good, connectivityRttMs: 4999, firstEvidenceAfterS: 60, battery: { ...good.battery, level: 40 } }, c).state).toBe("ready");
+    expect(
+      preflight(
+        {
+          ...good,
+          connectivityRttMs: 4999,
+          firstEvidenceAfterS: 60,
+          battery: { ...good.battery, level: 40 },
+        },
+        c,
+      ).state,
+    ).toBe("ready");
   });
   it("blocking beats warnings", () => {
-    expect(preflight({ ...good, homeGeofenceSet: false, contractConfirmed: false }, c).state).toBe("not_ready");
+    expect(preflight({ ...good, homeGeofenceSet: false, contractConfirmed: false }, c).state).toBe(
+      "not_ready",
+    );
   });
   it("is deterministic", () => {
     expect(preflight(good, c)).toEqual(preflight(good, c));

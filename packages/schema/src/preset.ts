@@ -15,8 +15,29 @@ export type SensitivityPreset = z.infer<typeof SensitivityPreset>;
 
 /** Starting points to calibrate with the sweep. These are data, not logic. */
 export const PRESETS: Record<PresetName, SensitivityPreset> = {
-  relaxed: { name: "relaxed", separation_min: 40, silence_min: 30, score_floor: 0.4, score_floor_min: 15, ack_timeout_min: 7 },
-  standard: { name: "standard", separation_min: 25, silence_min: 20, score_floor: 0.5, score_floor_min: 10, ack_timeout_min: 5 },
-  cautious: { name: "cautious", separation_min: 15, silence_min: 12, score_floor: 0.6, score_floor_min: 6, ack_timeout_min: 3 },
+  relaxed: {
+    name: "relaxed",
+    separation_min: 40,
+    silence_min: 30,
+    score_floor: 0.4,
+    score_floor_min: 15,
+    ack_timeout_min: 7,
+  },
+  standard: {
+    name: "standard",
+    separation_min: 25,
+    silence_min: 20,
+    score_floor: 0.5,
+    score_floor_min: 10,
+    ack_timeout_min: 5,
+  },
+  cautious: {
+    name: "cautious",
+    separation_min: 15,
+    silence_min: 12,
+    score_floor: 0.6,
+    score_floor_min: 6,
+    ack_timeout_min: 3,
+  },
 };
 export const PRESET_ORDER: PresetName[] = ["relaxed", "standard", "cautious"];

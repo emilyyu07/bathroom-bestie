@@ -1,8 +1,11 @@
 {
   "name": "tether",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@9.15.9",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "vitest run",
     "typecheck": "pnpm -r --if-present typecheck",

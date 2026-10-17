@@ -14,10 +14,20 @@ export function judge(sc: ScenarioFile, r: RunResult): Verdict {
   const l = sc.label;
   if (l.expect === "activation_blocked") {
     const blocked = r.readiness?.state === "not_ready";
-    return { expected: "activation blocked", actual: r.readiness ? r.readiness.state : "no snapshot", timeToAlert: null, pass: blocked };
+    return {
+      expected: "activation blocked",
+      actual: r.readiness ? r.readiness.state : "no snapshot",
+      timeToAlert: null,
+      pass: blocked,
+    };
   }
   if (l.expect === "no_alert") {
-    return { expected: "no alert", actual: r.alerts.length ? `${r.alerts.length} alert(s)` : "no alert", timeToAlert: null, pass: r.alerts.length === 0 };
+    return {
+      expected: "no alert",
+      actual: r.alerts.length ? `${r.alerts.length} alert(s)` : "no alert",
+      timeToAlert: null,
+      pass: r.alerts.length === 0,
+    };
   }
   const first = r.alerts.find((a) => a.rung >= l.rung);
   const t = first ? first.t - start : null;

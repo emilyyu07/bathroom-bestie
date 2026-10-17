@@ -6,6 +6,7 @@ import { ReadinessSnapshot } from "./readiness";
 
 /** Evidence as authored in a scenario: personId/contractId/t are filled in by the runner. */
 export const ScenarioEvidence = EvidenceReport.omit({ personId: true, contractId: true, t: true });
+export type ScenarioEvidence = z.infer<typeof ScenarioEvidence>;
 
 export const ScenarioLabel = z.discriminatedUnion("expect", [
   z.object({ expect: z.literal("no_alert") }),
