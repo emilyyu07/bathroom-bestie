@@ -1,16 +1,10 @@
 import type { Ctx } from "./ctx";
 import type { SilenceClass } from "./signals";
-import type { IncidentKind } from "./state";
+import type { IncidentKind, Severity } from "./state";
 
-/**
- * How a kind of incident behaves on the ladder:
- *  - hard:     climbs rungs on ack timeouts until a human or returning evidence ends it
- *  - advisory: a nudge to her only; never reaches friends alone, but upgrades in place the moment
- *              a different concern appears (the ack timeout then counts from the upgrade)
- *  - notice:   told once and never escalates (e.g. a permission turned off)
- */
-export type Severity = "hard" | "advisory" | "notice";
+export type { Severity } from "./state";
 
+/** The severity a detector gives its concern by default. A detector may override it per tick. */
 export const SEVERITY: Record<IncidentKind, Severity> = {
   low_confidence: "hard",
   unexplained_stop: "hard",
@@ -23,7 +17,10 @@ export interface Concern {
   kind: IncidentKind;
   severity: Severity;
 }
-const concern = (kind: IncidentKind): Concern => ({ kind, severity: SEVERITY[kind] });
+const concern = (kind: IncidentKind, severity: Severity = SEVERITY[kind]): Concern => ({
+  kind,
+  severity,
+});
 
 /** Per-person readings for this tick, computed once by `observe` and read by every detector. */
 export interface Signals {

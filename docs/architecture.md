@@ -32,8 +32,11 @@ confirm or the home event.
 
 - `ingest.ts` folds evidence into per-person state. `actions.ts` applies confirm/worry. `observe.ts` is the only step that
   updates tick-level tracking (score dip timer, soft notes).
-- `concerns.ts`: detectors in priority order (`DETECTORS`), each a read-only function over the tick's `Signals`, plus
-  `SEVERITY` (hard / advisory / notice). New concerns (e.g. overdue handoffs) are added here, not in the loop.
+- `concerns.ts`: detectors in priority order (`DETECTORS`), each a read-only function over the tick's `Signals`. A
+  detector returns a `Concern {kind, severity}`; `SEVERITY` is only each kind's default. Severity is **stored on the
+  incident** (hard / advisory / notice), so one kind can be advisory while she is reachable and hard once she is quiet.
+  Ladder rule: only a hard concern upgrades an advisory incident (kind and/or severity, ack timeout restarts); two
+  advisories never swap places; an advisory-only tick closes a stronger open incident. New concerns (e.g. overdue handoffs) are added here, not in the loop.
 - `ladder.ts`: resolve / upgrade-in-place / escalate for one open incident. `incidents.ts`: open, resolve, cooldown.
 - `render.ts`: the only place an incident becomes alert text and recipients (fixed templates).
 - `replay.ts`: `replay`/`rebuild` derive state and alerts purely from the logs. `EngineState.version`

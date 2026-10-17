@@ -60,7 +60,7 @@ export function applyAction(ctx: Ctx, a: FriendAction, emit: Emit): void {
   const inc = openIncident(
     ctx,
     a.targetPersonId,
-    "friend_worry",
+    { kind: "friend_worry", severity: "hard" }, // a human report always climbs
     byWatcher ? 4 : 2,
     byWatcher ? "friend" : "watcher",
     { raisedBy: a.by, reason: a.reason },

@@ -89,7 +89,7 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     const concern = detectConcern(ctx, id, observe(ctx, id));
     if (!open) {
       if (concern && (p.cooldownUntil === null || now >= p.cooldownUntil)) {
-        emit(openIncident(ctx, id, concern.kind, 1, "self"));
+        emit(openIncident(ctx, id, concern, 1, "self"));
       }
       continue;
     }

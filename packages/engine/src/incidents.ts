@@ -1,4 +1,5 @@
-import { COOLDOWN_MIN, type Incident, type IncidentKind } from "./state";
+import type { Concern } from "./concerns";
+import { COOLDOWN_MIN, type Incident } from "./state";
 import type { Ctx } from "./ctx";
 
 export const openFor = ({ state }: Ctx, id: string): Incident | undefined =>
@@ -7,7 +8,7 @@ export const openFor = ({ state }: Ctx, id: string): Incident | undefined =>
 export function openIncident(
   { state, now }: Ctx,
   id: string,
-  kind: IncidentKind,
+  concern: Concern,
   rung: 1 | 2 | 3 | 4,
   step: Incident["step"],
   extra: Partial<Incident> = {},
@@ -15,7 +16,8 @@ export function openIncident(
   const inc: Incident = {
     id: `${id}@${now}`,
     personId: id,
-    kind,
+    kind: concern.kind,
+    severity: concern.severity,
     rung,
     step,
     openedAt: now,
