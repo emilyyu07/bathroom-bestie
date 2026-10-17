@@ -20,7 +20,9 @@ export const ScenarioLabel = z.discriminatedUnion("expect", [
     /** When the concerning behavior begins; time-to-alert is measured from here. */
     onset: Minute,
     maxRung: z.number().int().min(1).max(4).optional(),
-    resolvedBy: z.enum(["confirmed", "evidence_returned", "rejoined", "arrived"]).optional(),
+    resolvedBy: z
+      .enum(["confirmed", "evidence_returned", "rejoined", "arrived", "home"])
+      .optional(),
   }),
   z.object({ expect: z.literal("activation_blocked") }),
 ]);
