@@ -1,6 +1,6 @@
 # Remaining scope and delegation plan
 
-Status as of `main` @ `bfb3270` (2026-10-17). About 24 hours remain; this plan assumes 18 working hours (section 4). Purpose: one place for the sync-up on what is left, who owns it, and in what
+Status as of `main` @ `f453aad` (2026-10-17), after the 3-minute report cadence (PR #9) merged. About 24 hours remain; this plan assumes 18 working hours (section 4).
 order. `docs/scope.md` is still a placeholder; reconciling it with the real scope document is item **S1** below and gates
 the final sign-off.
 
@@ -14,7 +14,7 @@ _emulator_ (Elika's reported Android 15 emulator run), _unrun_ (written, never e
 
 | Area      | Functional today                                                                                                                                                                                                                                                                                        | Verified                                         |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Schema    | Contract, evidence, actions, alerts, readiness, scenarios; presets as data; milestone union (`area` / `home`) with `who`; 200 m min area radius; `expires` guard; `normalizeContract`                                                                                                                   | unit                                             |
+| Schema    | Contract, evidence, actions, alerts, readiness, scenarios; presets as data; milestone union (`area` / `home`) with `who`; 200 m min area radius; `expires` guard; `normalizeContract`; **`thresholds.report_every_min` (3 min) with a `silence_min >= 2 x cadence` check**                              | unit                                             |
 | Engine    | Confidence of normal (4 streams); silence classes; full ladder; confirm/worry with rate limit and cooldown; cohesion (separation nudge, duration rule, score penalty); milestones (overdue home/area, advisory then hard); severity stored per incident; replay/rebuild and state version 4; pre-flight | unit, sim                                        |
 | Simulator | 11 scenarios, `run`, `sweep`, `replay`; determinism and preset-monotonicity property tests                                                                                                                                                                                                              | unit, sim                                        |
 | API       | compile (Gemini or mock), preset, pre-flight, activate (409 unless ready), evidence, actions, incidents, watchers, health, `GET /contracts/:id`; per-minute runner with cursor rule and stale-cache rebuild                                                                                             | unit (in-memory); Postgres: _unrun by A_         |
@@ -22,8 +22,23 @@ _emulator_ (Elika's reported Android 15 emulator run), _unrun_ (written, never e
 | Mobile    | Plan (compile, read-back, terms, preset); real pre-flight (permissions, battery, round trip, first evidence, watchers, geofence _status_); Watcher accept + confirm/worry buttons; Status screen; reporter starts on activation and on foreground                                                       | _emulator_                                       |
 | Console   | Replay (score curves, alerts) and sweep chart pages                                                                                                                                                                                                                                                     | serves 200; UI _unreviewed by A_                 |
 
-Suite: 210 tests pass, 32 skipped (27 Postgres integration, 5 live Gemini), 4 `todo` (handoff stubs). Typecheck, lint
+Suite: 223 tests pass, 32 skipped (27 Postgres integration, 5 live Gemini), 4 `todo` (handoff stubs). Typecheck, lint
 and `pnpm sim run` clean.
+
+### 1.1 Report cadence: 3 minutes (done, PR #9)
+
+Phones report every **3 minutes** (`thresholds.report_every_min`, contract data, default 3), down from 5, so cautious's
+12-minute silence threshold is exactly **4 reports** (it was 2.4). What that means in practice, and what is tested:
+
+- Silence trips **12 min** after the last report at cautious (20 standard, 30 relaxed); the incident turns hard.
+- A friend is alerted at **15 min** at cautious (12 + the 3-min ack). A report arriving by then cancels it, so a friend hears
+  only after **five consecutive missed reports**.
+- Detection timing is measured from the last report and does not depend on the cadence (tested at 1, 2, 3 and 5 min).
+- A contract check requires `silence_min >= 2 x report_every_min`, so one late report can never count as silence.
+- Sweep at 3 min (false alerts per normal night, median / worst minutes to alert): relaxed 0, 35.5 / 40; standard 0.143,
+  21 / 23; cautious 0.429, 11 / 13.
+- **For Elika:** the reporter and the foreground service must read `thresholds.report_every_min` from the contract instead of
+  hard-coding an interval (requested in PR #9). Cost: about 67% more evidence rows and reports; negligible for the API.
 
 ---
 
@@ -106,6 +121,18 @@ and `pnpm sim run` clean.
 - **`pnpm demo`.** A scripted end-to-end night on the in-memory store and a fake clock (compile, pre-flight, activate,
   drift apart and go dark, ladder, confirm). A whole night runs in a second, whereas the real API runs on the real clock.
 
+#### A8. Area-less arrival report (S-M) — **in progress** (invariant 5)
+
+- **Purpose.** Invariant 5: the server receives only an "arrived" event, never coordinates. An arrival is currently an
+  ordinary evidence report carrying a ~110 m rounded `area`, which is her home area. That defeats keeping home on the device.
+- **Spec.** `area` is optional on a report **only when `homeArrived` is true**; a normal report without `area` is rejected.
+  The API drops any `area` an arrival report sends before storing it. The engine marks her home and ignores any area on an
+  arrival for location logic. The evidence table's `lat`/`lon` become nullable (migration 006). Scenarios 01, 09 and 10 send
+  arrivals without an area.
+- **Honest limit.** Normal reports before she arrives still trace her approach, so the last ones before arrival sit within
+  ~110 m of home. The arrival event itself carries nothing; B1 also stops the reporter on arrival so nothing is sent from home.
+- **Touches B's files minimally:** `pgStore.ts` row mapping and a migration. Elika should run `pnpm test:db`.
+
 ### Person B: apps, API, infrastructure
 
 #### B1. Home geofence registration and `homeArrived` (L) — **critical path blocker**
@@ -118,7 +145,7 @@ and `pnpm sim run` clean.
   - A "set my home" step that stores the location **on the device only** (invariant 5: the server never receives home
     coordinates).
   - `TaskManager.defineTask(HOME_GEOFENCE_TASK)` and `Location.startGeofencingAsync`.
-  - On enter, send an evidence report with `homeArrived: true`. Nothing else about home leaves the phone.
+  - On arrival send a report with `homeArrived: true` and **no `area`** (see A8), then stop the reporter: the night is over for her, and normal reports from home would reveal where home is.
   - Pre-flight keeps reading task status; it must pass once registered.
 - **Verify.** Emulator with mock location: leaving then entering the region produces one `homeArrived` report. Then an
   end-to-end run of sim scenarios 09-11 shapes against a real device.
@@ -129,7 +156,7 @@ and `pnpm sim run` clean.
   disappearance.
 - **Spec.** Run the reporter inside an Android foreground service (`startLocationUpdatesAsync` with a foreground-service
   notification) instead of a foreground timer. Send `permissionOk: false` once if permission is revoked, then stop. Keep
-  the 5-minute cadence. Handle battery optimization.
+  the cadence in `thresholds.report_every_min` (3 min, read from the contract; also the foreground-service interval). Handle battery optimization.
 - **Verify.** Emulator backgrounded for 15+ minutes still delivers reports. The Status branch's resume-on-foreground stays.
 
 #### B3. Friend-side alert view (M) — **demo-critical**
@@ -225,18 +252,18 @@ Fallback if the phone path breaks: the scripted `pnpm demo` plus the console rep
 
 ### 4.3 Schedule (work-hours from the sync)
 
-| Hours       | Emily (A)                                                                                                                                | Elika (B)                                                              |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **H0-H1**   | Sync: decisions in section 7; paste the real scope into `docs/scope.md` and diff it (**S1**); merge PR #8                                | Same                                                                   |
-| **H1-H5**   | CI (1 h) · `GET /incidents?to=` (0.5 h, supports B3) · `pnpm demo` (1.5 h) · "group still together" factor A2 (0.5 h) · start A1 (0.5 h) | **B1 home geofence**, timeboxed 4 h                                    |
-| **H5-H9**   | **A1 exit-alone** + scenarios 12-13 (4 h)                                                                                                | **B3 friend alert view** (3 h) · **B4 verify Postgres + Gemini** (1 h) |
-| **H9-H13**  | A5 hardening subset · A4 minimal: scenarios 14-15, nudges-per-night metric, trade-off table (4 h)                                        | **B2 background reporting**, timeboxed 4 h                             |
-| **H13-H15** | Pair with Elika on the emulator (verify geofence and background); id-as-name request                                                     | id-as-name field in the Plan screen (0.5 h) + fixes                    |
-| **H15**     | **Feature freeze** (no new features after this)                                                                                          |                                                                        |
-| **H15-H18** | Integration: clean-clone check, end-to-end dry run of the demo path, fix list, final summary (**S3**)                                    | Same                                                                   |
-| **H18-H24** | Sleep and demo prep: script and talk track, rehearsal twice, backup screen recording                                                     | Same                                                                   |
+| Hours       | Emily (A)                                                                                                                                             | Elika (B)                                                              |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **H0-H1**   | Sync: decisions in section 7; paste the real scope into `docs/scope.md` and diff it (**S1**); merge PR #8                                             | Same                                                                   |
+| **H1-H5**   | Cadence ✅ (PR #9, done ahead of schedule) · **A8 area-less arrival (1 h)** · CI (1 h) · `GET /incidents?to=` (0.5 h, supports B3) · start A1 (1.5 h) | **B1 home geofence**, timeboxed 4 h                                    |
+| **H5-H9**   | **A1 exit-alone** + scenarios 12-13 (4 h)                                                                                                             | **B3 friend alert view** (3 h) · **B4 verify Postgres + Gemini** (1 h) |
+| **H9-H13**  | `pnpm demo` (1.5 h) · scenarios 14-15 + nudges-per-night metric (1.5 h) · hardening subset (1 h)                                                      | **B2 background reporting**, timeboxed 4 h                             |
+| **H13-H15** | Pair with Elika on the emulator (verify geofence and background); id-as-name request                                                                  | id-as-name field in the Plan screen (0.5 h) + fixes                    |
+| **H15**     | **Feature freeze** (no new features after this)                                                                                                       |                                                                        |
+| **H15-H18** | Integration: clean-clone check, end-to-end dry run of the demo path, fix list, final summary (**S3**)                                                 | Same                                                                   |
+| **H18-H24** | Sleep and demo prep: script and talk track, rehearsal twice, backup screen recording                                                                  | Same                                                                   |
 
-Capacity check. Emily: 1 + 4 + 4 + 4 + 2 + 3 = 18 h. Elika: 1 + 4 + 4 + 4 + 2 + 3 = 18 h.
+Capacity check. Emily: 1 + 4 + 4 + 4 + 2 + 3 = 18 h (the cadence change, ~1.5 h, was done before the sync and is not in the budget; the "group still together" factor A2 is optional and sits at the end of the cut line). Elika: 1 + 4 + 4 + 4 + 2 + 3 = 18 h.
 
 ### 4.4 Gates (go / no-go)
 
