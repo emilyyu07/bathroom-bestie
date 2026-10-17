@@ -1,4 +1,5 @@
 import { distanceM, type Contract, type EvidenceReport } from "@bathroombestie/schema";
+import { applicable } from "./milestones";
 import type { EngineState } from "./state";
 
 /** Fold one evidence report into the derived per-person state (evidence itself stays append-only). */
@@ -20,5 +21,14 @@ export function ingest(contract: Contract, state: EngineState, e: EvidenceReport
   if (distanceM(e.area, contract.corridor.center) <= contract.corridor.radius_m)
     p.lastCorridorAt = e.t;
   if (moved) p.lastMoveAt = e.t;
+  for (const m of applicable(contract, e.personId)) {
+    // Reaching it late still counts: it ends the nudge. Rounded locations + the 200 m minimum radius make this reliable.
+    if (
+      m.kind === "area" &&
+      p.milestoneMet[m.id] === undefined &&
+      distanceM(e.area, m.within.center) <= m.within.radius_m
+    )
+      p.milestoneMet[m.id] = e.t;
+  }
   if (e.homeArrived) p.home = true;
 }

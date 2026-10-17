@@ -1,4 +1,5 @@
 import type { Ctx } from "./ctx";
+import { overdue } from "./milestones";
 import type { SilenceClass } from "./signals";
 import type { IncidentKind, Severity } from "./state";
 
@@ -10,6 +11,7 @@ export const SEVERITY: Record<IncidentKind, Severity> = {
   unexplained_stop: "hard",
   friend_worry: "hard",
   separation: "advisory",
+  missed_milestone: "advisory",
   evidence_lost: "notice",
 };
 
@@ -50,6 +52,19 @@ const lowConfidence: Detector = ({ contract, state, now }, id) => {
     : null;
 };
 
+/**
+ * Past a deadline she set. Advisory (a nudge to her) while she is still reporting; hard once her
+ * phone has also gone quiet: late AND silent are two independent signals, so it climbs the ladder
+ * without waiting for the score path (and covers the case where she was last seen with the group).
+ */
+const missedMilestone: Detector = ({ contract, state, now }, id, s) =>
+  overdue(contract, state.people[id]!, id, now).length === 0
+    ? null
+    : concern(
+        "missed_milestone",
+        s.silentMin >= contract.thresholds.silence_min ? "hard" : "advisory",
+      );
+
 const separation: Detector = ({ contract }, _id, s) =>
   // Only nudge her while she is reachable.
   s.silentMin < contract.thresholds.silence_min && s.apartMin >= contract.thresholds.separation_min
@@ -62,6 +77,7 @@ export const DETECTORS: Detector[] = [
   batteryDeath,
   unexplainedStop,
   lowConfidence,
+  missedMilestone,
   separation,
 ];
 

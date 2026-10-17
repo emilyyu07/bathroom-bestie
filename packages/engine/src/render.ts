@@ -5,6 +5,7 @@ import type { Ctx, EmitOptions } from "./ctx";
 import { classifySilence, silentMinutes } from "./signals";
 import type { Incident } from "./state";
 import { FACTOR_TEMPLATES, REASON_TEXT, TEMPLATES, fill } from "./templates";
+import { overdue } from "./milestones";
 import { nextAfter, watcherFor } from "./watchers";
 
 /** Top plain-language reasons, observable behavior only (invariant 6). Caller keeps the first three. */
@@ -14,6 +15,8 @@ export function factorsFor(ctx: Ctx, id: string): string[] {
   const apartMin = separatedFor(contract, state, id, now);
   const c = confidenceOfNormal(contract, p, now, apartMin);
   const out: string[] = [];
+  const late = overdue(contract, p, id, now)[0];
+  if (late) out.push(fill(FACTOR_TEMPLATES.pastDeadline, { minutes: now - late.by }));
   const silent = silentMinutes(contract, state, id, now);
   const cls = classifySilence(contract, state, id, now);
   if (silent >= contract.thresholds.silence_min / 2)
@@ -60,21 +63,33 @@ export function renderAlert(ctx: Ctx, inc: Incident, seq: number, opts: EmitOpti
 
   switch (inc.step) {
     case "self": {
-      const tpl =
-        inc.kind === "evidence_lost"
-          ? TEMPLATES.evidenceLost
-          : inc.kind === "separation"
-            ? TEMPLATES.separation
-            : TEMPLATES.nudge;
-      // A separation nudge reports time apart; every other nudge reports time without an update.
-      const m = inc.kind === "separation" ? separatedFor(contract, state, id, now) : minutes;
+      const late = overdue(contract, p, id, now)[0];
+      let tpl: string = TEMPLATES.nudge;
+      let m = minutes; // default: time without an update
+      if (inc.kind === "evidence_lost") tpl = TEMPLATES.evidenceLost;
+      else if (inc.kind === "separation") {
+        tpl = TEMPLATES.separation;
+        m = separatedFor(contract, state, id, now); // time apart
+      } else if (inc.kind === "missed_milestone" && late) {
+        tpl = late.kind === "home" ? TEMPLATES.milestoneHome : TEMPLATES.milestoneArea;
+        m = now - late.by; // time past the deadline
+      }
       message = fill(tpl, { name: id, minutes: m });
       to = [id];
       break;
     }
     case "watcher": {
-      const tpl = inc.kind === "unexplained_stop" ? TEMPLATES.unexplained : TEMPLATES.watcher;
-      message = fill(tpl, { name: id, minutes });
+      const late = overdue(contract, p, id, now)[0];
+      if (inc.kind === "missed_milestone" && late) {
+        message = fill(TEMPLATES.milestoneLate, {
+          name: id,
+          minutes: now - late.by,
+          silent: minutes,
+        });
+      } else {
+        const tpl = inc.kind === "unexplained_stop" ? TEMPLATES.unexplained : TEMPLATES.watcher;
+        message = fill(tpl, { name: id, minutes });
+      }
       to = watcher ? [watcher] : others;
       break;
     }

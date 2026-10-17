@@ -66,7 +66,7 @@ apparent distances are quantized. People really within ~80 m are never flagged a
 threshold the flag can be a false positive, and real separations just over 150 m can look closer. Treat `separation_m` as
 good to about one grid cell. Tightening it needs finer coordinates, which would conflict with invariant 5.
 
-## Milestones and home tracking (schema; engine detectors follow)
+## Milestones and home tracking
 
 - `Milestone` is a union: `{kind:"area", by, within}` or `{kind:"home", by}`, each with optional `who` (omitted = every
   member; compile writes `["me"]`). A home milestone means "the phone's home geofence must fire by `by`".
@@ -74,6 +74,17 @@ good to about one grid cell. Tightening it needs finer coordinates, which would 
   features are armed only on devices that can report arrival. Compile emits a home milestone only if she states a home time.
 - New per-preset thresholds: `milestone_grace_min` (20/10/5) and `exit_alone_min` (60/45/30).
 - `normalizeContract(raw)` parses a stored contract, filling thresholds added later from the contract's own preset.
+- Guards: an area milestone needs a radius of at least 200 m (locations are rounded to ~110 m); `expires` must cover the
+  window end and every `by + milestone_grace_min`, so a deadline the engine would stop watching before can't exist.
+- **Engine (`milestones.ts`, `concerns.ts`).** `overdue()` = applicable (honouring `who`), unmet, and `now > by + grace`. A
+  home milestone is met when the geofence fires (`p.home`); an area milestone when a report lands in its circle, even late
+  (`PersonState.milestoneMet`). The `missed_milestone` detector is **advisory** (nudge to her) while she is reporting and
+  **hard** once silent for `silence_min`: late AND quiet are two independent signals, so it climbs without waiting for the
+  score path. A dying battery (battery death) still suppresses escalation.
+- **Nudges that end on their own** (`separation`, `missed_milestone`) each know whether their situation still holds
+  (`stillApplies`) and end as `rejoined` / `arrived`, which start no cooldown. If she rejoins but is still late, the
+  separation nudge closes and the late-nudge opens on the next tick. While a separation nudge is open it holds the floor;
+  the late-nudge is not shown alongside it.
 
 ## Open requests for `apps/*` (Person B)
 

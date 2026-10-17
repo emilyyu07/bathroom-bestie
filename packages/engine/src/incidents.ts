@@ -39,6 +39,8 @@ export function resolveIncident(
   inc.resolvedAt = now;
   inc.resolution = how;
   if (by) inc.confirmedBy = by;
-  // Rejoining closes a nudge to her only; it must not blind the engine to a second wander-off.
-  if (how !== "rejoined") state.people[inc.personId]!.cooldownUntil = now + COOLDOWN_MIN;
+  // Rejoining / arriving closes a nudge about her own situation; it must not blind the engine to a
+  // second wander-off or a later deadline.
+  if (how !== "rejoined" && how !== "arrived")
+    state.people[inc.personId]!.cooldownUntil = now + COOLDOWN_MIN;
 }

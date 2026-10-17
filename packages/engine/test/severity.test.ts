@@ -40,6 +40,7 @@ describe("stepIncident severity rules", () => {
   const setup = (open: Partial<Incident> & Pick<Incident, "kind" | "severity">, now: number) => {
     const contract = makeContract();
     const state = initialState(contract);
+    state.people.ana!.apartSince = 10; // an advisory separation nudge normally means she IS still apart
     const ctx: Ctx = { contract, state, now };
     const inc = openIncident(ctx, "ana", { kind: open.kind, severity: open.severity }, 1, "self");
     Object.assign(inc, open, { rungSince: 0 });
@@ -71,12 +72,7 @@ describe("stepIncident severity rules", () => {
 
   it("two advisory kinds never swap places (no flip-flop)", () => {
     const { ctx, inc, emit } = setup({ kind: "separation", severity: "advisory" }, 40);
-    stepIncident(
-      ctx,
-      inc,
-      c("missed_milestone" as never /* a second advisory kind; real next commit */, "advisory"),
-      emit,
-    );
+    stepIncident(ctx, inc, c("missed_milestone", "advisory"), emit);
     expect(inc).toMatchObject({
       kind: "separation",
       severity: "advisory",
@@ -103,5 +99,13 @@ describe("stepIncident severity rules", () => {
     stepIncident(ctx, inc, c("evidence_lost", "notice"), emit);
     expect(emitted).toHaveLength(0);
     expect(inc.severity).toBe("notice");
+  });
+
+  it("when the incumbent nudge's OWN situation has ended, the other advisory takes over without a cooldown", () => {
+    const { ctx, inc, emit } = setup({ kind: "separation", severity: "advisory" }, 60);
+    ctx.state.people.ana!.apartSince = null; // she rejoined the group...
+    stepIncident(ctx, inc, c("missed_milestone", "advisory"), emit); // ...but is still late for home
+    expect(inc).toMatchObject({ status: "resolved", resolution: "rejoined" });
+    expect(ctx.state.people.ana!.cooldownUntil).toBeNull(); // so the next tick can open the milestone nudge
   });
 });
