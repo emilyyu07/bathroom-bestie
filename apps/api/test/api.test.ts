@@ -447,4 +447,74 @@ describe("runner", () => {
     const row = await store.getEngine(contract.id);
     expect(row!.state.version).toBeGreaterThan(1);
   });
+
+  describe("a second tick in a minute that was already evaluated (timer jitter)", () => {
+    const activeNight = async () => {
+      const { contract } = (
+        await app.inject({
+          method: "POST",
+          url: "/contracts/compile",
+          payload: { sentence: "out with Bea and Cy" },
+        })
+      ).json();
+      await app.inject({
+        method: "POST",
+        url: "/preflight",
+        payload: { contractId: contract.id, snapshot: good },
+      });
+      await app.inject({ method: "POST", url: `/contracts/${contract.id}/activate` });
+      await tick(store, clock); // first evaluation
+      clock.t += 5;
+      await tick(store, clock); // minute +5 is now evaluated
+      return contract as { id: string };
+    };
+
+    it("does not drop a friend's action that arrives between two ticks of the same minute", async () => {
+      const c = await activeNight();
+      await app.inject({
+        method: "POST",
+        url: "/actions",
+        payload: { contractId: c.id, type: "worry", by: "cy", targetPersonId: "me" },
+      });
+      await tick(store, clock); // same minute again: nothing new to evaluate, so it must not consume the action
+      clock.t += 1;
+      await tick(store, clock);
+      const state = (await store.getEngine(c.id))!.state;
+      expect(state.actionLog.map((a) => `${a.type}:${a.by}:${a.outcome}`)).toEqual([
+        "worry:cy:applied",
+      ]);
+      expect((await store.listAlerts(c.id)).map((a) => a.rung)).toEqual([2]);
+    });
+
+    it("does not drop evidence that arrives between two ticks of the same minute", async () => {
+      const c = await activeNight();
+      await app.inject({
+        method: "POST",
+        url: "/evidence",
+        payload: {
+          personId: "bea",
+          contractId: c.id,
+          t: clock.nowMinute(),
+          area: { lat: 43.65, lon: -79.38 },
+          motion: "walking",
+          batteryPct: 80,
+          charging: false,
+          permissionOk: true,
+        },
+      });
+      await tick(store, clock);
+      clock.t += 1;
+      await tick(store, clock);
+      const state = (await store.getEngine(c.id))!.state;
+      expect(state.people.bea!.lastReportAt).toBe(clock.nowMinute() - 1);
+    });
+
+    it("is idempotent: ticking the same minute repeatedly changes nothing", async () => {
+      const c = await activeNight();
+      const before = JSON.stringify(await store.getEngine(c.id));
+      await tick(store, clock);
+      await tick(store, clock);
+      expect(JSON.stringify(await store.getEngine(c.id))).toEqual(before);
+    });
+  });
 });
