@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, SafeAreaView, Text, View } from "react-native";
+import { Keyboard, Pressable, SafeAreaView, Text, View } from "react-native";
 import { get } from "./src/api";
 import { clearIdentity, loadIdentity, saveIdentity, type Identity } from "./src/identity";
 import { endNight, runningNight, useNightReporting } from "./src/night";
@@ -33,6 +33,17 @@ export default function App() {
   // She tapped "The plan looks right" for this contract (the planner identity is saved on that tap).
   const [confirmed, setConfirmed] = useState(false);
   const nightEnded = useCallback(() => setActive(false), []);
+  // The pinned "Leave this night" button rides up on the keyboard and covers what she's typing
+  // into (e.g. "Make my plan"), so it hides while the keyboard is open.
+  const [typing, setTyping] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => setTyping(true));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setTyping(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
   // Both roles report once the night is active: the group checks compare her with her friends.
   useNightReporting(contractId, me, active, nightEnded);
 
@@ -201,7 +212,7 @@ export default function App() {
       {screen === "watcher" && (
         <Watcher contractId={contractId} me={me} target={planner || "your friend"} />
       )}
-      {role !== null && screen !== "welcome" && screen !== "join" && (
+      {role !== null && screen !== "welcome" && screen !== "join" && !typing && (
         <View style={{ paddingHorizontal: space.lg, paddingBottom: space.md }}>
           <Button tone="quiet" title="Leave this night" onPress={() => void leave()} />
         </View>
