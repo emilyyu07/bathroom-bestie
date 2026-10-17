@@ -14,6 +14,7 @@ Requires Node 22+, pnpm 9 (`npm i -g pnpm@9`), Docker.
     pnpm sim run            # scenario table; exits nonzero on regression
     pnpm sim sweep          # writes packages/sim/out/sweep.{json,csv}
     pnpm sim replay         # writes out/replay.json for the console
+    pnpm demo               # scripted night through the real API routes (in-memory store, fake clock): exit-alone, then an arrival
     pnpm api                # Fastify on :3000 (offline mock unless GEMINI_API_KEY is set)
     pnpm --filter @bathroombestie/console dev
 
