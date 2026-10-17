@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Button, Pressable, Text, TextInput, View } from "react-native";
+import { Button, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { get, post } from "../api";
 import { saveIdentity, type Identity } from "../identity";
+import { requestPermissions } from "../readiness";
 
 interface Night {
   contract: { id: string; group: { members: string[] } };
@@ -40,6 +41,8 @@ export function Join({
   const join = async (personId: string) => {
     if (!night) return;
     try {
+      // Her friends' phones report too (the group checks compare her with them), so ask now.
+      if (Platform.OS === "android") await requestPermissions();
       await post(
         `/contracts/${encodeURIComponent(night.contract.id)}/watchers/${encodeURIComponent(personId)}/accept`,
         {},
@@ -82,6 +85,12 @@ export function Join({
           <Text style={{ color: "#555" }}>
             Joining means you agree to watch {planner}'s night: BathroomBestie may send you alerts
             about her, and you can say you're with her or that you're worried.
+          </Text>
+          <Text style={{ color: "#555" }}>
+            Once the night starts, your phone also sends your rough area (about 100 m) all night, so
+            BathroomBestie can tell whether the group is together. Nobody sees anyone's location;
+            only an alert about someone shows their last-known area. You'll be asked to allow
+            location (all the time) and notifications.
           </Text>
         </View>
       )}
