@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Keyboard, Pressable, SafeAreaView, Text, View } from "react-native";
+import { Keyboard, Platform, Pressable, SafeAreaView, Text, View } from "react-native";
 import { get } from "./src/api";
 import { clearIdentity, loadIdentity, saveIdentity, type Identity } from "./src/identity";
 import { endNight, runningNight, useNightReporting } from "./src/night";
@@ -96,8 +96,12 @@ export default function App() {
     setScreen("welcome");
   };
 
+  // Android's SafeAreaView does nothing, so it needs 40 to clear the status bar; iOS's already
+  // clears the notch.
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 40, backgroundColor: color.bg }}>
+    <SafeAreaView
+      style={{ flex: 1, paddingTop: Platform.OS === "android" ? 40 : 0, backgroundColor: color.bg }}
+    >
       {role === "planner" && TABS.some(([t]) => t === screen) && (
         <View
           accessibilityRole="tablist"
