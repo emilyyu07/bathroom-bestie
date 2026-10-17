@@ -19,6 +19,13 @@ Requires Node 22+, pnpm 9 (`npm i -g pnpm@9`), Docker.
 
 Copy `.env.example` to `.env` to configure. Mobile: see `apps/mobile/README.md` (dev build required).
 
+## CI
+
+`.github/workflows/ci.yml` runs on every PR and on `main`: typecheck, lint, `pnpm test`, `pnpm sim run`, a check that the
+committed scenario/sweep/replay files match what the generators produce (regenerate with
+`pnpm --filter @bathroombestie/sim generate && pnpm sim sweep && pnpm sim replay`, then `pnpm exec prettier --write
+packages/sim`), and `pnpm test:db` against a TimescaleDB service. The mobile app is not part of CI (it installs separately).
+
 ## Layout
 
 `packages/schema` zod types · `packages/engine` pure engine + preflight · `packages/sim` scenarios, run, sweep ·
