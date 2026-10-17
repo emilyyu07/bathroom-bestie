@@ -10,6 +10,12 @@ Background location needs a **development build**, not Expo Go:
     npx expo run:android          # or: eas build --profile development --platform android
     npx expo start --dev-client
 
+No Android Studio needed: JDK 17 plus Google's command-line tools work. Install
+`platform-tools`, `emulator`, `platforms;android-35`, `build-tools;35.0.0`,
+`ndk;26.1.10909125` and `system-images;android-35;google_apis;arm64-v8a` with `sdkmanager`, set
+`JAVA_HOME` and `ANDROID_HOME`, create an AVD with `avdmanager`, start it with `emulator -avd <name>`,
+then `npx expo run:android`. The emulator reaches the local API at 10.0.2.2:3000.
+
 No device? The screens run in a browser against the local API (`pnpm api` first):
 
     npx expo start --web          # http://localhost:8081
