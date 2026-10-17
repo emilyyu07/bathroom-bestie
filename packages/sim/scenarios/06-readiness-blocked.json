@@ -1,0 +1,99 @@
+{
+  "name": "06-readiness-blocked",
+  "description": "Background location denied and no watcher has accepted: activation is blocked.",
+  "contract": {
+    "id": "c1",
+    "corridor": {
+      "center": {
+        "lat": 43.65,
+        "lon": -79.38
+      },
+      "radius_m": 2000
+    },
+    "window": {
+      "start": 0,
+      "end": 360
+    },
+    "milestones": [],
+    "group": {
+      "members": [
+        "ana",
+        "bea",
+        "cy"
+      ],
+      "watch": [
+        {
+          "who": "bea",
+          "from": 0,
+          "to": 180
+        },
+        {
+          "who": "cy",
+          "from": 180,
+          "to": 360
+        }
+      ]
+    },
+    "thresholds": {
+      "separation_m": 150,
+      "separation_min": 25,
+      "silence_min": 20,
+      "score_floor": 0.5,
+      "score_floor_min": 10,
+      "watch_slot_min": 90,
+      "ack_timeout_min": 5
+    },
+    "confidence": {
+      "corridor": {
+        "w": 1,
+        "tau_min": 20
+      },
+      "movement": {
+        "w": 0.5,
+        "tau_min": 90
+      },
+      "freshness": {
+        "w": 1,
+        "tau_min": 10
+      }
+    },
+    "preset": "standard",
+    "wishes": {
+      "alert_order": [
+        "bea",
+        "cy"
+      ],
+      "offer_911_script": true
+    },
+    "expires": 480
+  },
+  "timelines": {},
+  "actions": [],
+  "readiness": {
+    "permissions": {
+      "backgroundLocation": false,
+      "notifications": true
+    },
+    "battery": {
+      "level": 85,
+      "restricted": false,
+      "lowPowerMode": false
+    },
+    "connectivityRttMs": 400,
+    "firstEvidenceAfterS": 20,
+    "watchers": [
+      {
+        "id": "bea",
+        "accepted": false,
+        "reachable": true
+      }
+    ],
+    "homeGeofenceSet": true,
+    "contractConfirmed": true
+  },
+  "durationMin": 1,
+  "truth": "excluded",
+  "label": {
+    "expect": "activation_blocked"
+  }
+}

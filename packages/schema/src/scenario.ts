@@ -11,10 +11,15 @@ export const ScenarioLabel = z.discriminatedUnion("expect", [
   z.object({ expect: z.literal("no_alert") }),
   z.object({
     expect: z.literal("alert"),
+    /** Minimum rung of the first alert that counts. */
     rung: z.number().int().min(1).max(4),
-    /** Window in minutes from scenario start in which the first alert at >= rung must occur. */
+    /** Window (minutes from start) in which that first alert must occur, at the scenario's preset. */
     from: Minute,
     to: Minute,
+    /** When the concerning behavior begins; time-to-alert is measured from here. */
+    onset: Minute,
+    maxRung: z.number().int().min(1).max(4).optional(),
+    resolvedBy: z.enum(["confirmed", "evidence_returned"]).optional(),
   }),
   z.object({ expect: z.literal("activation_blocked") }),
 ]);
@@ -30,6 +35,8 @@ export const ScenarioFile = z.object({
   readiness: ReadinessSnapshot.optional(),
   /** Minutes from start to simulate. */
   durationMin: z.number().int().positive(),
+  /** Ground truth for the sweep: is this a normal night, a concerning one, or excluded from sweep stats? */
+  truth: z.enum(["normal", "concerning", "excluded"]),
   label: ScenarioLabel,
 });
 export type ScenarioFile = z.infer<typeof ScenarioFile>;
