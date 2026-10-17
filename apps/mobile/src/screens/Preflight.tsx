@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
-import { Button, Linking, Platform, ScrollView, Share, Text, View } from "react-native";
+import { Linking, Platform, Share, Text, View } from "react-native";
 import { get, post } from "../api";
 import { clearHome, homeIsSet, setHomeHere } from "../home";
 import { collectSnapshot, requestPermissions } from "../readiness";
+import { color, font, space } from "../theme";
+import { Body, Button, Card, ErrorText, Heading, Screen } from "../ui";
+
+/** Same rule as the API's joinCodeOf (apps/api/src/join.ts): the id's first 6 hex digits. */
+const joinCodeOf = (contractId: string) => contractId.replace(/^c_/, "").slice(0, 6).toUpperCase();
 
 interface Report {
   state: "ready" | "ready_with_warnings" | "not_ready";
@@ -15,9 +20,15 @@ interface Report {
   }[];
 }
 const TITLE = {
-  ready: "Ready",
-  ready_with_warnings: "Ready with warnings",
-  not_ready: "Not ready",
+  ready: "You're all set ✨",
+  ready_with_warnings: "Good to go, with a few tips",
+  not_ready: "Almost there",
+} as const;
+/** A mark per check: done, a tip, or something to fix before the night can start. */
+const MARK = {
+  pass: { glyph: "✓", color: color.primary },
+  warning: { glyph: "!", color: color.honey },
+  blocking: { glyph: "✗", color: color.error },
 } as const;
 
 export function Preflight({
@@ -69,33 +80,43 @@ export function Preflight({
     Platform.OS === "android" &&
     report?.checks.some((c) => c.id === "battery_settings" && c.status === "fail");
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 8 }}>
+    <Screen>
       {contractId !== "" && (
-        <View style={{ gap: 4 }}>
-          <Text>Night code for your friends:</Text>
-          <Text selectable style={{ fontSize: 20, fontWeight: "600" }}>
-            {contractId}
+        <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
+          <Heading>Invite your friends 💌</Heading>
+          <Body muted>They join with this code:</Body>
+          <Text
+            selectable
+            style={{ ...font.extrabold, fontSize: 32, color: color.primary, letterSpacing: 4 }}
+          >
+            {joinCodeOf(contractId)}
           </Text>
+          <Body muted style={{ fontSize: 13 }}>
+            (or the full night code {contractId})
+          </Body>
           <Button
+            tone="quiet"
             title="Share the code"
             onPress={() =>
               void Share.share({
-                message: `Join my night on BathroomBestie with this code: ${contractId}`,
+                message: `Join my night on BathroomBestie with the code ${joinCodeOf(contractId)}`,
               }).catch(() => undefined)
             }
           />
-          <Text style={{ color: "#555" }}>
-            Friends who joined: {joined.length ? joined.join(", ") : "nobody yet"}
-          </Text>
-        </View>
+          <Body muted>
+            {joined.length ? `Joined: ${joined.join(", ")} 💗` : "Nobody has joined yet."}
+          </Body>
+        </Card>
       )}
       <Button
-        title={running ? "Checking…" : "Run pre-flight"}
+        big
+        title={running ? "Checking…" : report ? "Check again" : "Check I'm ready"}
         disabled={running || !contractId}
         onPress={() => void run()}
       />
       {needsPermissions && (
         <Button
+          tone="secondary"
           title="Allow location and notifications"
           onPress={async () => {
             await requestPermissions();
@@ -107,6 +128,7 @@ export function Preflight({
         // She exempts the app herself; we don't request REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
         // (restricted by Play policy). Re-run pre-flight after to see the change.
         <Button
+          tone="secondary"
           title="Open battery settings"
           onPress={() =>
             void Linking.sendIntent("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS").catch(
@@ -116,19 +138,21 @@ export function Preflight({
         />
       )}
       {Platform.OS === "android" && (
-        <View style={{ gap: 4 }}>
-          <Text style={{ color: "#555" }}>
+        <Card>
+          <Heading>Home 🏠</Heading>
+          <Body muted>
             {home === "set"
-              ? "Home is set on this phone. Your friends only learn when you've arrived."
-              : "Set your home so BathroomBestie knows when you arrive. It stays on this phone."}
-          </Text>
+              ? "Home is saved on this phone. Your friends only learn that you got home, never where."
+              : "Save your home so BathroomBestie knows when you're back. It never leaves this phone."}
+          </Body>
           <Button
+            tone={home === "set" ? "quiet" : "secondary"}
             title={
               home === "saving"
                 ? "Saving…"
                 : home === "set"
                   ? "Clear home"
-                  : "Set home to where I am now"
+                  : "I'm home now, save it"
             }
             disabled={home === "saving"}
             onPress={async () => {
@@ -145,17 +169,35 @@ export function Preflight({
               }
             }}
           />
-          {homeError && <Text style={{ color: "#b91c1c" }}>{homeError}</Text>}
-        </View>
+          {homeError && <ErrorText>{homeError}</ErrorText>}
+        </Card>
       )}
-      {report && <Text style={{ fontSize: 20 }}>{TITLE[report.state]}</Text>}
-      {report?.checks.map((c) => (
-        <Text key={c.id}>
-          {c.status === "pass" ? "✓" : c.severity === "blocking" ? "✗" : "!"} {c.label} — {c.detail}
-        </Text>
-      ))}
+      {report && (
+        <Card>
+          <Heading>{TITLE[report.state]}</Heading>
+          {report.checks.map((c) => {
+            const m =
+              MARK[
+                c.status === "pass" ? "pass" : c.severity === "blocking" ? "blocking" : "warning"
+              ];
+            return (
+              <View key={c.id} style={{ flexDirection: "row", gap: space.sm }}>
+                <Text style={{ ...font.extrabold, fontSize: 17, color: m.color, width: 18 }}>
+                  {m.glyph}
+                </Text>
+                <Body style={{ flex: 1 }}>
+                  <Text style={{ ...font.bold }}>{c.label}</Text>
+                  {"  "}
+                  <Text style={{ color: color.muted }}>{c.detail}</Text>
+                </Body>
+              </View>
+            );
+          })}
+        </Card>
+      )}
       {report && report.state !== "not_ready" && (
         <Button
+          big
           title="Start the night"
           onPress={async () => {
             await post(`/contracts/${contractId}/activate`, {});
@@ -163,6 +205,6 @@ export function Preflight({
           }}
         />
       )}
-    </ScrollView>
+    </Screen>
   );
 }

@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Button, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Platform, View } from "react-native";
 import { get, post } from "../api";
 import { saveIdentity, type Identity } from "../identity";
 import { requestPermissions } from "../readiness";
+import { color, space } from "../theme";
+import { Body, Button, Card, ErrorText, Field, Heading, Screen, Title } from "../ui";
 
 interface Night {
   contract: { id: string; group: { members: string[] } };
@@ -62,44 +64,42 @@ export function Join({
 
   const [planner, ...friends] = night?.contract.group.members ?? [];
   return (
-    <View style={{ padding: 16, gap: 12 }}>
-      <Text>Enter the join code she gave you (6 characters), or the full night code.</Text>
-      <TextInput
+    <Screen>
+      <Title>Join a friend's night 💌</Title>
+      <Field
+        label="Join code"
         value={code}
         onChangeText={setCode}
         placeholder="9F3A1B"
         autoCapitalize="none"
         autoCorrect={false}
-        style={{ borderWidth: 1, padding: 8 }}
       />
-      <Button title="Find the night" disabled={!code.trim()} onPress={() => void find()} />
-      {error && <Text style={{ color: "#b91c1c" }}>{error}</Text>}
+      <Body muted style={{ fontSize: 14 }}>
+        The 6 characters she gives you (or the full night code).
+      </Body>
+      <Button big title="Find the night" disabled={!code.trim()} onPress={() => void find()} />
+      {error && <ErrorText>{error}</ErrorText>}
       {night && (
-        <View style={{ gap: 10 }}>
-          <Text style={{ fontSize: 18 }}>{planner}'s night. Which one are you?</Text>
+        <View style={{ gap: space.md }}>
+          <Heading>{planner}'s night. Which one are you?</Heading>
           {friends.map((f) => (
-            <Pressable
-              accessibilityRole="button"
-              key={f}
-              onPress={() => void join(f)}
-              style={{ backgroundColor: "#16a34a", padding: 16, borderRadius: 10 }}
-            >
-              <Text style={{ color: "white", fontSize: 18 }}>I'm {f}</Text>
-            </Pressable>
+            <Button key={f} title={`I'm ${f}`} onPress={() => void join(f)} />
           ))}
-          <Text style={{ color: "#555" }}>
-            Joining means you agree to watch {planner}'s night: BathroomBestie may send you alerts
-            about her, and you can say you're with her or that you're worried.
-          </Text>
-          <Text style={{ color: "#555" }}>
-            Once the night starts, your phone also sends your rough area (about 100 m) all night, so
-            BathroomBestie can tell whether the group is together. Nobody sees anyone's location;
-            only an alert about someone shows their last-known area. You'll be asked to allow
-            location (all the time) and notifications.
-          </Text>
+          <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
+            <Body>
+              Joining means you'll watch out for {planner} tonight: BathroomBestie may send you
+              alerts about her, and you can say you're with her or that you're worried.
+            </Body>
+            <Body muted>
+              Once the night starts, your phone also sends your rough area (about 100 m), so
+              BathroomBestie can tell whether the group is together. Nobody sees anyone's location;
+              only an alert about someone shows their last-known area. You'll be asked to allow
+              location (all the time) and notifications.
+            </Body>
+          </Card>
         </View>
       )}
-      <Button title="Back" onPress={onBack} />
-    </View>
+      <Button tone="quiet" title="Back" onPress={onBack} />
+    </Screen>
   );
 }

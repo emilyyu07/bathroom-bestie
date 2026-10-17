@@ -11,11 +11,14 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
+    "@expo-google-fonts/nunito": "^0.4.2",
     "@expo/metro-runtime": "~4.0.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~52.0.0",
     "expo-asset": "~11.0.5",
     "expo-battery": "~9.0.0",
+    "expo-file-system": "~18.0.12",
+    "expo-font": "~13.0.4",
     "expo-location": "~18.0.0",
     "expo-notifications": "~0.29.0",
     "expo-task-manager": "~12.0.0",

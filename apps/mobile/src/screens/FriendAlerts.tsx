@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Linking, Platform, Pressable, Text, View } from "react-native";
+import { color, font, space } from "../theme";
+import { Body, Button, Card, ErrorText, Heading, Pill } from "../ui";
 import { get, nowMinute, post } from "../api";
 
 /** Mirrors Alert in packages/schema (the mobile app is outside the workspace). */
@@ -17,7 +19,7 @@ interface Alert {
 
 const POLL_MS = 20_000; // no push delivery in scope: the friend's phone polls
 const RUNG: Record<Alert["rung"], string> = {
-  1: "Nudge to her",
+  1: "A nudge to her",
   2: "You're her watcher",
   3: "Passed on to you",
   4: "You're taking over",
@@ -89,71 +91,81 @@ export function FriendAlerts({
 
   const now = nowMinute();
   return (
-    <View style={{ gap: 12 }}>
-      <Text style={{ fontSize: 18 }}>Alerts for you</Text>
-      {error && <Text style={{ color: "#b91c1c" }}>Can't reach BathroomBestie. Retrying.</Text>}
-      {!error && alerts.length === 0 && <Text>None. Nothing to do.</Text>}
+    <View style={{ gap: space.md }}>
+      <Heading>Alerts for you</Heading>
+      {error && <ErrorText>Can't reach BathroomBestie. Retrying…</ErrorText>}
+      {!error && alerts.length === 0 && (
+        <Card>
+          <Body>All quiet. Nothing to do right now. ✨</Body>
+        </Card>
+      )}
       {alerts.slice(0, 10).map((a) => (
-        <View
+        <Card
           key={a.id}
-          style={{
-            borderWidth: 1,
-            borderColor: a.rung === 4 ? "#b91c1c" : "#d97706",
-            borderRadius: 10,
-            padding: 12,
-            gap: 6,
-          }}
+          style={a.rung === 4 ? { borderColor: color.berry, borderWidth: 2.5 } : undefined}
         >
-          <Text style={{ fontWeight: "600" }}>
-            {RUNG[a.rung]} · about {a.personId} · {Math.max(0, now - a.t)} min ago
-          </Text>
-          <Text style={{ fontSize: 16 }}>{a.message}</Text>
+          <View
+            style={{ flexDirection: "row", gap: space.sm, alignItems: "center", flexWrap: "wrap" }}
+          >
+            <Pill strong={a.rung === 4}>{RUNG[a.rung]}</Pill>
+            <Body muted>
+              about {a.personId} · {Math.max(0, now - a.t)} min ago
+            </Body>
+          </View>
+          {/* Fixed engine template text: shown exactly as written. */}
+          <Body style={{ ...font.bold, fontSize: 17 }}>{a.message}</Body>
           {a.factors.map((f) => (
-            <Text key={f} style={{ color: "#555" }}>
+            <Body key={f} muted>
               • {f}
-            </Text>
+            </Body>
           ))}
-          {a.raisedBy && <Text style={{ color: "#555" }}>Raised by {a.raisedBy}</Text>}
+          {a.raisedBy && <Body muted>Raised by {a.raisedBy}</Body>}
           {a.lastKnown ? (
-            <Pressable accessibilityRole="button" onPress={() => void openMap(a.lastKnown!.area)}>
-              <Text style={{ color: "#2563eb" }}>
-                Last known area at {clock(a.lastKnown.t)} (about 100 m): open in Maps
+            <Pressable accessibilityRole="link" onPress={() => void openMap(a.lastKnown!.area)}>
+              <Text style={{ ...font.bold, fontSize: 16, color: color.primary }}>
+                📍 Last known area at {clock(a.lastKnown.t)} (about 100 m) · open in Maps
               </Text>
             </Pressable>
           ) : (
-            <Text style={{ color: "#555" }}>No location reported yet.</Text>
+            <Body muted>No location reported yet.</Body>
           )}
           {a.script911 && (
             // Invariant 4: text only. BathroomBestie never calls anyone; she decides.
-            <View style={{ backgroundColor: "#fef2f2", padding: 10, borderRadius: 8, gap: 4 }}>
-              <Text style={{ fontWeight: "600" }}>
+            <View
+              style={{
+                backgroundColor: color.blush,
+                padding: space.md,
+                borderRadius: 14,
+                gap: space.xs,
+              }}
+            >
+              <Body style={font.bold}>
                 If you decide to call emergency services, you can read this:
-              </Text>
-              <Text selectable>{a.script911}</Text>
-              <Text style={{ color: "#555" }}>BathroomBestie never calls anyone.</Text>
+              </Body>
+              <Body selectable>{a.script911}</Body>
+              <Body muted>BathroomBestie never calls anyone.</Body>
             </View>
           )}
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => void act(a, "confirm")}
-              style={{ backgroundColor: "#16a34a", padding: 10, borderRadius: 8 }}
-            >
-              <Text style={{ color: "white" }}>I'm with her</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => void act(a, "worry")}
-              style={{ backgroundColor: "#d97706", padding: 10, borderRadius: 8 }}
-            >
-              <Text style={{ color: "white" }}>I'm worried</Text>
-            </Pressable>
+          <View style={{ flexDirection: "row", gap: space.sm }}>
+            <View style={{ flex: 1 }}>
+              <Button tone="withHer" title="I'm with her" onPress={() => void act(a, "confirm")} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button tone="worry" title="I'm worried" onPress={() => void act(a, "worry")} />
+            </View>
           </View>
-          {sent[a.id] && <Text style={{ color: "#555" }}>{sent[a.id]}</Text>}
-        </View>
+          {sent[a.id] &&
+            (sent[a.id]!.startsWith("Couldn't") ? (
+              <ErrorText>{sent[a.id]}</ErrorText>
+            ) : (
+              <Body muted>{sent[a.id]}</Body>
+            ))}
+        </Card>
       ))}
       {checkedAt !== null && (
-        <Text style={{ color: "#888" }}>Checked at {clock(checkedAt)}. Updates every 20 s.</Text>
+        <Body muted style={{ fontSize: 13 }}>
+          Checked at {clock(checkedAt)} · updates every 20 s
+        </Body>
       )}
     </View>
   );

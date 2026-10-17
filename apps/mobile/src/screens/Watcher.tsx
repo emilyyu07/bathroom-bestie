@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { View } from "react-native";
 import { get, post } from "../api";
+import { space } from "../theme";
+import { Body, Button, Card, Chip, ErrorText, Heading, Screen } from "../ui";
 import { FriendAlerts } from "./FriendAlerts";
 
 const REASONS = [
@@ -33,65 +35,62 @@ export function Watcher({
       .then((r) => setWatching(r.watchers.some((w) => w.id === me && w.accepted)))
       .catch(() => undefined);
   }, [contractId, me]);
-  const send = (type: "confirm" | "worry") =>
-    post("/actions", {
-      contractId,
-      type,
-      by: me,
-      targetPersonId: target,
-      ...(type === "worry" && reason ? { reason } : {}),
-    });
-  const big = { padding: 32, borderRadius: 12, alignItems: "center" as const };
+  const [sent, setSent] = useState<string | null>(null);
+  const send = async (type: "confirm" | "worry") => {
+    try {
+      await post("/actions", {
+        contractId,
+        type,
+        by: me,
+        targetPersonId: target,
+        ...(type === "worry" && reason ? { reason } : {}),
+      });
+      setSent(
+        type === "confirm"
+          ? `Sent: you're with ${target}. 💗`
+          : "Sent. BathroomBestie will let the right friend know.",
+      );
+    } catch {
+      setSent("Couldn't send. Try again.");
+    }
+  };
   if (!watching)
     return (
-      <View style={{ padding: 16, gap: 16 }}>
-        <Text style={{ fontSize: 18 }}>{target} asked you to watch her night.</Text>
-        <Pressable
-          accessibilityRole="button"
+      <Screen>
+        <Card>
+          <Heading>{target} wants you on her team tonight 💗</Heading>
+          <Body>
+            You'll only hear from BathroomBestie if something seems off. Any time, you can say
+            you're with her, or that you're worried.
+          </Body>
+        </Card>
+        <Button
+          big
+          title="I've got her back"
           onPress={async () => {
             await post(`/contracts/${contractId}/watchers/${me}/accept`, {});
             setWatching(true);
           }}
-          style={{ ...big, backgroundColor: "#2563eb" }}
-        >
-          <Text style={{ fontSize: 24, color: "white" }}>Watch tonight</Text>
-        </Pressable>
-      </View>
+        />
+      </Screen>
     );
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => void send("confirm")}
-        style={{ ...big, backgroundColor: "#16a34a" }}
-      >
-        <Text style={{ fontSize: 24, color: "white" }}>I'm with her</Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => void send("worry")}
-        style={{ ...big, backgroundColor: "#d97706" }}
-      >
-        <Text style={{ fontSize: 24, color: "white" }}>I'm worried</Text>
-      </Pressable>
-      <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
-        {REASONS.map(([id, label]) => (
-          <Pressable
-            accessibilityRole="button"
-            key={id}
-            onPress={() => setReason(id)}
-            style={{
-              padding: 10,
-              borderWidth: 1,
-              borderRadius: 20,
-              backgroundColor: reason === id ? "#fde68a" : "white",
-            }}
-          >
-            <Text>{label}</Text>
-          </Pressable>
-        ))}
-      </View>
+    <Screen>
+      <Card>
+        <Heading>How's {target}?</Heading>
+        <Body muted>If you're with her, let us know. If something feels off, say so.</Body>
+        <Button big tone="withHer" title="I'm with her" onPress={() => void send("confirm")} />
+        <Button big tone="worry" title="I'm worried" onPress={() => void send("worry")} />
+        <Body muted>Why? (optional)</Body>
+        <View style={{ flexDirection: "row", gap: space.sm, flexWrap: "wrap" }}>
+          {REASONS.map(([id, label]) => (
+            <Chip key={id} label={label} selected={reason === id} onPress={() => setReason(id)} />
+          ))}
+        </View>
+        {sent &&
+          (sent.startsWith("Couldn't") ? <ErrorText>{sent}</ErrorText> : <Body muted>{sent}</Body>)}
+      </Card>
       <FriendAlerts contractId={contractId} me={me} reason={reason} />
-    </ScrollView>
+    </Screen>
   );
 }

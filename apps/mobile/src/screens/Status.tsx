@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { get, nowMinute } from "../api";
+import { color, space } from "../theme";
+import { Body, Card, Heading, Pill, Screen, Title } from "../ui";
 
 interface Contract {
   window: { start: number; end: number };
@@ -51,9 +53,12 @@ export function Status({
 
   if (!active)
     return (
-      <View style={{ padding: 16 }}>
-        <Text>No night is running. Make a plan and run pre-flight to start one.</Text>
-      </View>
+      <Screen>
+        <Card>
+          <Heading>No night yet</Heading>
+          <Body muted>Make a plan and check you're ready, then start your night here.</Body>
+        </Card>
+      </Screen>
     );
 
   const slots = contract?.group.watch ?? [];
@@ -63,30 +68,42 @@ export function Status({
     (m) => m.kind === "home" && (!m.who || m.who.includes(me)),
   );
   return (
-    <View style={{ padding: 16, gap: 10 }}>
-      <Text style={{ fontSize: 20 }}>BathroomBestie is watching your night.</Text>
-      {current && (
-        <Text>
-          Watching now: {current.who} (until {clock(current.to)})
-        </Text>
+    <Screen>
+      <Title>We're looking out for you tonight 💗</Title>
+      <Card>
+        {current && (
+          <Body>
+            <Body style={{ color: color.primary }}>Watching now: </Body>
+            {current.who} (until {clock(current.to)})
+          </Body>
+        )}
+        {next && (
+          <Body>
+            <Body style={{ color: color.primary }}>Next: </Body>
+            {next.who} (from {clock(next.from)})
+          </Body>
+        )}
+        {contract && <Body muted>Night ends around {clock(contract.window.end)}</Body>}
+        {home && <Body muted>Home by {clock(home.by)} 🏠</Body>}
+      </Card>
+      <Heading>Messages for you</Heading>
+      {alerts.length === 0 && (
+        <Card>
+          <Body>Nothing to do. Have fun! ✨</Body>
+        </Card>
       )}
-      {next && (
-        <Text>
-          Next: {next.who} (from {clock(next.from)})
-        </Text>
-      )}
-      {contract && <Text>Night ends around {clock(contract.window.end)}</Text>}
-      {home && <Text>Home by {clock(home.by)}</Text>}
-      <Text style={{ fontSize: 18, marginTop: 12 }}>Messages for you</Text>
-      {alerts.length === 0 && <Text>None. Nothing to do.</Text>}
       {alerts.slice(0, 3).map((a) => (
-        <Text key={a.id}>
-          {a.message} ({Math.max(0, now - a.t)} min ago)
-        </Text>
+        <Card key={a.id} style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
+          <View style={{ flexDirection: "row" }}>
+            <Pill>{Math.max(0, now - a.t)} min ago</Pill>
+          </View>
+          {/* Fixed engine template text: shown exactly as written. */}
+          <Body>{a.message}</Body>
+        </Card>
       ))}
-      <Text style={{ color: "#555", marginTop: 12 }}>
-        Opening the app sends a fresh update, which clears any nudge.
-      </Text>
-    </View>
+      <Body muted style={{ fontSize: 14, marginTop: space.sm }}>
+        Got a nudge? Just open the app. That sends a fresh update and clears it.
+      </Body>
+    </Screen>
   );
 }

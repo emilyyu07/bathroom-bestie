@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, SafeAreaView, Text, View } from "react-native";
+import { Keyboard, Pressable, SafeAreaView, Text, View } from "react-native";
 import { get } from "./src/api";
 import { clearIdentity, loadIdentity, saveIdentity, type Identity } from "./src/identity";
 import { endNight, runningNight, useNightReporting } from "./src/night";
@@ -9,6 +9,15 @@ import { Preflight } from "./src/screens/Preflight";
 import { Status } from "./src/screens/Status";
 import { Watcher } from "./src/screens/Watcher";
 import { Welcome } from "./src/screens/Welcome";
+import { color, font, radius, space } from "./src/theme";
+import { Body, Button } from "./src/ui";
+
+/** The planner's three steps, as tabs. */
+const TABS = [
+  ["plan", "Plan"],
+  ["preflight", "Get ready"],
+  ["status", "Tonight"],
+] as const;
 
 type Screen = "loading" | "welcome" | "join" | "plan" | "preflight" | "status" | "watcher";
 
@@ -24,6 +33,17 @@ export default function App() {
   // She tapped "The plan looks right" for this contract (the planner identity is saved on that tap).
   const [confirmed, setConfirmed] = useState(false);
   const nightEnded = useCallback(() => setActive(false), []);
+  // The pinned "Leave this night" button rides up on the keyboard and covers what she's typing
+  // into (e.g. "Make my plan"), so it hides while the keyboard is open.
+  const [typing, setTyping] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => setTyping(true));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setTyping(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
   // Both roles report once the night is active: the group checks compare her with her friends.
   useNightReporting(contractId, me, active, nightEnded);
 
@@ -77,15 +97,53 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 40 }}>
-      {role === "planner" && (
-        <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-          {(["plan", "preflight", "status"] as const).map((s) => (
-            <Button key={s} title={s} onPress={() => setScreen(s)} />
-          ))}
+    <SafeAreaView style={{ flex: 1, paddingTop: 40, backgroundColor: color.bg }}>
+      {role === "planner" && TABS.some(([t]) => t === screen) && (
+        <View
+          accessibilityRole="tablist"
+          style={{
+            flexDirection: "row",
+            gap: space.sm,
+            paddingHorizontal: space.lg,
+            paddingTop: space.sm,
+            paddingBottom: space.sm,
+          }}
+        >
+          {TABS.map(([s, label]) => {
+            const on = screen === s;
+            return (
+              <Pressable
+                key={s}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: on }}
+                onPress={() => setScreen(s)}
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  paddingVertical: 10,
+                  borderRadius: radius.button,
+                  backgroundColor: on ? color.primary : color.blush,
+                }}
+              >
+                <Text
+                  style={{
+                    ...font.extrabold,
+                    fontSize: 15,
+                    color: on ? color.white : color.primary,
+                  }}
+                >
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       )}
-      {screen === "loading" && <Text style={{ padding: 16 }}>Loading…</Text>}
+      {screen === "loading" && (
+        <Body muted style={{ padding: space.lg }}>
+          Loading…
+        </Body>
+      )}
       {screen === "welcome" && (
         <Welcome
           onPlan={() => {
@@ -135,18 +193,28 @@ export default function App() {
       )}
       {screen === "status" && <Status contractId={contractId} me={me} active={active} />}
       {screen === "watcher" && (
-        <Text style={{ paddingHorizontal: 16, paddingTop: 12, color: "#555" }}>
-          {active
-            ? "BathroomBestie is on: your phone is sending your rough area until the night ends."
-            : `Waiting for ${planner || "your friend"} to start the night.`}
-        </Text>
+        <View
+          style={{
+            marginHorizontal: space.lg,
+            marginTop: space.sm,
+            padding: space.md,
+            borderRadius: radius.card,
+            backgroundColor: color.blush,
+          }}
+        >
+          <Body style={{ ...font.semibold, color: color.primary }}>
+            {active
+              ? "BathroomBestie is on: your phone is sending your rough area until the night ends. 💗"
+              : `Waiting for ${planner || "your friend"} to start the night…`}
+          </Body>
+        </View>
       )}
       {screen === "watcher" && (
         <Watcher contractId={contractId} me={me} target={planner || "your friend"} />
       )}
-      {role !== null && screen !== "welcome" && screen !== "join" && (
-        <View style={{ padding: 16 }}>
-          <Button title="Leave this night" color="#6b7280" onPress={() => void leave()} />
+      {role !== null && screen !== "welcome" && screen !== "join" && !typing && (
+        <View style={{ paddingHorizontal: space.lg, paddingBottom: space.md }}>
+          <Button tone="quiet" title="Leave this night" onPress={() => void leave()} />
         </View>
       )}
     </SafeAreaView>
