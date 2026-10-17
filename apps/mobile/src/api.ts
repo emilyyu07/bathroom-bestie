@@ -15,4 +15,10 @@ export async function post<T>(path: string, body: unknown): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+export async function get<T>(path: string): Promise<T> {
+  const r = await fetch(`${API_URL}${path}`);
+  if (!r.ok) throw new Error(`${path}: ${r.status}`);
+  return r.json() as Promise<T>;
+}
+
 export const nowMinute = () => Math.floor(Date.now() / 60000);

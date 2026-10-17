@@ -142,6 +142,19 @@ export class PgStore implements Store {
       );
     }
   }
+  async acceptWatcher(contractId: string, personId: string, t: number) {
+    await this.pool.query(
+      "INSERT INTO watchers (contract_id, person_id, accepted_at) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
+      [contractId, personId, t],
+    );
+  }
+  async acceptedWatchers(contractId: string) {
+    const r = await this.pool.query(
+      "SELECT person_id FROM watchers WHERE contract_id = $1 ORDER BY accepted_at, person_id",
+      [contractId],
+    );
+    return r.rows.map((x) => x.person_id as string);
+  }
   async listAlerts(contractId?: string) {
     const r = contractId
       ? await this.pool.query("SELECT body FROM incidents WHERE contract_id = $1 ORDER BY t, id", [

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Text, View } from "react-native";
 import { post } from "../api";
+import { collectSnapshot, requestPermissions } from "../readiness";
 
 interface Report {
   state: "ready" | "ready_with_warnings" | "not_ready";
@@ -18,27 +19,48 @@ const TITLE = {
   not_ready: "Not ready",
 } as const;
 
-export function Preflight({ contractId, onActive }: { contractId: string; onActive: () => void }) {
+export function Preflight({
+  contractId,
+  me,
+  confirmed,
+  onActive,
+}: {
+  contractId: string;
+  me: string;
+  /** She reviewed the read-back and terms and chose to continue. */
+  confirmed: boolean;
+  onActive: () => void;
+}) {
   const [report, setReport] = useState<Report | null>(null);
+  const [running, setRunning] = useState(false);
+  const run = async () => {
+    setRunning(true);
+    try {
+      const snapshot = await collectSnapshot({ contractId, me, contractConfirmed: confirmed });
+      setReport(await post<Report>("/preflight", { contractId, snapshot }));
+    } finally {
+      setRunning(false);
+    }
+  };
+  const needsPermissions = report?.checks.some(
+    (c) => c.status === "fail" && (c.id === "background_location" || c.id === "notifications"),
+  );
   return (
     <View style={{ padding: 16, gap: 8 }}>
       <Button
-        title="Run pre-flight"
-        onPress={async () => {
-          // TODO: build the snapshot from real device state (permissions, battery settings, RTT,
-          // first evidence, accepted watchers, geofence). Placeholder values below.
-          const snapshot = {
-            permissions: { backgroundLocation: false, notifications: false },
-            battery: { level: 100, restricted: false, lowPowerMode: false },
-            connectivityRttMs: null,
-            firstEvidenceAfterS: null,
-            watchers: [],
-            homeGeofenceSet: false,
-            contractConfirmed: true,
-          };
-          setReport(await post<Report>("/preflight", { contractId, snapshot }));
-        }}
+        title={running ? "Checking…" : "Run pre-flight"}
+        disabled={running || !contractId}
+        onPress={() => void run()}
       />
+      {needsPermissions && (
+        <Button
+          title="Allow location and notifications"
+          onPress={async () => {
+            await requestPermissions();
+            await run();
+          }}
+        />
+      )}
       {report && <Text style={{ fontSize: 20 }}>{TITLE[report.state]}</Text>}
       {report?.checks.map((c) => (
         <Text key={c.id}>

@@ -19,6 +19,7 @@ export function Watcher({
   target: string;
 }) {
   const [reason, setReason] = useState<string | undefined>();
+  const [watching, setWatching] = useState(false);
   const send = (type: "confirm" | "worry") =>
     post("/actions", {
       contractId,
@@ -28,6 +29,21 @@ export function Watcher({
       ...(type === "worry" && reason ? { reason } : {}),
     });
   const big = { padding: 32, borderRadius: 12, alignItems: "center" as const };
+  if (!watching)
+    return (
+      <View style={{ padding: 16, gap: 16 }}>
+        <Text style={{ fontSize: 18 }}>{target} asked you to watch her night.</Text>
+        <Pressable
+          onPress={async () => {
+            await post(`/contracts/${contractId}/watchers/${me}/accept`, {});
+            setWatching(true);
+          }}
+          style={{ ...big, backgroundColor: "#2563eb" }}
+        >
+          <Text style={{ fontSize: 24, color: "white" }}>Watch tonight</Text>
+        </Pressable>
+      </View>
+    );
   return (
     <View style={{ padding: 16, gap: 16 }}>
       <Pressable
