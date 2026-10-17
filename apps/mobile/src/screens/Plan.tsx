@@ -1,10 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { Button, Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
 import { post } from "../api";
 import { consequence } from "../sweep";
+import { color, font, space } from "../theme";
+import { Body, Button, Card, Chip, ErrorText, Field, Heading, Screen, Title } from "../ui";
 
 const PRESETS = ["relaxed", "standard", "cautious"] as const;
+/** What she sees; the contract keeps the preset names. */
+const PRESET_LABEL = { relaxed: "Relaxed", standard: "Standard", cautious: "Careful" } as const;
 type Preset = (typeof PRESETS)[number];
 type Compiled = {
   contract: { id: string; preset: Preset; group: { members: string[] } };
@@ -30,6 +34,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [me, setMe] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [making, setMaking] = useState(false);
 
   // The server recomputes thresholds from the preset; show its terms, not a local guess.
   const pick = async (p: Preset) => {
@@ -44,75 +49,107 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
     }
   };
 
+  const make = async () => {
+    setMaking(true);
+    try {
+      const r = await post<Compiled & { readBack: string }>("/contracts/compile", {
+        me: name.trim(),
+        sentence,
+        localTime: new Date().toTimeString().slice(0, 5), // lets "until 2am" become hours
+      });
+      void AsyncStorage.setItem(NAME_KEY, name.trim()).catch(() => undefined);
+      setReadBack(r.readBack);
+      setId(r.contract.id);
+      setJoinCode(r.joinCode);
+      setMe(r.contract.group.members[0]!); // the server's form of her name
+      setPreset(r.contract.preset);
+      setTerms(r.terms);
+      setError(null);
+    } catch (e) {
+      // 400: a name the server won't accept; else e.g. 503 compiler_unavailable when the
+      // model is overloaded. Her sentence is kept either way.
+      setError(
+        String(e).includes(": 400")
+          ? "Use letters for your name (spaces, ' and - are fine)."
+          : "Couldn't make your plan right now. Try again in a moment.",
+      );
+    } finally {
+      setMaking(false);
+    }
+  };
+
   return (
-    <View style={{ padding: 16, gap: 12 }}>
-      <Text>Your first name (your friends see it in alerts)</Text>
-      <TextInput
+    <Screen>
+      <Title>Plan your night 💗</Title>
+      <Body muted>One sentence is enough. We'll read it back so you can check it.</Body>
+      <Field
+        label="Your first name"
         value={name}
         onChangeText={setName}
         placeholder="Ana"
         autoCapitalize="words"
         maxLength={30}
-        style={{ borderWidth: 1, padding: 8 }}
       />
-      <Text>Describe your night in a sentence.</Text>
-      <TextInput
+      <Field
+        label="What's the plan?"
         value={sentence}
         onChangeText={setSentence}
-        placeholder="Out with Bea and Cy until 2am"
-        style={{ borderWidth: 1, padding: 8 }}
+        placeholder="Out with Bea and Cy until 2am, home by 3"
+        multiline
       />
+      <Body muted style={{ fontSize: 14 }}>
+        Your friends see your first name in any alert.
+      </Body>
       <Button
-        title="Make my plan"
-        disabled={!name.trim() || !sentence.trim()}
-        onPress={async () => {
-          try {
-            const r = await post<Compiled & { readBack: string }>("/contracts/compile", {
-              me: name.trim(),
-              sentence,
-              localTime: new Date().toTimeString().slice(0, 5), // lets "until 2am" become hours
-            });
-            void AsyncStorage.setItem(NAME_KEY, name.trim()).catch(() => undefined);
-            setReadBack(r.readBack);
-            setId(r.contract.id);
-            setJoinCode(r.joinCode);
-            setMe(r.contract.group.members[0]!); // the server's form of her name
-            setPreset(r.contract.preset);
-            setTerms(r.terms);
-            setError(null);
-          } catch (e) {
-            // 400: a name the server won't accept; else e.g. 503 compiler_unavailable when the
-            // model is overloaded. Her sentence is kept either way.
-            setError(
-              String(e).includes(": 400")
-                ? "Use letters for your name (spaces, ' and - are fine)."
-                : "Couldn't make your plan right now. Try again in a moment.",
-            );
-          }
-        }}
+        big
+        title={making ? "Making your plan…" : "Make my plan"}
+        disabled={making || !name.trim() || !sentence.trim()}
+        onPress={() => void make()}
       />
-      {readBack && <Text>{readBack}</Text>}
-      {joinCode && <Text>Friends join with the code {joinCode}</Text>}
-      {terms.map((t) => (
-        <Text key={t}>{t}</Text>
-      ))}
-      {id &&
-        PRESETS.map((p) => (
-          <View key={p}>
-            <Button title={`${p}${p === preset ? " ✓" : ""}`} onPress={() => void pick(p)} />
-            {p === preset && <Text>{consequence(p)}</Text>}
+      {error && <ErrorText>{error}</ErrorText>}
+      {readBack && (
+        <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
+          <Heading>Here's your plan</Heading>
+          <Body>{readBack}</Body>
+          {joinCode && (
+            <Body>
+              Friends join with the code{" "}
+              <Text style={{ ...font.extrabold, color: color.primary }}>{joinCode}</Text>
+            </Body>
+          )}
+          {terms.map((t) => (
+            <View key={t} style={{ flexDirection: "row", gap: space.sm }}>
+              <Text style={{ ...font.extrabold, color: color.primary, fontSize: 16 }}>✓</Text>
+              <Body style={{ flex: 1 }}>{t}</Body>
+            </View>
+          ))}
+        </Card>
+      )}
+      {id && (
+        <Card>
+          <Heading>How careful should we be?</Heading>
+          <View style={{ flexDirection: "row", gap: space.sm, flexWrap: "wrap" }}>
+            {PRESETS.map((p) => (
+              <Chip
+                key={p}
+                label={PRESET_LABEL[p]}
+                selected={p === preset}
+                onPress={() => void pick(p)}
+              />
+            ))}
           </View>
-        ))}
-      {error && <Text style={{ color: "#b91c1c" }}>{error}</Text>}
+          <Body muted>{consequence(preset)}</Body>
+        </Card>
+      )}
       {id && me && (
         // Pre-flight's "Night plan confirmed" check means this tap: she read the plan back.
-        <View style={{ gap: 4 }}>
-          <Text style={{ color: "#555" }}>
-            Check the read-back and terms above. Change the sentence or setting if anything is off.
-          </Text>
-          <Button title="The plan looks right" onPress={() => onCompiled({ id, me })} />
+        <View style={{ gap: space.sm }}>
+          <Body muted>
+            Anything off? Change the sentence and make it again, or pick another setting.
+          </Body>
+          <Button big title="The plan looks right" onPress={() => onCompiled({ id, me })} />
         </View>
       )}
-    </View>
+    </Screen>
   );
 }

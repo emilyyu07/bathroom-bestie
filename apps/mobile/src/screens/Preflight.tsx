@@ -6,6 +6,9 @@ import { collectSnapshot, requestPermissions } from "../readiness";
 import { color, font, space } from "../theme";
 import { Body, Button, Card, ErrorText, Heading, Screen } from "../ui";
 
+/** Same rule as the API's joinCodeOf (apps/api/src/join.ts): the id's first 6 hex digits. */
+const joinCodeOf = (contractId: string) => contractId.replace(/^c_/, "").slice(0, 6).toUpperCase();
+
 interface Report {
   state: "ready" | "ready_with_warnings" | "not_ready";
   checks: {
@@ -81,19 +84,22 @@ export function Preflight({
       {contractId !== "" && (
         <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
           <Heading>Invite your friends 💌</Heading>
-          <Body muted>They join with this night code:</Body>
+          <Body muted>They join with this code:</Body>
           <Text
             selectable
-            style={{ ...font.extrabold, fontSize: 24, color: color.primary, letterSpacing: 1 }}
+            style={{ ...font.extrabold, fontSize: 32, color: color.primary, letterSpacing: 4 }}
           >
-            {contractId}
+            {joinCodeOf(contractId)}
           </Text>
+          <Body muted style={{ fontSize: 13 }}>
+            (or the full night code {contractId})
+          </Body>
           <Button
-            tone="secondary"
+            tone="quiet"
             title="Share the code"
             onPress={() =>
               void Share.share({
-                message: `Join my night on BathroomBestie with this code: ${contractId}`,
+                message: `Join my night on BathroomBestie with the code ${joinCodeOf(contractId)}`,
               }).catch(() => undefined)
             }
           />
