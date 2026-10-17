@@ -20,6 +20,24 @@ export const thresholdsFor = (preset: PresetName, prev?: Thresholds): Thresholds
   };
 };
 
+/**
+ * Timers for a demo night, so the whole story (apart, alone, a friend alerted) plays in minutes on
+ * a real phone. Same engine, different contract data (invariant 7); the contract carries
+ * `demo: true` and the plan screen says so. Spatial thresholds are unchanged.
+ */
+export const DEMO_THRESHOLDS: Thresholds = {
+  separation_m: 150,
+  watch_slot_min: 90,
+  separation_min: 2,
+  silence_min: 3,
+  score_floor: 0.5,
+  score_floor_min: 3,
+  ack_timeout_min: 1,
+  milestone_grace_min: 1,
+  exit_alone_min: 3,
+  report_every_min: 1,
+};
+
 /** Starting weights; calibrate with the sweep. */
 export const DEFAULT_CONFIDENCE: ConfidenceModel = {
   corridor: { w: 1, tau_min: 20 },

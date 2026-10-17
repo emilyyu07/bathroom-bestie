@@ -2,6 +2,7 @@ import { ApiError, GoogleGenAI } from "@google/genai";
 import {
   DraftPlan,
   DEFAULT_CONFIDENCE,
+  DEMO_THRESHOLDS,
   draftJsonSchema,
   thresholdsFor,
   type Contract,
@@ -109,6 +110,7 @@ export function buildContract(
   ctx: CompileContext,
   sentence: string,
   me = "me",
+  demo = false,
 ): Contract {
   const id =
     "c_" + createHash("sha256").update(`${sentence}|${ctx.now}`).digest("hex").slice(0, 10);
@@ -139,12 +141,13 @@ export function buildContract(
         to: Math.min(end, start + (i + 1) * slot),
       })),
     },
-    thresholds: thresholdsFor(d.preset),
+    thresholds: demo ? DEMO_THRESHOLDS : thresholdsFor(d.preset),
     confidence: DEFAULT_CONFIDENCE,
     preset: d.preset,
     wishes: { alert_order: order, offer_911_script: d.offer_911_script },
     // Keep the contract alive past her home time so a missed home milestone can still be noticed.
     expires: Math.max(end, homeBy ?? end) + 120,
+    ...(demo ? { demo: true } : {}),
   };
 }
 
@@ -153,6 +156,9 @@ export const termsOf = (c: Contract): string[] => {
   const home = c.milestones.find((m) => m.kind === "home");
   const hours = (to: number) => Math.round(((to - c.window.start) / 60) * 10) / 10;
   return [
+    ...(c.demo
+      ? ["DEMO NIGHT: timers are shortened to minutes, so alerts come far sooner than real ones."]
+      : []),
     `Watching: ${c.group.watch.map((w) => w.who).join(", ")}`,
     `Setting: ${c.preset}. A friend is alerted when your phone goes quiet after you'd been apart from the group` +
       (home ? ", or when you're well past a time you planned to be home" : "") +

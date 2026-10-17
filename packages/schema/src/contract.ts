@@ -85,6 +85,8 @@ export const Contract = z
     preset: PresetName,
     wishes: Wishes,
     expires: Minute,
+    /** A rehearsal night: timers are minutes, not tens of minutes (DEMO_THRESHOLDS). Always shown to her. */
+    demo: z.boolean().optional(),
   })
   .refine(
     (c) =>
