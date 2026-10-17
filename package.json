@@ -16,7 +16,8 @@
     "api": "pnpm --filter @bathroombestie/api dev",
     "db:up": "docker compose up -d --wait db",
     "test:db": "DATABASE_URL_TEST=${DATABASE_URL_TEST:-postgres://bathroombestie:bathroombestie@localhost:5432/bathroombestie_test} vitest run apps/api/test/pg.integration.test.ts",
-    "test:gemini": "GEMINI_LIVE=1 node --env-file=.env node_modules/vitest/vitest.mjs run apps/api/test/gemini.live.test.ts"
+    "test:gemini": "GEMINI_LIVE=1 node --env-file=.env node_modules/vitest/vitest.mjs run apps/api/test/gemini.live.test.ts",
+    "mobile:check": "npm --prefix apps/mobile run check"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
