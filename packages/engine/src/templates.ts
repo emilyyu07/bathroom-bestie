@@ -12,7 +12,8 @@ export const TEMPLATES = {
   group: "Nobody has responded about {name}, who hasn't sent an update for {minutes} min.",
   unexplained:
     "{name}'s phone stopped sending updates {minutes} min ago while apart from the group.",
-  separation: "You've been apart from your group for {minutes} min. Let them know you're okay.",
+  // Informational on purpose: nothing in the app can clear this (only rejoining or a friend's confirm can).
+  separation: "You've been apart from your group for {minutes} min.",
   milestoneHome: "You're {minutes} min past the time you planned to be home.",
   milestoneArea: "You're {minutes} min past a time you planned to arrive somewhere.",
   milestoneLate:
