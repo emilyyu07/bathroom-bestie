@@ -7,9 +7,10 @@ Autonomous safety net for a night out. See `CLAUDE.md` for invariants and `docs/
 Requires Node 22+, pnpm 9 (`npm i -g pnpm@9`), Docker.
 
     pnpm install
-    docker compose up -d
+    pnpm db:up              # docker compose up, waits for TimescaleDB
     pnpm migrate            # applies apps/api/migrations to the local TimescaleDB
     pnpm test
+    pnpm test:db            # API + every scenario against real Postgres (own _test database)
     pnpm sim run            # scenario table; exits nonzero on regression
     pnpm sim sweep          # writes packages/sim/out/sweep.{json,csv}
     pnpm sim replay         # writes out/replay.json for the console
