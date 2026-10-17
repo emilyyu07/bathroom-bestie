@@ -29,6 +29,13 @@ describe.skipIf(!key)("gemini compile (live)", () => {
     expect(d.hours).toBe(5);
   }, 60_000);
 
+  it("a stated home time becomes her home milestone; none otherwise", async () => {
+    const { c } = await compile("Drinks with Bea until midnight, I'll be home by 1am");
+    expect(c.milestones).toEqual([{ id: "home", kind: "home", by: ctx.now + 240, who: ["me"] }]);
+    const { c: plain } = await compile("Drinks with Bea for a few hours");
+    expect(plain.milestones).toEqual([]);
+  }, 60_000);
+
   it("asks to be careful -> cautious; explicit opt-out of the script is respected", async () => {
     const { c } = await compile(
       "Bar with Kim for 3 hours, be careful, and don't offer any emergency call script",

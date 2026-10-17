@@ -55,6 +55,33 @@ describe("api", () => {
     expect(evil.headers["access-control-allow-origin"]).toBeUndefined();
   });
 
+  it("a stated home time becomes her home milestone, and makes the geofence check blocking", async () => {
+    const r = (
+      await app.inject({
+        method: "POST",
+        url: "/contracts/compile",
+        payload: { sentence: "Out with Bea and Cy for 4 hours, home in 5 hours" },
+      })
+    ).json();
+    const start = clock.nowMinute();
+    expect(r.contract.milestones).toEqual([
+      { id: "home", kind: "home", by: start + 300, who: ["me"] },
+    ]);
+    expect(r.contract.expires).toBe(start + 300 + 120); // outlives the window to see the deadline
+    expect(r.terms.join(" ")).toContain("planned to be home");
+    expect(r.terms).toContain("Home by: about 5 h from now");
+    const pf = await app.inject({
+      method: "POST",
+      url: "/preflight",
+      payload: { contractId: r.contract.id, snapshot: { ...good, homeGeofenceSet: false } },
+    });
+    expect(pf.json().state).toBe("not_ready");
+
+    const plain = await compile(); // no home time stated
+    expect(plain.contract.milestones).toEqual([]);
+    expect(plain.terms.join(" ")).not.toContain("home");
+  });
+
   it("rejects bad input with 400", async () => {
     const r = await app.inject({ method: "POST", url: "/contracts/compile", payload: {} });
     expect(r.statusCode).toBe(400);

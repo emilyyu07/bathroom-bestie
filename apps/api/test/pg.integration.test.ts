@@ -139,6 +139,30 @@ describe.skipIf(!url)("postgres integration", () => {
       expect((await store.getContract(contract.id))!.contract.preset).toBe("relaxed");
     });
 
+    it("reads contracts saved before newer thresholds existed, skipping unreadable rows", async () => {
+      const { contract } = await compile(); // cautious
+      const old = structuredClone(contract);
+      delete old.thresholds.milestone_grace_min;
+      delete old.thresholds.exit_alone_min;
+      await pool.query("UPDATE contracts SET body = $2, status = 'active' WHERE id = $1", [
+        contract.id,
+        old,
+      ]);
+      await pool.query(
+        "INSERT INTO contracts (id, body, status) VALUES ('broken', '{\"id\":\"broken\"}', 'active')",
+      );
+      const got = (await store.getContract(contract.id))!.contract;
+      expect(got.thresholds).toMatchObject({ milestone_grace_min: 5, exit_alone_min: 30 });
+      expect((await store.listActive()).map((c) => c.id)).toEqual([contract.id]);
+    });
+
+    it("fails loudly when no active contract can be read", async () => {
+      await pool.query(
+        "INSERT INTO contracts (id, body, status) VALUES ('broken', '{\"id\":\"broken\"}', 'active')",
+      );
+      await expect(store.listActive()).rejects.toThrow();
+    });
+
     it("stores only the rounded area", async () => {
       const { contract } = await compile();
       await app.inject({
