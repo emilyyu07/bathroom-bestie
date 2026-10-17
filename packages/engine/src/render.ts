@@ -1,6 +1,6 @@
 import type { Alert, AlertKind } from "@bathroombestie/schema";
 import { confidenceOfNormal } from "./confidence";
-import { separatedFor } from "./cohesion";
+import { isTogether, separatedFor } from "./cohesion";
 import type { Ctx, EmitOptions } from "./ctx";
 import { classifySilence, silentMinutes } from "./signals";
 import type { Incident } from "./state";
@@ -25,6 +25,10 @@ export function factorsFor(ctx: Ctx, id: string): string[] {
     out.push(fill(FACTOR_TEMPLATES.noUpdate, { minutes: silent }));
   if (p.lastBattery !== null && cls === "unexplained")
     out.push(fill(FACTOR_TEMPLATES.battery, { battery: Math.round(p.lastBattery) }));
+  // Context only: her phone is quiet, but others who are still reporting were last near her.
+  // Detection never reads this; it just tells the friend she was not alone when it went quiet.
+  if (silent >= contract.thresholds.silence_min / 2 && isTogether(contract, state, id, now))
+    out.push(FACTOR_TEMPLATES.togetherNearby);
   if (apartMin >= contract.thresholds.separation_min)
     out.push(fill(FACTOR_TEMPLATES.apartFor, { minutes: apartMin }));
   const corridor = c.penalties.find((x) => x.stream === "corridor")!;
@@ -130,6 +134,9 @@ export function renderAlert(ctx: Ctx, inc: Incident, seq: number, opts: EmitOpti
       break;
   }
 
+  // A friend's report is a human report whatever opened the incident (invariant 8): the alert says
+  // so. The incident keeps its own kind, so detection and the ladder are unaffected.
+  if (opts.attributed) kind = "friend_worry";
   if (opts.attributed && inc.step !== "friend") {
     const reasonText = inc.reason
       ? fill(REASON_TEXT[inc.reason as keyof typeof REASON_TEXT], { name: id })

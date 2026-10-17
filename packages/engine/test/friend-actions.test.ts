@@ -68,6 +68,23 @@ describe("friend worry", () => {
     expect(alerts[0]!.message).toContain("can't find ana");
   });
 
+  it("marks an attributed alert on an existing incident as a friend's report, not the incident's kind", () => {
+    // Apart from 30, dark from 60: a separation nudge opens at 55 and becomes an unexplained stop
+    // by 80. cy (not the watcher) worries at 82, which lifts it to rung 2 and says who said so.
+    const { alerts, state } = run({
+      to: 84,
+      evidence: darkAna(60, 61, 30),
+      actions: [worry(82, "cy", "not_answering")],
+    });
+    const said = alerts.find((a) => a.t === 82)!;
+    expect(said).toMatchObject({ rung: 2, raisedBy: "cy", kind: "friend_worry" });
+    expect(said.message).toContain("cy");
+    // The system-raised alert before it keeps the incident's own kind...
+    expect(alerts.find((a) => a.t === 55)!.kind).toBe("separation");
+    // ...and the incident itself is unchanged, so the ladder behaves exactly as before.
+    expect(state.incidents[0]!.kind).toBe("unexplained_stop");
+  });
+
   it("works with zero evidence at all", () => {
     const { alerts } = run({
       to: 7,

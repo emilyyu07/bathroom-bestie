@@ -137,6 +137,13 @@ good to about one grid cell. Tightening it needs finer coordinates, which would 
   (report 1, separation 2, silence 3, exit-alone 3, ack 1) so the whole story plays live. The engine is unchanged; the
   plan screen's first term says DEMO NIGHT; picking a preset keeps the demo timers. `STORE=memory` runs the API without a
   database. The friend driver (`pnpm demo:friends`) joins by code and reports through the normal routes.
+- **A friend's report is labelled as one (invariant 8).** Any alert raised by a friend's "I'm worried" has kind
+  `friend_worry`, even when it lifts an incident that something else opened (a quiet phone, a separation). The incident
+  keeps its own kind, so detection and the ladder do not change; only the alert says whose report it is.
+- **"Others in the group are still reporting near the last known area" is a factor, not a detector.** It is added when her
+  phone has been quiet for at least half of `silence_min` and a fresh peer is within `separation_m` of her last-known
+  area. It never raises, delays or silences an alert (a test pins the alert times), and it sits after "no update" so it
+  survives the three-factor cap.
 - **No "I'm fine" button (agreed by both owners).** The product has no check-ins. Opening the app already sends an
   evidence report immediately, which clears silence and low-score nudges. Nudges the app cannot clear (separation, and later
   missed milestone) are worded as facts, never as instructions. The mobile Status screen shows "watching" only.

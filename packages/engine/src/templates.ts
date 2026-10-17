@@ -49,6 +49,7 @@ export const FACTOR_TEMPLATES = {
   leftAlone: "Left the group {minutes} min ago; not home yet",
   pastDeadline: "{minutes} min past a planned arrival time",
   apartFor: "Apart from the group for {minutes} min",
+  togetherNearby: "Others in the group are still reporting near the last known area",
   score: "Confidence of normal is {score}",
 } as const;
 
