@@ -4,11 +4,14 @@ import { Plan } from "./src/screens/Plan";
 import { Preflight } from "./src/screens/Preflight";
 import { Status } from "./src/screens/Status";
 import { Watcher } from "./src/screens/Watcher";
+import { useNightReporting } from "./src/night";
 
 // TODO: real identity/auth is out of scope; ids are placeholders.
 export default function App() {
   const [screen, setScreen] = useState<"plan" | "preflight" | "status" | "watcher">("plan");
   const [contractId, setContractId] = useState("");
+  const [active, setActive] = useState(false);
+  useNightReporting(contractId, "me", active);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 40 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
@@ -20,6 +23,7 @@ export default function App() {
         <Plan
           onCompiled={(c) => {
             setContractId(c.id);
+            setActive(false);
             setScreen("preflight");
           }}
         />
@@ -29,10 +33,13 @@ export default function App() {
           contractId={contractId}
           me="me"
           confirmed={contractId !== ""}
-          onActive={() => setScreen("status")}
+          onActive={() => {
+            setActive(true);
+            setScreen("status");
+          }}
         />
       )}
-      {screen === "status" && <Status />}
+      {screen === "status" && <Status contractId={contractId} me="me" active={active} />}
       {screen === "watcher" && <Watcher contractId={contractId} me="bea" target="me" />}
     </SafeAreaView>
   );
