@@ -233,3 +233,85 @@ sc(
   },
   "08-separated-only.json",
 );
+
+// Home-deadline scenarios. Ana's home milestone applies only to her; expires covers it.
+const homeBy240 = () =>
+  makeContract({
+    milestones: [{ id: "home", kind: "home", by: 240, who: ["ana"] }],
+    expires: 480,
+  });
+
+// 9. Home on time: leaves the group late in the night and the geofence fires before the deadline.
+sc(
+  {
+    name: "09-home-on-time",
+    description:
+      "Ana leaves the group at 215 and arrives home at 230, before her 240 deadline. No alert.",
+    contract: homeBy240(),
+    timelines: {
+      ana: [
+        ...every(0, 210, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
+        ...every(215, 225, () => ({ area: FAR, motion: "vehicle", batteryPct: 60 })),
+        {
+          at: 230,
+          evidence: { ...base, area: FAR, motion: "vehicle", batteryPct: 60, homeArrived: true },
+        },
+      ],
+      ...together(300),
+    },
+    durationMin: 300,
+    truth: "normal",
+    label: { expect: "no_alert" },
+  },
+  "09-home-on-time.json",
+);
+
+// 10. Late but still reporting: a quiet nudge to her only, closed by arriving home.
+sc(
+  {
+    name: "10-home-late-reporting",
+    description:
+      "Ana stays out with the group past her 240 home deadline and keeps reporting. Nudge to her only; arrives at 300.",
+    contract: homeBy240(),
+    timelines: {
+      ana: [
+        ...every(0, 295, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
+        {
+          at: 300,
+          evidence: { ...base, area: FAR, motion: "vehicle", batteryPct: 55, homeArrived: true },
+        },
+      ],
+      ...together(300),
+    },
+    durationMin: 310,
+    truth: "normal",
+    label: {
+      expect: "alert",
+      rung: 1,
+      from: 251,
+      to: 251,
+      onset: 240,
+      maxRung: 1,
+      resolvedBy: "home",
+    },
+  },
+  "10-home-late-reporting.json",
+);
+
+// 11. Late AND quiet while last seen with the group: 'unexplained stop' does not apply, the milestone does.
+sc(
+  {
+    name: "11-home-missed-and-quiet",
+    description:
+      "Ana is last seen with the group at 235, then her phone goes quiet and she misses her 240 deadline.",
+    contract: homeBy240(),
+    timelines: {
+      ana: every(0, 235, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
+      ...together(300),
+    },
+    durationMin: 300,
+    truth: "concerning",
+    label: { expect: "alert", rung: 2, from: 258, to: 262, onset: 240 },
+  },
+  "11-home-missed-and-quiet.json",
+);

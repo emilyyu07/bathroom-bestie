@@ -6,7 +6,7 @@ import { loadScenarios } from "../src/scenarios";
 const scenarios = loadScenarios();
 
 describe("scenarios", () => {
-  it("has the eight scenarios", () => expect(scenarios).toHaveLength(8));
+  it("has the eleven scenarios", () => expect(scenarios).toHaveLength(11));
   for (const sc of scenarios) {
     it(`${sc.name} matches its label`, () => {
       const v = judge(sc, runScenario(sc));

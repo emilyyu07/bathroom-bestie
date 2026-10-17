@@ -2,7 +2,7 @@
   "presets": {
     "relaxed": {
       "falseAlertsPerNormalNight": 0,
-      "medianTimeToAlertMin": 37,
+      "medianTimeToAlertMin": 34.5,
       "worstTimeToAlertMin": 37,
       "knownMisses": [],
       "scenarios": [
@@ -41,12 +41,30 @@
           "truth": "normal",
           "alertsToOthers": 0,
           "timeToAlert": null
+        },
+        {
+          "name": "09-home-on-time",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "10-home-late-reporting",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "11-home-missed-and-quiet",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 32
         }
       ]
     },
     "standard": {
-      "falseAlertsPerNormalNight": 0.2,
-      "medianTimeToAlertMin": 25,
+      "falseAlertsPerNormalNight": 0.143,
+      "medianTimeToAlertMin": 22.5,
       "worstTimeToAlertMin": 25,
       "knownMisses": [],
       "scenarios": [
@@ -85,12 +103,30 @@
           "truth": "normal",
           "alertsToOthers": 0,
           "timeToAlert": null
+        },
+        {
+          "name": "09-home-on-time",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "10-home-late-reporting",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "11-home-missed-and-quiet",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 20
         }
       ]
     },
     "cautious": {
-      "falseAlertsPerNormalNight": 0.6,
-      "medianTimeToAlertMin": 15,
+      "falseAlertsPerNormalNight": 0.429,
+      "medianTimeToAlertMin": 12.5,
       "worstTimeToAlertMin": 15,
       "knownMisses": [],
       "scenarios": [
@@ -129,6 +165,24 @@
           "truth": "normal",
           "alertsToOthers": 0,
           "timeToAlert": null
+        },
+        {
+          "name": "09-home-on-time",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "10-home-late-reporting",
+          "truth": "normal",
+          "alertsToOthers": 0,
+          "timeToAlert": null
+        },
+        {
+          "name": "11-home-missed-and-quiet",
+          "truth": "concerning",
+          "alertsToOthers": 3,
+          "timeToAlert": 10
         }
       ]
     }
