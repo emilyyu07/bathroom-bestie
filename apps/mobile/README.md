@@ -48,3 +48,9 @@ Checks that need no device (also `pnpm mobile:check` from the repo root):
     npx expo export --platform android --output-dir /tmp/bb-export   # bundles the JS like a build
 
 These pass; the app has not yet been launched on a device or emulator. See TODOs in `src/evidenceReporter.ts` (foreground service, home geofence region events).
+
+The Watcher screen is the friend's side: "Watch tonight" accepts (remembered on the server), then
+it lists alerts addressed to them (`GET /incidents?to=`), polling every 20 s (no push delivery in
+scope). Each alert shows its rung, message, factors, who raised it and the rounded last-known area
+(opens in Maps), with "I'm with her" / "I'm worried". At rung 4 the pre-filled script is shown as
+text only; nothing is ever dialled (invariant 4).
