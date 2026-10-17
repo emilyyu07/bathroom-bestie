@@ -87,3 +87,20 @@ describe("GET /join/:code", () => {
     expect((await accept("cy")).statusCode).toBe(202);
   });
 });
+
+describe("contract ids", () => {
+  it("are unique when the same sentence is compiled twice in the same minute", async () => {
+    const a = await compile();
+    const b = await compile(); // same sentence, same fake-clock minute
+    expect(a.contract.id).not.toBe(b.contract.id);
+    // Neither overwrote the other: both exist and each has its own join code.
+    expect(store.contracts.size).toBe(2);
+    expect(a.joinCode).not.toBe(b.joinCode);
+    expect((await app.inject({ url: `/join/${a.joinCode}` })).json().contractId).toBe(
+      a.contract.id,
+    );
+    expect((await app.inject({ url: `/join/${b.joinCode}` })).json().contractId).toBe(
+      b.contract.id,
+    );
+  });
+});

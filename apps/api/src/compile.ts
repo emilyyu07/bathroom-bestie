@@ -112,9 +112,12 @@ export function buildContract(
   sentence: string,
   me = "me",
   demo = false,
+  /** Makes the id unique when the same sentence is compiled in the same minute. */
+  nonce = "",
 ): Contract {
   const id =
-    "c_" + createHash("sha256").update(`${sentence}|${ctx.now}`).digest("hex").slice(0, 10);
+    "c_" +
+    createHash("sha256").update(`${sentence}|${ctx.now}|${nonce}`).digest("hex").slice(0, 10);
   // Person ids are lower-case everywhere (evidence, actions), whatever case the model used.
   const id_ = (f: string) => f.trim().toLowerCase();
   me = id_(me); // her name is her id (B6): same form as her friends' ids
