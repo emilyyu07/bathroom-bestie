@@ -155,12 +155,22 @@ export class PgStore implements Store {
     );
     return r.rows.map((x) => x.person_id as string);
   }
-  async listAlerts(contractId?: string) {
-    const r = contractId
-      ? await this.pool.query("SELECT body FROM incidents WHERE contract_id = $1 ORDER BY t, id", [
-          contractId,
-        ])
-      : await this.pool.query("SELECT body FROM incidents ORDER BY t, id");
+  async listAlerts(contractId?: string, to?: string) {
+    const where: string[] = [];
+    const args: string[] = [];
+    if (contractId !== undefined) {
+      args.push(contractId);
+      where.push(`contract_id = $${args.length}`);
+    }
+    if (to !== undefined) {
+      // `to` is a JSON array of person ids inside the stored alert.
+      args.push(to);
+      where.push(`body->'to' @> to_jsonb($${args.length}::text)`);
+    }
+    const r = await this.pool.query(
+      `SELECT body FROM incidents ${where.length ? `WHERE ${where.join(" AND ")}` : ""} ORDER BY t, id`,
+      args,
+    );
     return r.rows.map((x) => x.body as Alert);
   }
 }

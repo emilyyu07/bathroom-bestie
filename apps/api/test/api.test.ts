@@ -223,6 +223,46 @@ describe("api", () => {
     expect(list.alerts[0].message).toContain("cy");
   });
 
+  it("GET /incidents?to=<person> lists only the alerts addressed to that person", async () => {
+    const { contract } = await compile(); // members: me, bea, cy; bea watches first
+    await app.inject({
+      method: "POST",
+      url: "/preflight",
+      payload: { contractId: contract.id, snapshot: good },
+    });
+    await app.inject({ method: "POST", url: `/contracts/${contract.id}/activate` });
+    await tick(store, clock);
+    clock.t += 5;
+    await app.inject({
+      method: "POST",
+      url: "/actions",
+      payload: { contractId: contract.id, type: "worry", by: "cy", targetPersonId: "me" },
+    });
+    clock.t += 10; // nobody acknowledges: rung 2 to bea, then rung 3 to cy, then the whole group
+    await tick(store, clock);
+
+    const get = async (qs: string) =>
+      (await app.inject({ method: "GET", url: `/incidents?contractId=${contract.id}${qs}` })).json()
+        .alerts as { rung: number; to: string[] }[];
+    const all = await get("");
+    expect(all.map((a) => a.to)).toEqual([["bea"], ["cy"], ["bea", "cy"]]);
+
+    expect((await get("&to=bea")).map((a) => a.rung)).toEqual([2, 3]); // her own + the group alert
+    expect((await get("&to=cy")).map((a) => a.rung)).toEqual([3, 3]); // next-person + the group alert
+    expect(await get("&to=me")).toEqual([]);
+    expect(await get("&to=nobody")).toEqual([]);
+  });
+
+  it("the to filter works without a contractId too", async () => {
+    await store.addAlerts([
+      { id: "a1", contractId: "x", to: ["bea"] },
+      { id: "a2", contractId: "y", to: ["bea", "cy"] },
+      { id: "a3", contractId: "y", to: ["cy"] },
+    ] as never);
+    const r = await app.inject({ method: "GET", url: "/incidents?to=bea" });
+    expect(r.json().alerts.map((a: { id: string }) => a.id)).toEqual(["a1", "a2"]);
+  });
+
   it("runner never skips a row that was not yet due when a later-seq row was delivered", async () => {
     const { contract } = await compile();
     await store.activate(contract.id);
