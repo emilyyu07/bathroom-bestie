@@ -15,6 +15,18 @@ const A = { lat: 43.65, lon: -79.38 }; // bar A
 const B = { lat: 43.653, lon: -79.383 }; // bar B, ~330 m away
 const FAR = { lat: 43.66, lon: -79.38 }; // ~1.1 km from A
 
+/** An arrival is an event, not a place (invariant 5): it carries no area. */
+const arrival = (at: number, batteryPct: number) => ({
+  at,
+  evidence: {
+    motion: "still" as const,
+    batteryPct,
+    charging: false,
+    permissionOk: true,
+    homeArrived: true,
+  },
+});
+
 const base: Ev = { area: A, motion: "still", batteryPct: 80, charging: false, permissionOk: true };
 
 /** Report every DEFAULT_REPORT_EVERY_MIN from `from` to `to` (inclusive), computing the evidence from the minute. */
@@ -51,16 +63,7 @@ sc(
           motion: groupMotion(t),
           batteryPct: Math.round(80 - t / 8),
         })),
-        {
-          at: 260,
-          evidence: {
-            ...base,
-            area: { lat: 43.662, lon: -79.395 },
-            motion: "vehicle",
-            batteryPct: 48,
-            homeArrived: true,
-          },
-        },
+        arrival(260, 48),
       ],
       ...together(300),
     },
@@ -258,10 +261,7 @@ sc(
       ana: [
         ...every(0, 210, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
         ...every(215, 225, () => ({ area: FAR, motion: "vehicle", batteryPct: 60 })),
-        {
-          at: 230,
-          evidence: { ...base, area: FAR, motion: "vehicle", batteryPct: 60, homeArrived: true },
-        },
+        arrival(230, 60),
       ],
       ...together(300),
     },
@@ -282,10 +282,7 @@ sc(
     timelines: {
       ana: [
         ...every(0, 295, (t) => ({ area: mid(t), motion: groupMotion(t), batteryPct: 70 })),
-        {
-          at: 300,
-          evidence: { ...base, area: FAR, motion: "vehicle", batteryPct: 55, homeArrived: true },
-        },
+        arrival(300, 55),
       ],
       ...together(300),
     },

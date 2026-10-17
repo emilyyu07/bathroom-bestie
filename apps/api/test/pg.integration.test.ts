@@ -222,6 +222,43 @@ describe.skipIf(!url)("postgres integration", () => {
       expect(await ids("")).toEqual(["a1", "a2", "a3"]);
     });
 
+    it("stores an arrival with no location at all, and reads it back that way", async () => {
+      const { contract } = await compile();
+      const arrival = {
+        personId: "me",
+        contractId: contract.id,
+        t: clock.nowMinute(),
+        motion: "still",
+        batteryPct: 70,
+        charging: false,
+        permissionOk: true,
+        homeArrived: true,
+      };
+      // a client that wrongly sends an area with its arrival: the API must drop it before storing
+      await app.inject({
+        method: "POST",
+        url: "/evidence",
+        payload: { ...arrival, area: { lat: 43.65321, lon: -79.38377 } },
+      });
+      const raw = await pool.query("SELECT lat, lon, home_arrived FROM evidence");
+      expect(raw.rows).toEqual([{ lat: null, lon: null, home_arrived: true }]);
+      const back = await store.evidenceAfter(contract.id, 0);
+      expect(back).toHaveLength(1);
+      expect("area" in back[0]!.e).toBe(false);
+      expect(back[0]!.e.homeArrived).toBe(true);
+    });
+
+    it("the database itself refuses an ordinary report with no location", async () => {
+      const { contract } = await compile();
+      await expect(
+        pool.query(
+          `INSERT INTO evidence (time, contract_id, person_id, t, motion, battery_pct, charging, permission_ok)
+           VALUES (now(), $1, 'me', 1, 'still', 50, false, true)`,
+          [contract.id],
+        ),
+      ).rejects.toThrow(/evidence_area_unless_arrival/);
+    });
+
     it("runner turns a friend worry into a listed alert", async () => {
       const { contract } = await compile();
       await app.inject({

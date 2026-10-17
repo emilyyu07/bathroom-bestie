@@ -9,16 +9,25 @@ export function ingest(contract: Contract, state: EngineState, e: EvidenceReport
   p.prevBattery = p.lastBattery;
   p.lastBattery = e.batteryPct;
   p.lastCharging = e.charging;
+  // An arrival is an event, not a place (invariant 5): she is home, and any area that came with it
+  // never feeds location logic.
+  if (e.homeArrived) {
+    p.home = true;
+    return;
+  }
+  if (p.home) return; // she is home: the night is over for her, so later reports move nothing
   if (!e.permissionOk) {
     p.permissionLost = true;
     return; // location/motion are not trustworthy without permission
   }
   p.permissionLost = false;
+  const area = e.area;
+  if (!area) return; // unreachable through the schema: only an arrival may omit it
   const moved =
     e.motion !== "still" ||
-    (p.lastArea !== null && (p.lastArea.lat !== e.area.lat || p.lastArea.lon !== e.area.lon));
-  p.lastArea = e.area;
-  if (distanceM(e.area, contract.corridor.center) <= contract.corridor.radius_m)
+    (p.lastArea !== null && (p.lastArea.lat !== area.lat || p.lastArea.lon !== area.lon));
+  p.lastArea = area;
+  if (distanceM(area, contract.corridor.center) <= contract.corridor.radius_m)
     p.lastCorridorAt = e.t;
   if (moved) p.lastMoveAt = e.t;
   for (const m of applicable(contract, e.personId)) {
@@ -26,9 +35,8 @@ export function ingest(contract: Contract, state: EngineState, e: EvidenceReport
     if (
       m.kind === "area" &&
       p.milestoneMet[m.id] === undefined &&
-      distanceM(e.area, m.within.center) <= m.within.radius_m
+      distanceM(area, m.within.center) <= m.within.radius_m
     )
       p.milestoneMet[m.id] = e.t;
   }
-  if (e.homeArrived) p.home = true;
 }

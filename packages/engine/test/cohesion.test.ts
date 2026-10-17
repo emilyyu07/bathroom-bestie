@@ -203,7 +203,7 @@ describe("coordinate rounding vs separation_m (150 m)", () => {
         });
       for (const e of [rep("ana", a), rep("bea", b)]) {
         const p = s.people[e.personId]!;
-        p.lastArea = e.area;
+        p.lastArea = e.area ?? null;
         p.lastReportAt = 0;
       }
       expect(isApart(c, s, "ana", 0), `${JSON.stringify([a, b])}`).toBe(false);

@@ -1,11 +1,15 @@
 import { z } from "zod";
 import { Contract } from "./contract";
-import { EvidenceReport, FriendAction } from "./evidence";
+import { EvidenceBase, FriendAction, NEEDS_AREA, needsArea } from "./evidence";
 import { Minute, PersonId } from "./common";
 import { ReadinessSnapshot } from "./readiness";
 
 /** Evidence as authored in a scenario: personId/contractId/t are filled in by the runner. */
-export const ScenarioEvidence = EvidenceReport.omit({ personId: true, contractId: true, t: true });
+export const ScenarioEvidence = EvidenceBase.omit({
+  personId: true,
+  contractId: true,
+  t: true,
+}).refine(needsArea, NEEDS_AREA);
 export type ScenarioEvidence = z.infer<typeof ScenarioEvidence>;
 
 export const ScenarioLabel = z.discriminatedUnion("expect", [

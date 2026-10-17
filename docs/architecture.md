@@ -109,6 +109,13 @@ report_every_min`. Cautious's 12-minute silence is then exactly 4 reports. Preci
   cancels it first, so a friend hears only after **five consecutive missed reports**. Detection timing is measured from
   the last report and does not depend on the cadence (tested at 1, 2, 3 and 5 min).
 
+- **An arrival is an event, not a place (invariant 5).** A `homeArrived` report carries no `area`: the schema makes `area`
+  optional only when `homeArrived` is true, the API drops any area a client sends with one, the engine marks her home
+  and ignores any location on it (and every later report from her), and the evidence table stores NULL `lat`/`lon` for it
+  (migration 006, with a CHECK that only an arrival may lack a location). The server therefore learns that she arrived,
+  never where home is. Limit: ordinary reports before she arrives still trace her approach, so the last ones sit within
+  ~110 m of home. The app should also stop reporting once she is home.
+
 ## Decisions to confirm
 
 - Times are integer epoch minutes everywhere.
