@@ -35,7 +35,8 @@
       "expo-notifications",
       "expo-asset",
       "expo-font",
-      "./plugins/withVectorAdaptiveIcon"
+      "./plugins/withVectorAdaptiveIcon",
+      "./plugins/withFmtCxx17"
     ],
     "icon": "./assets/icon.png",
     "backgroundColor": "#FFF7E1",
