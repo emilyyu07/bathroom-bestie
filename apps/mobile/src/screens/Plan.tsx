@@ -42,6 +42,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string }) => void }
         onPress={async () => {
           const r = await post<Compiled & { readBack: string }>("/contracts/compile", {
             sentence,
+            localTime: new Date().toTimeString().slice(0, 5), // lets "until 2am" become hours
           });
           setReadBack(r.readBack);
           setId(r.contract.id);
