@@ -37,6 +37,11 @@ confirm or the home event.
   escalates and closes as `rejoined`. If she then goes silent (unexplained, which now needs the duration rule) or the score
   drops, the same incident upgrades in place and the ack timeout counts from the upgrade.
 
+Long separation also feeds the score: a fourth stream, `confidence.separation` (w 0.4, tau 60 min), costs nothing until
+she has been apart longer than tau. Its penalty is **capped** (`cap` 0.4, so N stays above 0.67) so separation alone can
+never cross any preset's score floor; it only tips the score when she is also quiet or out of the area. If the nudge is
+open when she goes quiet while apart, it is held open (not resolved), so no cooldown delays the stronger concern.
+
 ## Decisions to confirm
 
 - Times are integer epoch minutes everywhere.

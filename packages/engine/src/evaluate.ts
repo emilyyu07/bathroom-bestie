@@ -104,7 +104,7 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
 
   const factorsFor = (id: string): string[] => {
     const p = state.people[id]!;
-    const c = confidenceOfNormal(contract, p, now);
+    const c = confidenceOfNormal(contract, p, now, separatedFor(contract, state, id, now));
     const out: string[] = [];
     const silent = sinceMin(id);
     const cls = classifySilence(contract, state, id, now);
@@ -301,7 +301,7 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
     if (!active) continue;
 
     const cls = classifySilence(contract, state, id, now);
-    const { n } = confidenceOfNormal(contract, p, now);
+    const { n } = confidenceOfNormal(contract, p, now, separatedFor(contract, state, id, now));
     const th = contract.thresholds;
     if (n < th.score_floor) p.lowSince ??= now;
     else p.lowSince = null;
@@ -346,6 +346,9 @@ export function evaluate(input: EvaluateInput): EvaluateResult {
       resolve(open, "evidence_returned");
       continue;
     } else if (!concern) {
+      // She went quiet while still apart (timer frozen): not a rejoin. Keep the nudge open so the
+      // score or unexplained path can take it over without a cooldown getting in the way.
+      if (open.kind === "separation" && p.apartSince !== null) continue;
       resolve(open, open.kind === "separation" ? "rejoined" : "evidence_returned");
       continue;
     } else if (open.kind === "separation" && concern !== "separation") {

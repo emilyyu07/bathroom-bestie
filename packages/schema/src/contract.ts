@@ -29,6 +29,16 @@ export const ConfidenceModel = z.object({
   corridor: Stream,
   movement: Stream,
   freshness: Stream,
+  /**
+   * Long separation from the group. `cap` bounds this stream's penalty so separation alone
+   * can lower confidence but never fall below the highest score_floor; it only tips the score
+   * when combined with another stream (silence, leaving the area).
+   */
+  separation: Stream.extend({ cap: z.number().positive().optional() }).default({
+    w: 0.4,
+    tau_min: 60,
+    cap: 0.4,
+  }),
 });
 export type ConfidenceModel = z.infer<typeof ConfidenceModel>;
 

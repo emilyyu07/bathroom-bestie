@@ -121,3 +121,42 @@ describe("group cohesion", () => {
     expect(() => separatedFor(c, s, "ana", 10)).not.toThrow();
   });
 });
+
+describe("separation lowers confidence of normal", () => {
+  it("separation alone, however long, never alerts a friend (capped)", () => {
+    const { alerts } = run({ to: 400, evidence: darkAna(10_000, 61, 0) });
+    expect(alerts.filter((a) => a.rung >= 2)).toEqual([]);
+  });
+
+  it("combined with a quiet phone it brings the score alert forward", () => {
+    // Battery 15%: neither battery-death nor 'unexplained', so only the score path can fire.
+    const first = (w: number) => {
+      const base = makeContract();
+      const c = makeContract({
+        confidence: { ...base.confidence, separation: { w, tau_min: 15, cap: 0.4 } },
+      });
+      return run({ contract: c, to: 300, evidence: darkAna(60, 15, 0) }).alerts.find(
+        (a) => a.rung >= 2,
+      )?.t;
+    };
+    const without = first(0);
+    const withSep = first(0.4);
+    expect(without).toBeDefined();
+    expect(withSep!).toBeLessThan(without!);
+  });
+});
+
+describe("regression: going quiet while apart is not a rejoin", () => {
+  it("keeps the separation nudge open (no cooldown) and lets the score path upgrade it", () => {
+    // Battery 15% => 'quiet' (not unexplained, not battery death): only the score can take over.
+    const base = makeContract();
+    const c = makeContract({
+      confidence: { ...base.confidence, separation: { w: 0, tau_min: 60, cap: 0.4 } },
+    });
+    const { alerts, state } = run({ contract: c, to: 200, evidence: darkAna(60, 15, 0) });
+    expect(state.incidents).toHaveLength(1);
+    expect(state.incidents[0]!.kind).toBe("low_confidence");
+    // score < 0.5 from t=77, sustained 10 min => concern at 87 => rung 2 after the 5 min ack
+    expect(alerts.find((a) => a.rung >= 2)!.t).toBe(92);
+  });
+});

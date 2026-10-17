@@ -21,6 +21,7 @@ export const DEFAULT_CONFIDENCE: ConfidenceModel = {
   corridor: { w: 1, tau_min: 20 },
   movement: { w: 0.5, tau_min: 90 },
   freshness: { w: 1, tau_min: 10 },
+  separation: { w: 0.4, tau_min: 60, cap: 0.4 },
 };
 
 import type { Contract } from "./contract";
