@@ -49,6 +49,11 @@ Checks that need no device (also `pnpm mobile:check` from the repo root):
 
 These pass; the app has not yet been launched on a device or emulator. See TODOs in `src/evidenceReporter.ts` (foreground service, home geofence region events).
 
+Each phone is either the planner or one friend of one night (`src/identity.ts`; auth is out of
+scope). On first launch: "Plan a night" or "Join a friend's night". The planner's Pre-flight shows
+the night code (the contract id) with a Share button and who has joined; a friend enters the code,
+picks which member they are, and that accepts the watch. "Leave this night" resets the phone.
+
 The Watcher screen is the friend's side: "Watch tonight" accepts (remembered on the server), then
 it lists alerts addressed to them (`GET /incidents?to=`), polling every 20 s (no push delivery in
 scope). Each alert shows its rung, message, factors, who raised it and the rounded last-known area

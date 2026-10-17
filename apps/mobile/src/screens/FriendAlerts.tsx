@@ -115,7 +115,7 @@ export function FriendAlerts({
           ))}
           {a.raisedBy && <Text style={{ color: "#555" }}>Raised by {a.raisedBy}</Text>}
           {a.lastKnown ? (
-            <Pressable onPress={() => void openMap(a.lastKnown!.area)}>
+            <Pressable accessibilityRole="button" onPress={() => void openMap(a.lastKnown!.area)}>
               <Text style={{ color: "#2563eb" }}>
                 Last known area at {clock(a.lastKnown.t)} (about 100 m): open in Maps
               </Text>
@@ -135,12 +135,14 @@ export function FriendAlerts({
           )}
           <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
             <Pressable
+              accessibilityRole="button"
               onPress={() => void act(a, "confirm")}
               style={{ backgroundColor: "#16a34a", padding: 10, borderRadius: 8 }}
             >
               <Text style={{ color: "white" }}>I'm with her</Text>
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => void act(a, "worry")}
               style={{ backgroundColor: "#d97706", padding: 10, borderRadius: 8 }}
             >
