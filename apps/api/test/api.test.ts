@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ReadinessSnapshot } from "@bathroombestie/schema";
 import { FakeClock } from "../src/clock";
-import { MockCompiler } from "../src/compile";
+import { MockCompiler, withRetry, type CompileContext, type Compiler } from "../src/compile";
 import { tick } from "../src/runner";
 import { buildServer } from "../src/server";
 import { MemoryStore } from "../src/store";
@@ -140,5 +140,69 @@ describe("api", () => {
     const { state } = (await store.getEngine(contract.id))!;
     expect(state.people.bea!.lastReportAt).toBe(T);
     expect(state.people.me!.lastReportAt).toBe(T + 1);
+  });
+
+  it("normalises model names, passes local time, and replaces a read-back with banned words", async () => {
+    let seen: CompileContext | undefined;
+    const stub: Compiler = {
+      async draft(_s, ctx) {
+        seen = ctx;
+        return {
+          friends: [" Bea", "CY", "bea"],
+          hours: 4,
+          radius_m: 1000,
+          preset: "standard",
+          watch_order: ["Cy"],
+          offer_911_script: true,
+          read_back: "You'll be out with Bea and Cy. Don't get drunk!",
+        };
+      },
+    };
+    const app2 = buildServer({ store, clock, compiler: stub });
+    const r = await app2.inject({
+      method: "POST",
+      url: "/contracts/compile",
+      payload: { sentence: "Out with Bea and Cy", localTime: "21:30" },
+    });
+    expect(r.statusCode).toBe(200);
+    expect(seen?.localTime).toBe("21:30");
+    const { contract, readBack } = r.json();
+    expect(contract.group.members).toEqual(["me", "bea", "cy"]);
+    expect(contract.wishes.alert_order).toEqual(["cy", "bea"]);
+    expect(readBack).not.toMatch(/drunk/i);
+    expect(readBack).toContain("Watching: cy, bea");
+    const bad = await app2.inject({
+      method: "POST",
+      url: "/contracts/compile",
+      payload: { sentence: "Out with Bea", localTime: "9pm" },
+    });
+    expect(bad.statusCode).toBe(400);
+  });
+
+  it("compile failures are a retryable 503, not a 400 or 500", async () => {
+    const down: Compiler = {
+      async draft() {
+        throw new Error("model unavailable");
+      },
+    };
+    const app2 = buildServer({ store, clock, compiler: down });
+    const r = await app2.inject({
+      method: "POST",
+      url: "/contracts/compile",
+      payload: { sentence: "Out with Bea" },
+    });
+    expect(r.statusCode).toBe(503);
+    expect(r.json()).toEqual({ error: "compiler_unavailable" });
+  });
+
+  it("withRetry retries only retryable errors, then gives up", async () => {
+    let n = 0;
+    const flaky = () => (++n < 3 ? Promise.reject(new Error("busy")) : Promise.resolve("ok"));
+    expect(await withRetry(flaky, [0, 0], () => true)).toBe("ok");
+    n = 0;
+    await expect(withRetry(flaky, [0], () => true)).rejects.toThrow("busy");
+    n = 0;
+    await expect(withRetry(flaky, [0, 0], () => false)).rejects.toThrow("busy");
+    expect(n).toBe(1);
   });
 });

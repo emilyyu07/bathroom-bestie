@@ -9,7 +9,7 @@ import {
 } from "@bathroombestie/schema";
 import { preflight } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
-import { buildContract, termsOf, type Compiler } from "./compile";
+import { buildContract, safeReadBack, termsOf, type Compiler } from "./compile";
 import type { Store } from "./store";
 
 export interface Deps {
@@ -22,6 +22,10 @@ const CompileBody = z.object({
   sentence: z.string().min(3).max(500),
   area: z.object({ lat: z.number(), lon: z.number() }).default({ lat: 43.65, lon: -79.38 }),
   me: z.string().default("me"),
+  localTime: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .optional(),
 });
 const PreflightBody = z.object({ contractId: z.string(), snapshot: ReadinessSnapshot });
 const ActionBody = z.object({
@@ -42,16 +46,28 @@ export function buildServer({ store, clock, compiler }: Deps) {
     return reply.send(err);
   });
 
-  app.post("/contracts/compile", async (req) => {
+  app.post("/contracts/compile", async (req, reply) => {
     const body = CompileBody.parse(req.body);
     const ctx = {
       now: clock.nowMinute(),
       area: { lat: roundCoord(body.area.lat), lon: roundCoord(body.area.lon) },
+      localTime: body.localTime,
     };
-    const draft = await compiler.draft(body.sentence, ctx);
+    let draft;
+    try {
+      draft = await compiler.draft(body.sentence, ctx);
+    } catch (e) {
+      // Model down, rate-limited, or returned an invalid plan: not her input's fault; she can retry.
+      req.log.warn({ err: e }, "compile failed");
+      return reply.code(503).send({ error: "compiler_unavailable" });
+    }
     const contract = buildContract(draft, ctx, body.sentence, body.me);
     await store.saveContract(contract);
-    return { contract, readBack: draft.read_back, terms: termsOf(contract) };
+    return {
+      contract,
+      readBack: safeReadBack(draft.read_back, contract),
+      terms: termsOf(contract),
+    };
   });
 
   app.post("/preflight", async (req, reply) => {

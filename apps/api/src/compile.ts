@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { ApiError, GoogleGenAI } from "@google/genai";
 import {
   DraftPlan,
   DEFAULT_CONFIDENCE,
@@ -14,6 +14,8 @@ export interface CompileContext {
   now: number;
   /** User's coarse area (already ~100 m). The corridor is centred here. */
   area: { lat: number; lon: number };
+  /** Her local wall-clock time ("HH:MM"), so "until 2am" can be turned into hours. */
+  localTime?: string;
 }
 export interface Compiler {
   draft(sentence: string, ctx: CompileContext): Promise<DraftPlan>;
@@ -49,29 +51,54 @@ export class MockCompiler implements Compiler {
   }
 }
 
+/** Retries `fn` after each delay while `retryable(err)`; rethrows the last error. */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  delaysMs: number[],
+  retryable: (e: unknown) => boolean,
+): Promise<T> {
+  for (let i = 0; ; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i >= delaysMs.length || !retryable(e)) throw e;
+      await new Promise((r) => setTimeout(r, delaysMs[i]));
+    }
+  }
+}
+
+/** Rate limits and overload are temporary; anything else (bad key, bad request) is not. */
+const transient = (e: unknown) => e instanceof ApiError && [429, 500, 503].includes(e.status);
+
 export class GeminiCompiler implements Compiler {
   private ai: GoogleGenAI;
   constructor(
     apiKey: string,
-    private model = "gemini-2.5-flash",
+    private model = "gemini-3.8-flash",
+    private retryDelaysMs = [1000, 3000],
   ) {
     this.ai = new GoogleGenAI({ apiKey });
   }
-  async draft(sentence: string): Promise<DraftPlan> {
-    const res = await this.ai.models.generateContent({
-      model: this.model,
-      contents:
-        "Turn this description of a night out into a plan. Only use what she said; do not add concerns about health. " +
-        `Description: ${JSON.stringify(sentence)}`,
-      config: { responseMimeType: "application/json", responseJsonSchema: draftJsonSchema() },
-    });
+  async draft(sentence: string, ctx?: CompileContext): Promise<DraftPlan> {
+    const call = () =>
+      this.ai.models.generateContent({
+        model: this.model,
+        contents:
+          "Turn this description of a night out into a plan. Only use what she said; do not add concerns about health. " +
+          "Use preset standard unless she asks to be more careful (cautious) or more relaxed (relaxed). " +
+          "Set offer_911_script to true unless she explicitly says not to offer it. " +
+          (ctx?.localTime ? `Her local time now is ${ctx.localTime}. ` : "") +
+          `Description: ${JSON.stringify(sentence)}`,
+        config: { responseMimeType: "application/json", responseJsonSchema: draftJsonSchema() },
+      });
+    const res = await withRetry(call, this.retryDelaysMs, transient);
     return DraftPlan.parse(JSON.parse(res.text ?? "{}")); // never trust the model: re-validate
   }
 }
 
 export const makeCompiler = (): Compiler =>
   process.env.GEMINI_API_KEY
-    ? new GeminiCompiler(process.env.GEMINI_API_KEY, process.env.GEMINI_MODEL)
+    ? new GeminiCompiler(process.env.GEMINI_API_KEY, process.env.GEMINI_MODEL || undefined)
     : new MockCompiler();
 
 /** Deterministic: the model only drafts; thresholds, ids and times are computed here. */
@@ -83,10 +110,13 @@ export function buildContract(
 ): Contract {
   const id =
     "c_" + createHash("sha256").update(`${sentence}|${ctx.now}`).digest("hex").slice(0, 10);
-  const friends = d.friends.filter((f) => f !== me);
+  // Person ids are lower-case everywhere (evidence, actions), whatever case the model used.
+  const id_ = (f: string) => f.trim().toLowerCase();
+  const friends = [...new Set(d.friends.map(id_))].filter((f) => f !== me);
+  const watchOrder = d.watch_order.map(id_);
   const order = [
-    ...d.watch_order.filter((f) => friends.includes(f)),
-    ...friends.filter((f) => !d.watch_order.includes(f)),
+    ...[...new Set(watchOrder)].filter((f) => friends.includes(f)),
+    ...friends.filter((f) => !watchOrder.includes(f)),
   ];
   const start = ctx.now;
   const end = start + Math.round(d.hours * 60);
@@ -121,3 +151,10 @@ export const termsOf = (c: Contract): string[] => {
     `Window: ${Math.round((c.window.end - c.window.start) / 60)} h`,
   ];
 };
+
+/** Invariant 6 words. The model's read-back is shown to her, so it is held to the same rule. */
+const BANNED = ["drug", "spiked", "intoxicated", "drunk", "sick", "medical", "unwell"];
+
+/** The model's read-back, or a deterministic one built from the terms if it strays. */
+export const safeReadBack = (readBack: string, c: Contract): string =>
+  BANNED.some((w) => readBack.toLowerCase().includes(w)) ? termsOf(c).join(". ") + "." : readBack;
