@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ReadinessSnapshot } from "@tether/schema";
+import type { ReadinessSnapshot } from "@bathroombestie/schema";
 import { FakeClock } from "../src/clock";
 import { MockCompiler } from "../src/compile";
 import { tick } from "../src/runner";

@@ -1,4 +1,4 @@
-import type { FriendReason } from "@tether/schema";
+import type { FriendReason } from "@bathroombestie/schema";
 
 /**
  * Invariant 3 + 6: every word of alert text lives here. Observable behavior or an
@@ -6,13 +6,14 @@ import type { FriendReason } from "@tether/schema";
  */
 export const TEMPLATES = {
   nudge:
-    "Tether hasn't had a normal update from you for {minutes} min. Open the app so your friends know you're fine.",
+    "BathroomBestie hasn't had a normal update from you for {minutes} min. Open the app so your friends know you're fine.",
   watcher: "{name} hasn't sent a normal update for {minutes} min. Can you reach {name}?",
   next: "Still no update from {name} after {minutes} min, and {watcher} hasn't responded. You're next.",
   group: "Nobody has responded about {name}, who hasn't sent an update for {minutes} min.",
   unexplained:
     "{name}'s phone stopped sending updates {minutes} min ago while apart from the group.",
-  evidenceLost: "Tether can't see updates from {name}'s phone because a permission was turned off.",
+  evidenceLost:
+    "BathroomBestie can't see updates from {name}'s phone because a permission was turned off.",
   worry: "{friend} reports: {reasonText}.",
   worryNoReason: "{friend} reports being worried about {name}.",
   takeover: "You're taking over for {name}. The last known area is shown below.",

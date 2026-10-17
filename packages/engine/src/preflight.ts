@@ -1,4 +1,9 @@
-import type { CheckResult, Contract, ReadinessReport, ReadinessSnapshot } from "@tether/schema";
+import type {
+  CheckResult,
+  Contract,
+  ReadinessReport,
+  ReadinessSnapshot,
+} from "@bathroombestie/schema";
 
 export const PREFLIGHT_LIMITS = { rttMs: 5000, firstEvidenceS: 60, minStartBattery: 40 } as const;
 
@@ -36,15 +41,15 @@ export function preflight(snapshot: ReadinessSnapshot, contract: Contract): Read
       "blocking",
       snapshot.permissions.notifications,
       "Allowed.",
-      "Allow notifications so Tether can reach you.",
+      "Allow notifications so BathroomBestie can reach you.",
     ),
     check(
       "connectivity",
-      "Connection to Tether",
+      "Connection to BathroomBestie",
       "blocking",
       snapshot.connectivityRttMs !== null && snapshot.connectivityRttMs < PREFLIGHT_LIMITS.rttMs,
       "Round trip is fast enough.",
-      "Could not reach Tether in under 5 seconds.",
+      "Could not reach BathroomBestie in under 5 seconds.",
     ),
     check(
       "first_evidence",
@@ -101,7 +106,7 @@ export function preflight(snapshot: ReadinessSnapshot, contract: Contract): Read
       "warning",
       snapshot.homeGeofenceSet,
       "Set on this device.",
-      "Set a home spot so Tether knows when you arrive.",
+      "Set a home spot so BathroomBestie knows when you arrive.",
     ),
   ];
 

@@ -6,8 +6,14 @@ import {
   type PresetName,
   type ReadinessReport,
   type ScenarioFile,
-} from "@tether/schema";
-import { confidenceOfNormal, evaluate, initialState, preflight, type EngineState } from "@tether/engine";
+} from "@bathroombestie/schema";
+import {
+  confidenceOfNormal,
+  evaluate,
+  initialState,
+  preflight,
+  type EngineState,
+} from "@bathroombestie/engine";
 
 export interface RunResult {
   alerts: Alert[];
@@ -47,7 +53,10 @@ export function runScenario(sc: ScenarioFile, preset?: PresetName): RunResult {
     trace.push({
       t: now - start,
       n: Object.fromEntries(
-        contract.group.members.map((id) => [id, Math.round(confidenceOfNormal(contract, state.people[id]!, now).n * 1000) / 1000]),
+        contract.group.members.map((id) => [
+          id,
+          Math.round(confidenceOfNormal(contract, state.people[id]!, now).n * 1000) / 1000,
+        ]),
       ),
     });
   }

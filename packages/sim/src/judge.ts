@@ -1,4 +1,4 @@
-import type { ScenarioFile } from "@tether/schema";
+import type { ScenarioFile } from "@bathroombestie/schema";
 import type { RunResult } from "./runner";
 
 export interface Verdict {

@@ -1,4 +1,4 @@
-import { distanceM, type Contract } from "@tether/schema";
+import { distanceM, type Contract } from "@bathroombestie/schema";
 import type { EngineState } from "./state";
 
 export type SilenceClass = "none" | "quiet" | "battery_death" | "unexplained" | "evidence_lost";

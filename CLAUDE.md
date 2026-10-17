@@ -1,4 +1,4 @@
-# Tether
+# BathroomBestie
 
 Autonomous safety net for a night out. `docs/scope.md` is the source of truth; flag any conflict with it.
 

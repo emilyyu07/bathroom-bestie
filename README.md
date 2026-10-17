@@ -1,4 +1,4 @@
-# Tether
+# BathroomBestie
 
 Autonomous safety net for a night out. See `CLAUDE.md` for invariants and `docs/` for design.
 
@@ -14,7 +14,7 @@ Requires Node 22+, pnpm 9 (`npm i -g pnpm@9`), Docker.
     pnpm sim sweep          # writes packages/sim/out/sweep.{json,csv}
     pnpm sim replay         # writes out/replay.json for the console
     pnpm api                # Fastify on :3000 (offline mock unless GEMINI_API_KEY is set)
-    pnpm --filter @tether/console dev
+    pnpm --filter @bathroombestie/console dev
 
 Copy `.env.example` to `.env` to configure. Mobile: see `apps/mobile/README.md` (dev build required).
 

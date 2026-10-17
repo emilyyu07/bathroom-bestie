@@ -6,8 +6,8 @@ import {
   FriendReason,
   ReadinessSnapshot,
   roundCoord,
-} from "@tether/schema";
-import { preflight } from "@tether/engine";
+} from "@bathroombestie/schema";
+import { preflight } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
 import { buildContract, termsOf, type Compiler } from "./compile";
 import type { Store } from "./store";

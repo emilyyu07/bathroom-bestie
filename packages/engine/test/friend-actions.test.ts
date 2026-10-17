@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FriendAction } from "@tether/schema";
+import type { FriendAction } from "@bathroombestie/schema";
 import { run, darkAna } from "./helpers";
 
 const confirm = (t: number, by = "bea"): FriendAction => ({

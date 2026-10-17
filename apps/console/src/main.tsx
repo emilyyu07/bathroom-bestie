@@ -7,7 +7,7 @@ function App() {
   const [page, setPage] = useState<"replay" | "sweep">("replay");
   return (
     <div style={{ fontFamily: "system-ui", maxWidth: 960, margin: "0 auto", padding: 16 }}>
-      <h1>Tether console</h1>
+      <h1>BathroomBestie console</h1>
       <nav style={{ display: "flex", gap: 12, marginBottom: 16 }}>
         <button onClick={() => setPage("replay")} disabled={page === "replay"}>
           Replay

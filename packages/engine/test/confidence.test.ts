@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeContract } from "@tether/schema";
+import { makeContract } from "@bathroombestie/schema";
 import { confidenceOfNormal, initialState } from "../src";
 
 describe("confidence of normal", () => {

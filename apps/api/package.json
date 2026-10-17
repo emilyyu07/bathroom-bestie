@@ -1,5 +1,5 @@
 {
-  "name": "@tether/api",
+  "name": "@bathroombestie/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
-    "@tether/engine": "workspace:*",
-    "@tether/schema": "workspace:*",
+    "@bathroombestie/engine": "workspace:*",
+    "@bathroombestie/schema": "workspace:*",
     "fastify": "^5.2.0",
     "pg": "^8.13.1",
     "zod": "^4.0.0"

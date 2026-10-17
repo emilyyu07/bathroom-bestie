@@ -5,7 +5,7 @@ import type {
   EvidenceReport,
   FriendAction,
   ReadinessReport,
-} from "@tether/schema";
+} from "@bathroombestie/schema";
 import type { EngineRow, Store, StoredContract } from "./store";
 
 /** Postgres/TimescaleDB store. Evidence is append-only; there is no UPDATE or DELETE on it. */

@@ -1,4 +1,4 @@
-import type { Contract, Minute } from "@tether/schema";
+import type { Contract, Minute } from "@bathroombestie/schema";
 
 export interface PersonState {
   lastReportAt: Minute | null;

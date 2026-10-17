@@ -1,5 +1,5 @@
 {
-  "name": "@tether/sim",
+  "name": "@bathroombestie/sim",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "generate": "tsx scripts/generate-scenarios.ts"
   },
   "dependencies": {
-    "@tether/engine": "workspace:*",
-    "@tether/schema": "workspace:*"
+    "@bathroombestie/engine": "workspace:*",
+    "@bathroombestie/schema": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0"

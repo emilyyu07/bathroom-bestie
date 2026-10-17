@@ -4,8 +4,8 @@ import type {
   EvidenceReport,
   FriendAction,
   ReadinessReport,
-} from "@tether/schema";
-import type { EngineState } from "@tether/engine";
+} from "@bathroombestie/schema";
+import type { EngineState } from "@bathroombestie/engine";
 
 export interface StoredContract {
   contract: Contract;

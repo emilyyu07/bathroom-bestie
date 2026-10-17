@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { PRESET_ORDER, makeContract, type PresetName, type ScenarioFile } from "@tether/schema";
+import {
+  PRESET_ORDER,
+  makeContract,
+  type PresetName,
+  type ScenarioFile,
+} from "@bathroombestie/schema";
 import { runScenario } from "../src/runner";
 import { loadScenarios } from "../src/scenarios";
 import { sweepScenarios, toCsv } from "../src/sweepCore";

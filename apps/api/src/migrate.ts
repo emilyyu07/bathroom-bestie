@@ -5,7 +5,9 @@ import pg from "pg";
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), "..", "migrations");
 const client = new pg.Client({
-  connectionString: process.env.DATABASE_URL ?? "postgres://tether:tether@localhost:5432/tether",
+  connectionString:
+    process.env.DATABASE_URL ??
+    "postgres://bathroombestie:bathroombestie@localhost:5432/bathroombestie",
 });
 await client.connect();
 await client.query("CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY)");

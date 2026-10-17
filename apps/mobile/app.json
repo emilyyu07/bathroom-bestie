@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Tether",
-    "slug": "tether",
+    "name": "BathroomBestie",
+    "slug": "bathroombestie",
     "version": "0.0.0",
     "platforms": ["android"],
     "android": {
-      "package": "app.tether.mobile",
+      "package": "app.bathroombestie.mobile",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",

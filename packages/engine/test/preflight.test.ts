@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeContract, type ReadinessSnapshot } from "@tether/schema";
+import { makeContract, type ReadinessSnapshot } from "@bathroombestie/schema";
 import { preflight } from "../src";
 
 const good: ReadinessSnapshot = {

@@ -2,12 +2,12 @@ services:
   db:
     image: timescale/timescaledb:latest-pg16
     environment:
-      POSTGRES_USER: tether
-      POSTGRES_PASSWORD: tether
-      POSTGRES_DB: tether
+      POSTGRES_USER: bathroombestie
+      POSTGRES_PASSWORD: bathroombestie
+      POSTGRES_DB: bathroombestie
     ports:
       - "5432:5432"
     volumes:
-      - tether-db:/var/lib/postgresql/data
+      - bathroombestie-db:/var/lib/postgresql/data
 volumes:
-  tether-db:
+  bathroombestie-db:

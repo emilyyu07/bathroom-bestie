@@ -5,7 +5,7 @@ import {
   type Contract,
   type EvidenceReport,
   type FriendAction,
-} from "@tether/schema";
+} from "@bathroombestie/schema";
 import { confidenceOfNormal } from "./confidence";
 import { classifySilence, isApart, silentMinutes } from "./signals";
 import {

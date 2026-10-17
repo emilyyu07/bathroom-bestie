@@ -6,7 +6,7 @@ import {
   draftJsonSchema,
   thresholdsFor,
   type Contract,
-} from "@tether/schema";
+} from "@bathroombestie/schema";
 import { createHash } from "node:crypto";
 
 export interface CompileContext {

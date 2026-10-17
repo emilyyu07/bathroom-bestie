@@ -44,7 +44,8 @@ export function replayCommand(): number {
   const json = JSON.stringify(replay) + "\n";
   mkdirSync(join(root, "out"), { recursive: true });
   writeFileSync(join(root, "out", "replay.json"), json);
-  if (existsSync(join(repo, "apps/console/public"))) writeFileSync(join(repo, "apps/console/public/replay.json"), json);
+  if (existsSync(join(repo, "apps/console/public")))
+    writeFileSync(join(repo, "apps/console/public/replay.json"), json);
   console.log("wrote packages/sim/out/replay.json");
   return 0;
 }

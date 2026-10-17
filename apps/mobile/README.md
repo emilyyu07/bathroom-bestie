@@ -1,4 +1,4 @@
-# Tether mobile (skeleton)
+# BathroomBestie mobile (skeleton)
 
 Expo, Android-first. **Not part of the pnpm workspace** (Metro and pnpm's symlinked layout don't mix); install separately:
 

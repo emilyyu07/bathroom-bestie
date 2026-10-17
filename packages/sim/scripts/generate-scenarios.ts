@@ -1,7 +1,7 @@
-// Generates scenarios/*.json. Run: pnpm --filter @tether/sim generate
+// Generates scenarios/*.json. Run: pnpm --filter @bathroombestie/sim generate
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { makeContract, ScenarioFile, type ScenarioEvidence } from "@tether/schema";
+import { makeContract, ScenarioFile, type ScenarioEvidence } from "@bathroombestie/schema";
 import { SCENARIO_DIR } from "../src/scenarios";
 
 type Ev = ScenarioEvidence;

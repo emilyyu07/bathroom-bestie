@@ -3,7 +3,7 @@ import {
   type Contract,
   type EvidenceReport,
   type FriendAction,
-} from "@tether/schema";
+} from "@bathroombestie/schema";
 import { evaluate, initialState, type EngineState } from "../src";
 
 export const ev = (

@@ -1,4 +1,4 @@
-import { evaluate, initialState } from "@tether/engine";
+import { evaluate, initialState } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
 import type { Store } from "./store";
 

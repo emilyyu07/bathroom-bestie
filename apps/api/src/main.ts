@@ -6,7 +6,9 @@ import { startRunner } from "./runner";
 import { buildServer } from "./server";
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL ?? "postgres://tether:tether@localhost:5432/tether",
+  connectionString:
+    process.env.DATABASE_URL ??
+    "postgres://bathroombestie:bathroombestie@localhost:5432/bathroombestie",
 });
 const store = new PgStore(pool);
 const app = buildServer({ store, clock: systemClock, compiler: makeCompiler() });

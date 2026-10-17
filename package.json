@@ -1,5 +1,5 @@
 {
-  "name": "tether",
+  "name": "bathroombestie",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.9",
@@ -11,9 +11,9 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "sim": "pnpm --filter @tether/sim exec tsx src/cli.ts",
-    "migrate": "pnpm --filter @tether/api migrate",
-    "api": "pnpm --filter @tether/api dev"
+    "sim": "pnpm --filter @bathroombestie/sim exec tsx src/cli.ts",
+    "migrate": "pnpm --filter @bathroombestie/api migrate",
+    "api": "pnpm --filter @bathroombestie/api dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

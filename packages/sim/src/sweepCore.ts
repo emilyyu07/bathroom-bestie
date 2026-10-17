@@ -1,4 +1,4 @@
-import { PRESET_ORDER, type PresetName, type ScenarioFile } from "@tether/schema";
+import { PRESET_ORDER, type PresetName, type ScenarioFile } from "@bathroombestie/schema";
 import { runScenario } from "./runner";
 
 export interface ScenarioSweep {

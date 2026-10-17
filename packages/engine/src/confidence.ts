@@ -1,4 +1,4 @@
-import type { Contract } from "@tether/schema";
+import type { Contract } from "@bathroombestie/schema";
 import type { PersonState } from "./state";
 
 export interface ConfidenceResult {
