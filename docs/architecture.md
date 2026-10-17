@@ -63,6 +63,26 @@ apparent distances are quantized. People really within ~80 m are never flagged a
 threshold the flag can be a false positive, and real separations just over 150 m can look closer. Treat `separation_m` as
 good to about one grid cell. Tightening it needs finer coordinates, which would conflict with invariant 5.
 
+## Milestones and home tracking (schema; engine detectors follow)
+
+- `Milestone` is a union: `{kind:"area", by, within}` or `{kind:"home", by}`, each with optional `who` (omitted = every
+  member; compile writes `["me"]`). A home milestone means "the phone's home geofence must fire by `by`".
+- A contract with a home milestone makes pre-flight's `home_geofence` check **blocking** (a warning otherwise), so home
+  features are armed only on devices that can report arrival. Compile emits a home milestone only if she states a home time.
+- New per-preset thresholds: `milestone_grace_min` (20/10/5) and `exit_alone_min` (60/45/30).
+- `normalizeContract(raw)` parses a stored contract, filling thresholds added later from the contract's own preset.
+
+## Open requests for `apps/*` (Person B)
+
+1. `PgStore.getContract` / `listActive`: return `normalizeContract(row.body)` instead of the raw JSON.
+2. Compile: `DraftPlan.home_by_hours` (optional). Prompt/mock: "home by"/"back by". `buildContract` adds
+   `{id:"home", kind:"home", by: start + home_by_hours*60, who:[me]}` only when present.
+3. `termsOf` copy: "A friend is alerted when your phone goes quiet after you'd been apart from the group, or when you're well
+   past a time you planned to be home." (the current "after N min of unexplained silence" is out of date.)
+4. Mobile pre-flight must report a real `homeGeofenceSet` (now blocking when a home time is set).
+5. Mobile Status: drop the "I'm fine" TODO ("no check-ins"; returning evidence already clears a nudge).
+6. After the scenario PRs merge, re-run `pnpm test:db` (it replays every scenario on Postgres).
+
 ## Decisions to confirm
 
 - Times are integer epoch minutes everywhere.

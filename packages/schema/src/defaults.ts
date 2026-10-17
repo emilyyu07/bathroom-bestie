@@ -13,6 +13,8 @@ export const thresholdsFor = (preset: PresetName, prev?: Thresholds): Thresholds
     score_floor: p.score_floor,
     score_floor_min: p.score_floor_min,
     ack_timeout_min: p.ack_timeout_min,
+    milestone_grace_min: p.milestone_grace_min,
+    exit_alone_min: p.exit_alone_min,
   };
 };
 

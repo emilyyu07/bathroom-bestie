@@ -10,6 +10,7 @@ export const PREFLIGHT_LIMITS = { rttMs: 5000, firstEvidenceS: 60, minStartBatte
 /** Pure and deterministic (invariant 9). Blocking fails => not_ready; warning fails => ready_with_warnings. */
 export function preflight(snapshot: ReadinessSnapshot, contract: Contract): ReadinessReport {
   const members = new Set(contract.group.members);
+  const needsGeofence = contract.milestones.some((m) => m.kind === "home");
   const usable = snapshot.watchers.filter((w) => w.accepted && w.reachable && members.has(w.id));
   const check = (
     id: string,
@@ -103,7 +104,9 @@ export function preflight(snapshot: ReadinessSnapshot, contract: Contract): Read
     check(
       "home_geofence",
       "Home geofence set",
-      "warning",
+      // The contract decides: a home deadline or exit-alone timer is only meaningful if this
+      // device can report "arrived", so a home milestone makes the geofence a hard requirement.
+      needsGeofence ? "blocking" : "warning",
       snapshot.homeGeofenceSet,
       "Set on this device.",
       "Set a home spot so BathroomBestie knows when you arrive.",

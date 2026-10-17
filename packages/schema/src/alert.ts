@@ -8,6 +8,7 @@ export const AlertKind = z.enum([
   "missed_milestone",
   "friend_worry",
   "separation",
+  "exit_alone",
   "escalation",
 ]);
 export type AlertKind = z.infer<typeof AlertKind>;

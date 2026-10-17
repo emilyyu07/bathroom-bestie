@@ -13,6 +13,12 @@ export const DraftPlan = z.object({
   watch_order: z
     .array(z.string())
     .describe("Friends in the order they should watch; subset of friends"),
+  home_by_hours: z
+    .number()
+    .min(1)
+    .max(24)
+    .optional()
+    .describe("Hours from now by which she expects to be home. Omit unless she said so."),
   offer_911_script: z.boolean(),
   read_back: z.string().describe("2-3 plain sentences repeating the plan back to her"),
 });
