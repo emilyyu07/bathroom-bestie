@@ -2,7 +2,6 @@ import { ApiError, GoogleGenAI } from "@google/genai";
 import {
   DraftPlan,
   DEFAULT_CONFIDENCE,
-  PRESETS,
   draftJsonSchema,
   thresholdsFor,
   type Contract,
@@ -39,12 +38,14 @@ export class MockCompiler implements Compiler {
         ? "relaxed"
         : "standard";
     const list = friends.length ? friends : ["friend"];
+    const homeBy = /\b(?:home|back)\s+(?:by|in|within)\s+(\d{1,2})\s*(?:h|hr|hrs|hours)\b/.exec(s);
     return {
       friends: list,
       hours: Math.min(14, Math.max(1, hours)),
       radius_m: 2000,
       preset,
       watch_order: list,
+      ...(homeBy ? { home_by_hours: Math.min(24, Math.max(1, Number(homeBy[1]))) } : {}),
       offer_911_script: true,
       read_back: `You're going out with ${list.join(" and ")} for about ${hours} hours. ${list[0]} watches first. Alerts use the ${preset} setting.`,
     };
@@ -87,6 +88,7 @@ export class GeminiCompiler implements Compiler {
           "Turn this description of a night out into a plan. Only use what she said; do not add concerns about health. " +
           "Use preset standard unless she asks to be more careful (cautious) or more relaxed (relaxed). " +
           "Set offer_911_script to true unless she explicitly says not to offer it. " +
+          "Set home_by_hours only if she says when she will be home or back, as hours from now; otherwise omit it. " +
           (ctx?.localTime ? `Her local time now is ${ctx.localTime}. ` : "") +
           `Description: ${JSON.stringify(sentence)}`,
         config: { responseMimeType: "application/json", responseJsonSchema: draftJsonSchema() },
@@ -121,11 +123,13 @@ export function buildContract(
   const start = ctx.now;
   const end = start + Math.round(d.hours * 60);
   const slot = Math.max(1, Math.ceil((end - start) / Math.max(1, order.length)));
+  // Only a time she stated becomes a home milestone; it binds her, not her friends.
+  const homeBy = d.home_by_hours === undefined ? null : start + Math.round(d.home_by_hours * 60);
   return {
     id,
     corridor: { center: ctx.area, radius_m: d.radius_m },
     window: { start, end },
-    milestones: [],
+    milestones: homeBy === null ? [] : [{ id: "home", kind: "home", by: homeBy, who: [me] }],
     group: {
       members: [me, ...friends],
       watch: order.map((who, i) => ({
@@ -138,17 +142,22 @@ export function buildContract(
     confidence: DEFAULT_CONFIDENCE,
     preset: d.preset,
     wishes: { alert_order: order, offer_911_script: d.offer_911_script },
-    expires: end + 120,
+    // Keep the contract alive past her home time so a missed home milestone can still be noticed.
+    expires: Math.max(end, homeBy ?? end) + 120,
   };
 }
 
 /** Deterministic facts shown beside the model's read-back so she can check it. */
 export const termsOf = (c: Contract): string[] => {
-  const p = PRESETS[c.preset];
+  const home = c.milestones.find((m) => m.kind === "home");
+  const hours = (to: number) => Math.round(((to - c.window.start) / 60) * 10) / 10;
   return [
     `Watching: ${c.group.watch.map((w) => w.who).join(", ")}`,
-    `Setting: ${c.preset} (alerts a friend after about ${p.silence_min} min of unexplained silence)`,
-    `Window: ${Math.round((c.window.end - c.window.start) / 60)} h`,
+    `Setting: ${c.preset}. A friend is alerted when your phone goes quiet after you'd been apart from the group` +
+      (home ? ", or when you're well past a time you planned to be home" : "") +
+      ".",
+    `Window: ${hours(c.window.end)} h`,
+    ...(home ? [`Home by: about ${hours(home.by)} h from now`] : []),
   ];
 };
 

@@ -1,4 +1,5 @@
 import pg from "pg";
+import { normalizeContract } from "@bathroombestie/schema";
 import type {
   Alert,
   Contract,
@@ -20,7 +21,10 @@ export class PgStore implements Store {
       id,
     ]);
     const row = r.rows[0];
-    return row ? { contract: row.body, status: row.status, readiness: row.readiness } : null;
+    // Rows saved before a threshold existed get it from their own preset.
+    return row
+      ? { contract: normalizeContract(row.body), status: row.status, readiness: row.readiness }
+      : null;
   }
   async setReadiness(id: string, rep: ReadinessReport) {
     await this.pool.query("UPDATE contracts SET readiness = $2 WHERE id = $1", [id, rep]);
@@ -39,7 +43,20 @@ export class PgStore implements Store {
     const r = await this.pool.query(
       "SELECT body FROM contracts WHERE status = 'active' ORDER BY id",
     );
-    return r.rows.map((x) => x.body as Contract);
+    // One unreadable row must not stop the runner from watching every other night. If none can
+    // be read, it is a bug rather than a bad row: fail loudly instead of watching nothing.
+    let lastError: unknown;
+    const out = r.rows.flatMap((x) => {
+      try {
+        return [normalizeContract(x.body)];
+      } catch (e) {
+        lastError = e;
+        console.error("skipping unreadable contract", x.body?.id, e);
+        return [];
+      }
+    });
+    if (r.rows.length > 0 && out.length === 0) throw lastError;
+    return out;
   }
   async addEvidence(e: EvidenceReport) {
     await this.pool.query(
