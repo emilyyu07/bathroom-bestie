@@ -22,19 +22,35 @@ export default function App() {
   const [role, setRole] = useState<Identity["role"] | null>(null);
   const [planner, setPlanner] = useState("");
   const nightEnded = useCallback(() => setActive(false), []);
-  useNightReporting(contractId, me, active && role === "planner", nightEnded);
+  // Both roles report once the night is active: the group checks compare her with her friends.
+  useNightReporting(contractId, me, active, nightEnded);
+
+  // A friend's phone waits for her to start the night, then starts reporting.
+  useEffect(() => {
+    if (role !== "friend" || active || !contractId) return;
+    const check = () =>
+      get<{ status: string }>(`/contracts/${encodeURIComponent(contractId)}`)
+        .then((c) => c.status === "active" && setActive(true))
+        .catch(() => undefined);
+    void check();
+    const h = setInterval(() => void check(), 20_000);
+    return () => clearInterval(h);
+  }, [role, active, contractId]);
 
   useEffect(() => {
     void (async () => {
-      // A night still reported in the background wins (it outlives the app); then the saved identity.
+      // The saved identity says who this phone is; a night still reported in the background (it
+      // outlives the app) says the night is on. Friends report too, so a running night alone
+      // doesn't mean planner: it only stands in for a missing identity from older builds.
       const n = await runningNight();
-      const id: Identity | null = n
-        ? { role: "planner", contractId: n.contractId, personId: n.personId }
-        : await loadIdentity();
+      const saved = await loadIdentity();
+      const id: Identity | null =
+        saved ?? (n ? { role: "planner", contractId: n.contractId, personId: n.personId } : null);
       if (!id) return setScreen("welcome");
       setRole(id.role);
       setContractId(id.contractId);
       setMe(id.personId);
+      setActive(!!n && n.contractId === id.contractId);
       if (id.role === "friend") {
         const c = await get<{ contract: { group: { members: string[] } } }>(
           `/contracts/${encodeURIComponent(id.contractId)}`,
@@ -42,13 +58,12 @@ export default function App() {
         setPlanner(c?.contract.group.members[0] ?? "");
         return setScreen("watcher");
       }
-      setActive(!!n);
       setScreen(n ? "status" : "preflight");
     })();
   }, []);
 
   const leave = async () => {
-    if (role === "planner") await endNight();
+    await endNight(); // stops this phone's reporting, whichever role
     await clearIdentity();
     setRole(null);
     setContractId("");
@@ -114,6 +129,13 @@ export default function App() {
         />
       )}
       {screen === "status" && <Status contractId={contractId} me={me} active={active} />}
+      {screen === "watcher" && (
+        <Text style={{ paddingHorizontal: 16, paddingTop: 12, color: "#555" }}>
+          {active
+            ? "BathroomBestie is on: your phone is sending your rough area until the night ends."
+            : `Waiting for ${planner || "your friend"} to start the night.`}
+        </Text>
+      )}
       {screen === "watcher" && (
         <Watcher contractId={contractId} me={me} target={planner || "your friend"} />
       )}

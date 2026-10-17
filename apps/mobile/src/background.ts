@@ -62,7 +62,7 @@ export async function startBackgroundReporting(night: Night): Promise<void> {
     distanceInterval: 0, // report on time even when she's not moving
     foregroundService: {
       notificationTitle: "BathroomBestie is on for tonight",
-      notificationBody: "Sending your rough area to your watchers until the night ends.",
+      notificationBody: "Sending your rough area until the night ends.",
       killServiceOnDestroy: false, // keep reporting if she swipes the app away
     },
   });
