@@ -21,6 +21,8 @@ export interface EngineRow {
 export interface Store {
   saveContract(c: Contract): Promise<void>;
   getContract(id: string): Promise<StoredContract | null>;
+  /** Contracts whose id starts with `prefix` (a join code). Hex only; never more than a handful. */
+  findByIdPrefix(prefix: string): Promise<StoredContract[]>;
   setReadiness(id: string, r: ReadinessReport): Promise<void>;
   /** Replaces a draft contract's body and clears its readiness. False if missing or not a draft. */
   updateDraft(c: Contract): Promise<boolean>;
@@ -56,6 +58,9 @@ export class MemoryStore implements Store {
   }
   async getContract(id: string) {
     return this.contracts.get(id) ?? null;
+  }
+  async findByIdPrefix(prefix: string) {
+    return [...this.contracts.values()].filter((c) => c.contract.id.startsWith(prefix));
   }
   async setReadiness(id: string, r: ReadinessReport) {
     this.contracts.get(id)!.readiness = r;
