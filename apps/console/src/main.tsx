@@ -9,8 +9,12 @@ function App() {
     <div style={{ fontFamily: "system-ui", maxWidth: 960, margin: "0 auto", padding: 16 }}>
       <h1>Tether console</h1>
       <nav style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-        <button onClick={() => setPage("replay")} disabled={page === "replay"}>Replay</button>
-        <button onClick={() => setPage("sweep")} disabled={page === "sweep"}>Sweep</button>
+        <button onClick={() => setPage("replay")} disabled={page === "replay"}>
+          Replay
+        </button>
+        <button onClick={() => setPage("sweep")} disabled={page === "sweep"}>
+          Sweep
+        </button>
       </nav>
       {page === "replay" ? <Replay /> : <Sweep />}
     </div>
