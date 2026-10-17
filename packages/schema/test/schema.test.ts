@@ -101,3 +101,34 @@ describe("normalizeContract", () => {
     expect(normalizeContract(JSON.parse(JSON.stringify(c)))).toEqual(Contract.parse(c));
   });
 });
+
+describe("milestone guards", () => {
+  const circle = (radius_m: number) => ({ center: { lat: 43.65, lon: -79.38 }, radius_m });
+
+  it("rejects an area milestone smaller than the location rounding can resolve (< 200 m)", () => {
+    expect(() => Milestone.parse({ id: "a", kind: "area", by: 10, within: circle(150) })).toThrow();
+    expect(Milestone.parse({ id: "a", kind: "area", by: 10, within: circle(200) }).kind).toBe(
+      "area",
+    );
+  });
+
+  const c = makeContract(); // window.end 360, expires 480, standard grace 10
+  const withHome = (by: number, expires: number) =>
+    Contract.safeParse({ ...c, expires, milestones: [{ id: "home", kind: "home", by }] });
+
+  it("accepts a contract whose expires covers the window and every deadline plus grace", () => {
+    expect(withHome(470, 480).success).toBe(true); // 470 + 10 = 480
+  });
+  it("rejects a milestone the engine would stop watching before judging", () => {
+    const r = withHome(471, 480);
+    expect(r.success).toBe(false);
+    expect(!r.success && r.error.issues[0]?.path).toEqual(["expires"]);
+  });
+  it("rejects expires before the end of the window", () => {
+    expect(Contract.safeParse({ ...c, expires: c.window.end - 1 }).success).toBe(false);
+  });
+  it("normalizeContract enforces the same guard on stored contracts", () => {
+    const raw = JSON.parse(JSON.stringify({ ...c, expires: 100 }));
+    expect(() => normalizeContract(raw)).toThrow();
+  });
+});

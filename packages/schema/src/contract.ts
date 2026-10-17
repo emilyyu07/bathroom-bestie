@@ -11,13 +11,23 @@ const MilestoneBase = {
 };
 
 /**
+ * Locations are rounded to ~110 m before the engine sees them, so a circle smaller than about one
+ * grid cell cannot be reliably entered. Area milestones need at least this radius.
+ */
+export const MIN_AREA_RADIUS_M = 200;
+
+/**
  * A promise she made about the night.
  *  - area: be inside `within` by `by`.
  *  - home: the phone's home geofence must have fired by `by`. Needs a device-side geofence, so a
  *    contract with a home milestone makes the pre-flight geofence check blocking.
  */
 export const Milestone = z.discriminatedUnion("kind", [
-  z.object({ ...MilestoneBase, kind: z.literal("area"), within: Circle }),
+  z.object({
+    ...MilestoneBase,
+    kind: z.literal("area"),
+    within: Circle.extend({ radius_m: z.number().min(MIN_AREA_RADIUS_M) }),
+  }),
   z.object({ ...MilestoneBase, kind: z.literal("home") }),
 ]);
 export type Milestone = z.infer<typeof Milestone>;
@@ -61,17 +71,28 @@ export const Wishes = z.object({
   offer_911_script: z.boolean(),
 });
 
-export const Contract = z.object({
-  id: z.string(),
-  corridor: Circle,
-  window: z.object({ start: Minute, end: Minute }),
-  milestones: z.array(Milestone),
-  group: z.object({ members: z.array(PersonId).min(1), watch: z.array(WatchSlot) }),
-  thresholds: Thresholds,
-  confidence: ConfidenceModel,
-  preset: PresetName,
-  wishes: Wishes,
-  expires: Minute,
-});
+export const Contract = z
+  .object({
+    id: z.string(),
+    corridor: Circle,
+    window: z.object({ start: Minute, end: Minute }),
+    milestones: z.array(Milestone),
+    group: z.object({ members: z.array(PersonId).min(1), watch: z.array(WatchSlot) }),
+    thresholds: Thresholds,
+    confidence: ConfidenceModel,
+    preset: PresetName,
+    wishes: Wishes,
+    expires: Minute,
+  })
+  .refine(
+    (c) =>
+      c.expires >=
+      Math.max(c.window.end, ...c.milestones.map((m) => m.by + c.thresholds.milestone_grace_min)),
+    {
+      path: ["expires"],
+      message:
+        "expires must cover the end of the window and every milestone deadline plus its grace, or the engine stops watching before the deadline can be judged",
+    },
+  );
 export type Contract = z.infer<typeof Contract>;
 export type Thresholds = z.infer<typeof Thresholds>;
