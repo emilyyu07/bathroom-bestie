@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
-import { post } from "../api";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { get, post } from "../api";
+import { FriendAlerts } from "./FriendAlerts";
 
 const REASONS = [
   ["cant_find", "Can't find her"],
@@ -8,7 +9,10 @@ const REASONS = [
   ["feels_off", "Feels off"],
 ] as const;
 
-/** Friend's screen: two big buttons, three reason chips. Reports are human, attributed, rate limited server-side. */
+/**
+ * Friend's screen: accept, then two big buttons, three reason chips and the alerts addressed to
+ * them. Reports are human, attributed, rate limited server-side.
+ */
 export function Watcher({
   contractId,
   me,
@@ -20,6 +24,15 @@ export function Watcher({
 }) {
   const [reason, setReason] = useState<string | undefined>();
   const [watching, setWatching] = useState(false);
+  // Acceptance lives on the server; ask it, so reopening this screen doesn't ask her to accept again.
+  useEffect(() => {
+    if (!contractId) return;
+    void get<{ watchers: { id: string; accepted: boolean }[] }>(
+      `/contracts/${encodeURIComponent(contractId)}/watchers`,
+    )
+      .then((r) => setWatching(r.watchers.some((w) => w.id === me && w.accepted)))
+      .catch(() => undefined);
+  }, [contractId, me]);
   const send = (type: "confirm" | "worry") =>
     post("/actions", {
       contractId,
@@ -45,7 +58,7 @@ export function Watcher({
       </View>
     );
   return (
-    <View style={{ padding: 16, gap: 16 }}>
+    <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Pressable
         onPress={() => void send("confirm")}
         style={{ ...big, backgroundColor: "#16a34a" }}
@@ -71,7 +84,7 @@ export function Watcher({
           </Pressable>
         ))}
       </View>
-      {/* TODO: at rung 4, show last-known area + the pre-filled script. Never auto-dial anyone. */}
-    </View>
+      <FriendAlerts contractId={contractId} me={me} reason={reason} />
+    </ScrollView>
   );
 }
