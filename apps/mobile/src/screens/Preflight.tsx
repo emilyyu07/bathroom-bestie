@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Linking, Platform, Text, View } from "react-native";
-import { post } from "../api";
+import { Button, Linking, Platform, ScrollView, Share, Text, View } from "react-native";
+import { get, post } from "../api";
 import { clearHome, homeIsSet, setHomeHere } from "../home";
 import { collectSnapshot, requestPermissions } from "../readiness";
 
@@ -35,6 +35,20 @@ export function Preflight({
   const [report, setReport] = useState<Report | null>(null);
   const [running, setRunning] = useState(false);
   const [home, setHome] = useState<"unset" | "set" | "saving">("unset");
+  // Friends join on their own phones with the night code; show who has so far.
+  const [joined, setJoined] = useState<string[]>([]);
+  useEffect(() => {
+    if (!contractId) return;
+    const load = () =>
+      get<{ watchers: { id: string; accepted: boolean }[] }>(
+        `/contracts/${encodeURIComponent(contractId)}/watchers`,
+      )
+        .then((r) => setJoined(r.watchers.filter((w) => w.accepted).map((w) => w.id)))
+        .catch(() => undefined);
+    void load();
+    const h = setInterval(() => void load(), 10_000);
+    return () => clearInterval(h);
+  }, [contractId]);
   const [homeError, setHomeError] = useState<string | null>(null);
   useEffect(() => {
     if (Platform.OS === "android") void homeIsSet().then((s) => setHome(s ? "set" : "unset"));
@@ -55,7 +69,26 @@ export function Preflight({
     Platform.OS === "android" &&
     report?.checks.some((c) => c.id === "battery_settings" && c.status === "fail");
   return (
-    <View style={{ padding: 16, gap: 8 }}>
+    <ScrollView contentContainerStyle={{ padding: 16, gap: 8 }}>
+      {contractId !== "" && (
+        <View style={{ gap: 4 }}>
+          <Text>Night code for your friends:</Text>
+          <Text selectable style={{ fontSize: 20, fontWeight: "600" }}>
+            {contractId}
+          </Text>
+          <Button
+            title="Share the code"
+            onPress={() =>
+              void Share.share({
+                message: `Join my night on BathroomBestie with this code: ${contractId}`,
+              }).catch(() => undefined)
+            }
+          />
+          <Text style={{ color: "#555" }}>
+            Friends who joined: {joined.length ? joined.join(", ") : "nobody yet"}
+          </Text>
+        </View>
+      )}
       <Button
         title={running ? "Checking…" : "Run pre-flight"}
         disabled={running || !contractId}
@@ -130,6 +163,6 @@ export function Preflight({
           }}
         />
       )}
-    </View>
+    </ScrollView>
   );
 }

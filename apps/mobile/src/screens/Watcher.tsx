@@ -47,6 +47,7 @@ export function Watcher({
       <View style={{ padding: 16, gap: 16 }}>
         <Text style={{ fontSize: 18 }}>{target} asked you to watch her night.</Text>
         <Pressable
+          accessibilityRole="button"
           onPress={async () => {
             await post(`/contracts/${contractId}/watchers/${me}/accept`, {});
             setWatching(true);
@@ -60,17 +61,23 @@ export function Watcher({
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Pressable
+        accessibilityRole="button"
         onPress={() => void send("confirm")}
         style={{ ...big, backgroundColor: "#16a34a" }}
       >
         <Text style={{ fontSize: 24, color: "white" }}>I'm with her</Text>
       </Pressable>
-      <Pressable onPress={() => void send("worry")} style={{ ...big, backgroundColor: "#d97706" }}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => void send("worry")}
+        style={{ ...big, backgroundColor: "#d97706" }}
+      >
         <Text style={{ fontSize: 24, color: "white" }}>I'm worried</Text>
       </Pressable>
       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
         {REASONS.map(([id, label]) => (
           <Pressable
+            accessibilityRole="button"
             key={id}
             onPress={() => setReason(id)}
             style={{
