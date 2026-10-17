@@ -51,7 +51,7 @@ about them and they are not a comparison peer (peers must be fresh). This keeps 
 engine raises nothing, and the group-based detectors (separation, exit-alone, unexplained stop) are inert because there is
 no one to compare her with. A friend's worry about someone who never reported is a human report: it still opens an
 incident and climbs. The "left the area" and "stopped moving" clocks also start at the first report, so a phone that joins
-late is not charged for the time before it existed. State version 6.
+late is not charged for the time before it existed. State version 7 (a late, older report no longer moves where she is now).
 
 ## Exit-alone (`cohesion.ts`, `concerns.ts`)
 
@@ -129,6 +129,14 @@ good to about one grid cell. Tightening it needs finer coordinates, which would 
 
 ## Decision log
 
+- **Backstage view: state, never position.** `GET /contracts/:id/backstage` lists who is reporting, quiet, home or not
+  joined, open incidents with their rung, and who was told what. It is for the presenter and carries no location of any
+  kind (a test walks every key and rejects coordinates), so it is not live position sharing. There is still no auth.
+- **A late, older report cannot move her back.** If a report arrives after a newer one (a retry, a buffered flush), things
+  that happened still count (arriving home, reaching a place, being in the corridor) but her current area, battery and
+  motion stay with the newest report. Engine state version 7.
+- **Contract ids carry a random nonce**, so compiling the same sentence twice in one minute makes two nights instead of a
+  duplicate-key error on Postgres. Join codes stay the first six digits of the id.
 - **Friends can join with a 6-character code as well as the full night code.** Compile returns `joinCode` (first 6 hex
   digits of the contract id, upper-case); `GET /join/:code` returns the owner and the friend names (with who has accepted).
   Not a secret: with no auth, anyone with the code can see the member names and claim one; a prefix collision answers

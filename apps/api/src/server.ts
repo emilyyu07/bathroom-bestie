@@ -1,4 +1,5 @@
 import cors from "@fastify/cors";
+import { randomUUID } from "node:crypto";
 import Fastify from "fastify";
 import { z } from "zod";
 import {
@@ -10,9 +11,10 @@ import {
   roundCoord,
   thresholdsFor,
 } from "@bathroombestie/schema";
-import { preflight } from "@bathroombestie/engine";
+import { initialState, preflight } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
 import { buildContract, safeReadBack, termsOf, type Compiler } from "./compile";
+import { backstageOf } from "./backstage";
 import { idPrefixOfCode, joinCodeOf } from "./join";
 import type { Store } from "./store";
 
@@ -79,7 +81,7 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
       req.log.warn({ err: e }, "compile failed");
       return reply.code(503).send({ error: "compiler_unavailable" });
     }
-    const contract = buildContract(draft, ctx, body.sentence, body.me, demo);
+    const contract = buildContract(draft, ctx, body.sentence, body.me, demo, randomUUID());
     await store.saveContract(contract);
     return {
       contract,
@@ -113,6 +115,23 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
     const stored = await store.getContract(req.params.id);
     if (!stored) return reply.code(404).send({ error: "unknown_contract" });
     return { contract: stored.contract, status: stored.status };
+  });
+
+  // The presenter's view of a night: who is reporting or quiet, open incidents and their rung, and
+  // who was told what. State only: it carries no location, so it is not live position sharing.
+  app.get<{ Params: { id: string } }>("/contracts/:id/backstage", async (req, reply) => {
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    const { contract } = stored;
+    const state = (await store.getEngine(contract.id))?.state ?? initialState(contract);
+    return backstageOf(
+      contract,
+      stored.status,
+      state,
+      await store.listAlerts(contract.id),
+      await store.acceptedWatchers(contract.id),
+      clock.nowMinute(),
+    );
   });
 
   // A friend typed the code she read out. Returns just enough to pick who they are and accept.
