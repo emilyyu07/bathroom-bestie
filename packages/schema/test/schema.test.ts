@@ -172,3 +172,34 @@ describe("report cadence", () => {
     expect(!r.success && r.error.issues[0]?.path).toEqual(["thresholds", "silence_min"]);
   });
 });
+
+describe("arrival reports carry no location (invariant 5)", () => {
+  const base = {
+    personId: "ana",
+    contractId: "c",
+    t: 1,
+    motion: "still" as const,
+    batteryPct: 50,
+    charging: false,
+    permissionOk: true,
+  };
+  it("an ordinary report still needs an area", () => {
+    const r = EvidenceReport.safeParse(base);
+    expect(r.success).toBe(false);
+    expect(!r.success && r.error.issues[0]?.path).toEqual(["area"]);
+    expect(EvidenceReport.safeParse({ ...base, homeArrived: false }).success).toBe(false);
+  });
+  it("an arrival may omit it", () => {
+    const r = EvidenceReport.parse({ ...base, homeArrived: true });
+    expect(r.area).toBeUndefined();
+    expect(r.homeArrived).toBe(true);
+  });
+  it("an arrival that does carry an area still parses (the API drops it before storing)", () => {
+    const r = EvidenceReport.parse({
+      ...base,
+      homeArrived: true,
+      area: { lat: 43.65321, lon: -79.38377 },
+    });
+    expect(r.area).toEqual({ lat: 43.653, lon: -79.384 });
+  });
+});

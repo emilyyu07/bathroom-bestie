@@ -193,6 +193,76 @@ describe("api", () => {
     expect(store.evidence[0]!.e.area).toEqual({ lat: 43.653, lon: -79.384 });
   });
 
+  describe("arrival reports (invariant 5: an arrival is an event, not a place)", () => {
+    const report = (contractId: string, extra: object) => ({
+      personId: "me",
+      contractId,
+      t: clock.nowMinute(),
+      motion: "still",
+      batteryPct: 70,
+      charging: false,
+      permissionOk: true,
+      ...extra,
+    });
+
+    it("accepts an arrival with no area and stores none", async () => {
+      const { contract } = await compile();
+      const r = await app.inject({
+        method: "POST",
+        url: "/evidence",
+        payload: report(contract.id, { homeArrived: true }),
+      });
+      expect(r.statusCode).toBe(202);
+      expect(store.evidence[0]!.e).toMatchObject({ homeArrived: true });
+      expect(store.evidence[0]!.e.area).toBeUndefined();
+    });
+
+    it("drops any area a client sends with an arrival before storing it", async () => {
+      const { contract } = await compile();
+      const r = await app.inject({
+        method: "POST",
+        url: "/evidence",
+        payload: report(contract.id, {
+          homeArrived: true,
+          area: { lat: 43.65321, lon: -79.38377 },
+        }),
+      });
+      expect(r.statusCode).toBe(202);
+      expect(store.evidence[0]!.e.homeArrived).toBe(true);
+      expect("area" in store.evidence[0]!.e).toBe(false);
+    });
+
+    it("still rejects an ordinary report with no area", async () => {
+      const { contract } = await compile();
+      const r = await app.inject({
+        method: "POST",
+        url: "/evidence",
+        payload: report(contract.id, {}),
+      });
+      expect(r.statusCode).toBe(400);
+      expect(store.evidence).toHaveLength(0);
+    });
+
+    it("runner marks her home from an arrival with no area", async () => {
+      const { contract } = await compile();
+      await app.inject({
+        method: "POST",
+        url: "/preflight",
+        payload: { contractId: contract.id, snapshot: good },
+      });
+      await app.inject({ method: "POST", url: `/contracts/${contract.id}/activate` });
+      await tick(store, clock);
+      clock.t += 2;
+      await app.inject({
+        method: "POST",
+        url: "/evidence",
+        payload: report(contract.id, { homeArrived: true }),
+      });
+      await tick(store, clock);
+      expect((await store.getEngine(contract.id))!.state.people.me!.home).toBe(true);
+    });
+  });
+
   it("runner turns a friend worry into a listed alert, with the injected clock", async () => {
     const { contract } = await compile();
     await app.inject({

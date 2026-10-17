@@ -150,7 +150,10 @@ export function buildServer({ store, clock, compiler }: Deps) {
     if (!stored) return reply.code(404).send({ error: "unknown_contract" });
     if (!stored.contract.group.members.includes(e.personId))
       return reply.code(403).send({ error: "not_a_member" });
-    await store.addEvidence({ ...e, t: Math.min(e.t, clock.nowMinute()) });
+    // An arrival is an event, not a place: drop any location a client sent with it (invariant 5).
+    const report = { ...e, t: Math.min(e.t, clock.nowMinute()) };
+    if (report.homeArrived) delete report.area;
+    await store.addEvidence(report);
     return reply.code(202).send({ ok: true });
   });
 

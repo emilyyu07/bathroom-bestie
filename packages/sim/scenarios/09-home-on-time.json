@@ -1055,11 +1055,7 @@
       {
         "at": 230,
         "evidence": {
-          "area": {
-            "lat": 43.66,
-            "lon": -79.38
-          },
-          "motion": "vehicle",
+          "motion": "still",
           "batteryPct": 60,
           "charging": false,
           "permissionOk": true,
