@@ -29,7 +29,8 @@
         }
       ],
       "expo-notifications",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/withFmtCxx17"
     ],
     "ios": {
       "bundleIdentifier": "app.bathroombestie.mobile",
