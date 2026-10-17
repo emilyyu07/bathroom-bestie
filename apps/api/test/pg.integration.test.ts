@@ -191,6 +191,37 @@ describe.skipIf(!url)("postgres integration", () => {
       expect(raw.rows).toEqual([{ lat: 43.653, lon: -79.384 }]);
     });
 
+    it("filters alerts by recipient with jsonb containment", async () => {
+      const { contract } = await compile();
+      const alert = (id: string, to: string[]) =>
+        ({
+          id,
+          contractId: contract.id,
+          incidentId: "i",
+          rung: 2,
+          kind: "friend_worry",
+          personId: "me",
+          t: 1,
+          to,
+          factors: [],
+          lastKnown: null,
+          message: "m",
+        }) as never;
+      await store.addAlerts([
+        alert("a1", ["bea"]),
+        alert("a2", ["bea", "cy"]),
+        alert("a3", ["cy"]),
+      ]);
+      const ids = async (qs: string) =>
+        (await app.inject({ method: "GET", url: `/incidents?contractId=${contract.id}${qs}` }))
+          .json()
+          .alerts.map((a: { id: string }) => a.id);
+      expect(await ids("&to=bea")).toEqual(["a1", "a2"]);
+      expect(await ids("&to=cy")).toEqual(["a2", "a3"]);
+      expect(await ids("&to=me")).toEqual([]);
+      expect(await ids("")).toEqual(["a1", "a2", "a3"]);
+    });
+
     it("runner turns a friend worry into a listed alert", async () => {
       const { contract } = await compile();
       await app.inject({

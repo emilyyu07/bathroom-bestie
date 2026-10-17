@@ -37,7 +37,8 @@ export interface Store {
   /** Records that `personId` agreed to watch; repeat calls keep the first time. */
   acceptWatcher(contractId: string, personId: string, t: number): Promise<void>;
   acceptedWatchers(contractId: string): Promise<string[]>;
-  listAlerts(contractId?: string): Promise<Alert[]>;
+  /** Alerts for a contract, and/or only those addressed to one person (`to` includes them). */
+  listAlerts(contractId?: string, to?: string): Promise<Alert[]>;
 }
 
 /** In-memory store for tests and offline demos. */
@@ -100,7 +101,10 @@ export class MemoryStore implements Store {
   async acceptedWatchers(contractId: string) {
     return [...(this.watchers.get(contractId)?.keys() ?? [])];
   }
-  async listAlerts(contractId?: string) {
-    return this.alerts.filter((a) => !contractId || a.contractId === contractId);
+  async listAlerts(contractId?: string, to?: string) {
+    return this.alerts.filter(
+      (a) =>
+        (!contractId || a.contractId === contractId) && (to === undefined || a.to.includes(to)),
+    );
   }
 }

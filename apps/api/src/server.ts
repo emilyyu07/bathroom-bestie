@@ -30,6 +30,7 @@ const CompileBody = z.object({
     .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
     .optional(),
 });
+const IncidentsQuery = z.object({ contractId: z.string().optional(), to: z.string().optional() });
 const PresetBody = z.object({ preset: PresetName });
 const PreflightBody = z.object({ contractId: z.string(), snapshot: ReadinessSnapshot });
 const ActionBody = z.object({
@@ -166,9 +167,11 @@ export function buildServer({ store, clock, compiler }: Deps) {
     return reply.code(202).send({ ok: true });
   });
 
-  app.get<{ Querystring: { contractId?: string } }>("/incidents", async (req) => ({
-    alerts: await store.listAlerts(req.query.contractId),
-  }));
+  // `to=<personId>`: only alerts addressed to that person (the friend's view polls this).
+  app.get("/incidents", async (req) => {
+    const q = IncidentsQuery.parse(req.query);
+    return { alerts: await store.listAlerts(q.contractId, q.to) };
+  });
 
   return app;
 }
