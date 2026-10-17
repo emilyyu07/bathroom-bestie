@@ -41,19 +41,28 @@ async function ensureDatabase(target: string) {
   }
 }
 
-/** Feeds a scenario into a store, then ticks the runner every `step` minutes to the end. */
+/**
+ * Feeds a scenario into a store as it would arrive (each row once its minute has come, in time
+ * order), ticking the runner every `step` minutes to the end.
+ */
 async function replay(store: Store, sc: ScenarioFile, step: number): Promise<Alert[]> {
   const c = sc.contract;
   const start = c.window.start;
   await store.saveContract(c);
   await store.activate(c.id);
-  for (const [personId, events] of Object.entries(sc.timelines))
-    for (const e of events)
-      await store.addEvidence({ ...e.evidence, personId, contractId: c.id, t: start + e.at });
-  for (const { at, ...a } of sc.actions) await store.addAction(c.id, { ...a, t: start + at });
+  const evidence = Object.entries(sc.timelines)
+    .flatMap(([personId, events]) =>
+      events.map((e) => ({ ...e.evidence, personId, contractId: c.id, t: start + e.at })),
+    )
+    .sort((a, b) => a.t - b.t);
+  const actions = sc.actions
+    .map(({ at, ...a }) => ({ ...a, t: start + at }))
+    .sort((a, b) => a.t - b.t);
   const clock = new FakeClock(start);
   const end = start + sc.durationMin;
   for (;;) {
+    while (evidence[0] && evidence[0].t <= clock.t) await store.addEvidence(evidence.shift()!);
+    while (actions[0] && actions[0].t <= clock.t) await store.addAction(c.id, actions.shift()!);
     await tick(store, clock);
     if (clock.t === end) break;
     clock.t = Math.min(end, clock.t + step);

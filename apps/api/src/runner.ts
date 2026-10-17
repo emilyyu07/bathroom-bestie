@@ -7,6 +7,15 @@ import type { Store } from "./store";
  * at a time (so a missed tick catches up with exact timings) and stores any alerts.
  * `now` comes from the injected clock, never from Date.
  */
+/**
+ * Rows up to (not including) the first whose `t` is after `now`. The cursor only advances over
+ * delivered rows, so a row is never skipped because a later-seq row was due first; it waits a tick.
+ */
+const readyPrefix = <R>(rows: R[], tOf: (r: R) => number, now: number) => {
+  const i = rows.findIndex((r) => tOf(r) > now);
+  return i < 0 ? rows : rows.slice(0, i);
+};
+
 export async function tick(store: Store, clock: Clock): Promise<number> {
   const now = clock.nowMinute();
   let emitted = 0;
@@ -16,8 +25,8 @@ export async function tick(store: Store, clock: Clock): Promise<number> {
       evSeq: 0,
       actSeq: 0,
     };
-    const evs = await store.evidenceAfter(contract.id, row.evSeq, now);
-    const acts = await store.actionsAfter(contract.id, row.actSeq, now);
+    const evs = readyPrefix(await store.evidenceAfter(contract.id, row.evSeq), (x) => x.e.t, now);
+    const acts = readyPrefix(await store.actionsAfter(contract.id, row.actSeq), (x) => x.a.t, now);
     let state = row.state;
     const from = (state.lastEvalAt ?? now - 1) + 1;
     for (let m = from; m <= now; m++) {

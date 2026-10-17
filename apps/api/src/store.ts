@@ -26,16 +26,9 @@ export interface Store {
   listActive(): Promise<Contract[]>;
   addEvidence(e: EvidenceReport): Promise<void>;
   addAction(contractId: string, a: FriendAction): Promise<void>;
-  evidenceAfter(
-    contractId: string,
-    seq: number,
-    upToT: number,
-  ): Promise<{ seq: number; e: EvidenceReport }[]>;
-  actionsAfter(
-    contractId: string,
-    seq: number,
-    upToT: number,
-  ): Promise<{ seq: number; a: FriendAction }[]>;
+  /** Rows after `seq`, in seq order, including ones whose `t` is still in the future. */
+  evidenceAfter(contractId: string, seq: number): Promise<{ seq: number; e: EvidenceReport }[]>;
+  actionsAfter(contractId: string, seq: number): Promise<{ seq: number; a: FriendAction }[]>;
   getEngine(contractId: string): Promise<EngineRow | null>;
   saveEngine(contractId: string, row: EngineRow): Promise<void>;
   addAlerts(alerts: Alert[]): Promise<void>;
@@ -72,13 +65,11 @@ export class MemoryStore implements Store {
   async addAction(contractId: string, a: FriendAction) {
     this.actions.push({ seq: ++this.seq, contractId, a });
   }
-  async evidenceAfter(contractId: string, seq: number, upToT: number) {
-    return this.evidence.filter(
-      (r) => r.contractId === contractId && r.seq > seq && r.e.t <= upToT,
-    );
+  async evidenceAfter(contractId: string, seq: number) {
+    return this.evidence.filter((r) => r.contractId === contractId && r.seq > seq);
   }
-  async actionsAfter(contractId: string, seq: number, upToT: number) {
-    return this.actions.filter((r) => r.contractId === contractId && r.seq > seq && r.a.t <= upToT);
+  async actionsAfter(contractId: string, seq: number) {
+    return this.actions.filter((r) => r.contractId === contractId && r.seq > seq);
   }
   async getEngine(contractId: string) {
     return this.engine.get(contractId) ?? null;

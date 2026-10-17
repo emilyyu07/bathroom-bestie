@@ -116,4 +116,29 @@ describe("api", () => {
     expect(list.alerts[0]).toMatchObject({ rung: 2, raisedBy: "cy", personId: "me" });
     expect(list.alerts[0].message).toContain("cy");
   });
+
+  it("runner never skips a row that was not yet due when a later-seq row was delivered", async () => {
+    const { contract } = await compile();
+    await store.activate(contract.id);
+    const T = clock.nowMinute();
+    await tick(store, clock);
+    const ev = (personId: string, t: number) => ({
+      personId,
+      contractId: contract.id,
+      t,
+      area: { lat: 43.65, lon: -79.38 },
+      motion: "walking" as const,
+      batteryPct: 70,
+      charging: false,
+      permissionOk: true,
+    });
+    await store.addEvidence(ev("me", T + 1)); // lower seq, due next minute
+    await store.addEvidence(ev("bea", T)); // higher seq, due now
+    await tick(store, clock);
+    clock.t += 1;
+    await tick(store, clock);
+    const { state } = (await store.getEngine(contract.id))!;
+    expect(state.people.bea!.lastReportAt).toBe(T);
+    expect(state.people.me!.lastReportAt).toBe(T + 1);
+  });
 });
