@@ -1,0 +1,27 @@
+# Cynthia (iOS), once her alert is on screen: pick a reason, tap "I'm worried", and (optionally) open
+# a text to the emergency contact. BathroomBestie sends nothing itself; this is the friend's own tap.
+# Env: TEXT_CONTACT ("1" to also tap "Text"; the Simulator cannot place a call, so Call is never tapped).
+appId: app.bathroombestie.mobile
+---
+- launchApp:
+    stopApp: false
+- tapOn:
+    text: "Not answering"
+    optional: true
+- tapOn: "I'm worried"
+- extendedWaitUntil:
+    visible: ".*(taking over|Sent to|already out).*"
+    timeout: 30000
+- runFlow:
+    when:
+      true: ${TEXT_CONTACT == "1"}
+    commands:
+      - scrollUntilVisible:
+          element: "Text"
+          direction: DOWN
+          timeout: 15000
+      - tapOn: "Text"
+      # Messages took over the screen; come back to BathroomBestie so it keeps reporting.
+      - launchApp:
+          appId: app.bathroombestie.mobile
+          stopApp: false

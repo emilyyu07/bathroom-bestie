@@ -16,6 +16,7 @@
     "api": "pnpm --filter @bathroombestie/api dev",
     "demo": "pnpm --filter @bathroombestie/api exec tsx scripts/demo.ts",
     "demo:friends": "pnpm --filter @bathroombestie/api exec tsx scripts/friends.ts",
+    "demo:conductor": "pnpm --filter @bathroombestie/api exec tsx scripts/conductor.ts",
     "api:demo": "STORE=memory DEMO_MODE=1 pnpm --filter @bathroombestie/api dev",
     "db:up": "docker compose up -d --wait db",
     "test:db": "DATABASE_URL_TEST=${DATABASE_URL_TEST:-postgres://bathroombestie:bathroombestie@localhost:5432/bathroombestie_test} vitest run apps/api/test/pg.integration.test.ts",

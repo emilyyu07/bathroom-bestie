@@ -1,0 +1,28 @@
+# Ana (Android): emergency contact, pre-flight, and start the night. Env: CONTACT_NAME, CONTACT_PHONE.
+appId: app.bathroombestie.mobile
+---
+- scrollUntilVisible:
+    element: "Save contact"
+    direction: DOWN
+    timeout: 20000
+- tapOn: "Mom, Dad, roommate….*"
+- inputText: ${CONTACT_NAME}
+- tapOn: "Their number….*"
+- inputText: ${CONTACT_PHONE}
+- hideKeyboard
+- tapOn: "Save contact"
+- scrollUntilVisible:
+    element: "Check I'm ready"
+    direction: UP
+    timeout: 20000
+- tapOn: "Check I'm ready"
+- tapOn:
+    text: "Allow location and notifications"
+    optional: true
+- tapOn:
+    text: "Check again"
+    optional: true
+- extendedWaitUntil:
+    visible: "Start the night"
+    timeout: 90000
+- tapOn: "Start the night"

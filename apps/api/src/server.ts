@@ -58,6 +58,9 @@ const ActionBody = z.object({
 
 export function buildServer({ store, clock, compiler, demo = false }: Deps) {
   const app = Fastify();
+  // Demo mode only: the newest night planned, so a demo automation can find its join code without a
+  // person relaying it. Nothing reads this outside demo mode.
+  let latestNight: string | null = null;
   // Browser clients in development (mobile via expo --web, the console) run on localhost ports.
   // The native app sends no Origin, so this does not affect it.
   void app.register(cors, { origin: /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/ });
@@ -85,6 +88,7 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
     }
     const contract = buildContract(draft, ctx, body.sentence, body.me, demo, randomUUID());
     await store.saveContract(contract);
+    if (demo) latestNight = contract.id;
     return {
       contract,
       readBack: safeReadBack(draft.read_back, contract),
@@ -111,6 +115,22 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
   });
 
   app.get("/health", async () => ({ ok: true })); // pre-flight times this round trip
+
+  // Demo mode only (not registered otherwise): where the newest night is up to. A demo automation
+  // polls this for the join code, and for the night going active.
+  if (demo)
+    app.get("/demo/latest", async (_req, reply) => {
+      const stored = latestNight ? await store.getContract(latestNight) : null;
+      if (!stored) return reply.code(404).send({ error: "no_night_yet" });
+      const { contract } = stored;
+      return {
+        contractId: contract.id,
+        joinCode: joinCodeOf(contract.id),
+        owner: contract.group.members[0],
+        members: contract.group.members,
+        status: stored.status,
+      };
+    });
 
   // The phone's view of a night (status screen): the contract and whether it is running.
   app.get<{ Params: { id: string } }>("/contracts/:id", async (req, reply) => {

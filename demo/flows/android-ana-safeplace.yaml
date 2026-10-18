@@ -1,0 +1,13 @@
+# Ana (Android): save the safe place. The conductor moves her emulator to the safe-place spot first, because
+# "I'm there now, use this spot" saves where she is right now (the address box needs a geocoder the
+# emulator often lacks). The conductor moves her back to the bar afterwards.
+appId: app.bathroombestie.mobile
+---
+- scrollUntilVisible:
+    element: "I'm there now, use this spot"
+    direction: DOWN
+    timeout: 20000
+- tapOn: "I'm there now, use this spot"
+- extendedWaitUntil:
+    visible: "Safe place.*"
+    timeout: 40000

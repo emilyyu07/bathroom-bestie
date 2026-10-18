@@ -1,0 +1,20 @@
+# Cynthia / Dee (iOS): join Ana's night by code and land on the friend screen.
+# Env: CODE (the 6-character join code), NAME (the friend's name as it appears on the Join screen, e.g. cynthia).
+appId: app.bathroombestie.mobile
+---
+- launchApp:
+    stopApp: false
+    permissions:
+      location: inuse
+- tapOn:
+    text: "Leave this night"
+    optional: true
+- tapOn: "Join a friend's night"
+- tapOn: "9F3A1B" # the join-code box (placeholder text)
+- inputText: ${CODE}
+- hideKeyboard
+- tapOn: "Find the night"
+- tapOn: "I'm ${NAME}"
+- extendedWaitUntil:
+    visible: ".*(Waiting for your friend|BathroomBestie is on|How's).*"
+    timeout: 20000
