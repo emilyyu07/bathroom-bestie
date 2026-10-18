@@ -188,7 +188,7 @@ async function runIos() {
         ? "waiting for Ana to plan a NEW night (ignoring the existing one)..."
         : "waiting for Ana's plan...",
     );
-    const night = await until(
+    let night = await until(
       "Ana's plan",
       async () => {
         const l = await latest();
@@ -196,29 +196,36 @@ async function runIos() {
       },
       Number(opt("wait", "30")) * 60,
     );
-    log(`CODE ${night.joinCode}  members ${night.members.join(", ")}`);
 
-    // Join the two iOS friends by typing the code in the real app.
-    for (const [name, d] of [
-      ["cynthia", cynthia],
-      ["dee", dee],
-    ] as const) {
-      if (!night.members.includes(name)) {
-        log(`skipping ${name}: not in this night (${night.members.join(", ")})`);
-        continue;
+    // Join the two iOS friends by typing the code in the real app. Ana may re-plan before she starts
+    // (a retry, a fixed tap): then the friends leave the old night and join the newest one.
+    for (;;) {
+      log(`CODE ${night.joinCode}  members ${night.members.join(", ")}`);
+      for (const [name, d] of [
+        ["cynthia", cynthia],
+        ["dee", dee],
+      ] as const) {
+        if (!night.members.includes(name)) {
+          log(`skipping ${name}: not in this night (${night.members.join(", ")})`);
+          continue;
+        }
+        maestro(d, "ios-join.yaml", { CODE: night.joinCode, NAME: name });
+        log(`JOINED ${name}`);
       }
-      maestro(d, "ios-join.yaml", { CODE: night.joinCode, NAME: name });
-      log(`JOINED ${name}`);
+      const outcome = await until(
+        "the night to start (Ana taps Start), or a newer plan",
+        async () => {
+          const l = await latest();
+          if (!l) return undefined;
+          if (l.contractId !== night.contractId) return { replanned: l };
+          return l.status === "active" ? { replanned: null } : undefined;
+        },
+        20 * 60,
+      );
+      if (!outcome.replanned) break;
+      log("Ana planned a NEW night: moving the friends to it");
+      night = outcome.replanned;
     }
-
-    await until(
-      "the night to start (Ana taps Start)",
-      async () => {
-        const l = await latest();
-        return l?.contractId === night.contractId && l.status === "active" ? true : undefined;
-      },
-      20 * 60,
-    );
     log("T0: the night is active");
 
     // Cynthia is the first named friend, so she is the first watcher: her alert is the first rung-2 one.
