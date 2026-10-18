@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Linking, Platform, Pressable, Text, View } from "react-native";
-import { color, font, space } from "../theme";
-import { Body, Button, Card, ErrorText, Heading, Pill } from "../ui";
+import { color, font, radius, space, type } from "../theme";
+import { Body, Button, Card, ErrorText, Label, Pill, Small } from "../ui";
 import { get, nowMinute, post } from "../api";
 
 /** Mirrors Alert in packages/schema (the mobile app is outside the workspace). */
@@ -91,12 +91,12 @@ export function FriendAlerts({
 
   const now = nowMinute();
   return (
-    <View style={{ gap: space.md }}>
-      <Heading>Alerts for you</Heading>
+    <View style={{ gap: space.lg }}>
+      <Label>Alerts for you</Label>
       {error && <ErrorText>Can't reach BathroomBestie. Retrying…</ErrorText>}
       {!error && alerts.length === 0 && (
         <Card>
-          <Body>All quiet. Nothing to do right now. ✨</Body>
+          <Body muted>All quiet. Nothing to do right now ✨</Body>
         </Card>
       )}
       {alerts.slice(0, 10).map((a) => (
@@ -104,46 +104,46 @@ export function FriendAlerts({
           key={a.id}
           style={a.rung === 4 ? { borderColor: color.berry, borderWidth: 2.5 } : undefined}
         >
-          <View
-            style={{ flexDirection: "row", gap: space.sm, alignItems: "center", flexWrap: "wrap" }}
-          >
+          <View style={{ gap: space.sm }}>
             <Pill strong={a.rung === 4}>{RUNG[a.rung]}</Pill>
-            <Body muted>
-              about {a.personId} · {Math.max(0, now - a.t)} min ago
-            </Body>
+            <Small>
+              About {a.personId} · {Math.max(0, now - a.t)} min ago
+            </Small>
           </View>
           {/* Fixed engine template text: shown exactly as written. */}
-          <Body style={{ ...font.bold, fontSize: 17 }}>{a.message}</Body>
-          {a.factors.map((f) => (
-            <Body key={f} muted>
-              • {f}
-            </Body>
-          ))}
-          {a.raisedBy && <Body muted>Raised by {a.raisedBy}</Body>}
+          <Body style={{ ...font.bold, fontSize: 17, lineHeight: 24 }}>{a.message}</Body>
+          {(a.factors.length > 0 || a.raisedBy) && (
+            <View style={{ gap: space.xs }}>
+              {a.factors.map((f) => (
+                <Small key={f}>• {f}</Small>
+              ))}
+              {a.raisedBy && <Small>Raised by {a.raisedBy}</Small>}
+            </View>
+          )}
           {a.lastKnown ? (
             <Pressable accessibilityRole="link" onPress={() => void openMap(a.lastKnown!.area)}>
-              <Text style={{ ...font.bold, fontSize: 16, color: color.primary }}>
-                📍 Last known area at {clock(a.lastKnown.t)} (about 100 m) · open in Maps
+              <Text style={{ ...font.bold, ...type.small, color: color.primary }}>
+                📍 Last known area at {clock(a.lastKnown.t)} (about 100 m) · Open in Maps
               </Text>
             </Pressable>
           ) : (
-            <Body muted>No location reported yet.</Body>
+            <Small>No location reported yet.</Small>
           )}
           {a.script911 && (
             // Invariant 4: text only. BathroomBestie never calls anyone; she decides.
             <View
               style={{
                 backgroundColor: color.blush,
-                padding: space.md,
-                borderRadius: 14,
-                gap: space.xs,
+                padding: space.lg,
+                borderRadius: radius.inset,
+                gap: space.sm,
               }}
             >
               <Body style={font.bold}>
                 If you decide to call emergency services, you can read this:
               </Body>
               <Body selectable>{a.script911}</Body>
-              <Body muted>BathroomBestie never calls anyone.</Body>
+              <Small>BathroomBestie never calls anyone.</Small>
             </View>
           )}
           <View style={{ flexDirection: "row", gap: space.sm }}>
@@ -158,14 +158,14 @@ export function FriendAlerts({
             (sent[a.id]!.startsWith("Couldn't") ? (
               <ErrorText>{sent[a.id]}</ErrorText>
             ) : (
-              <Body muted>{sent[a.id]}</Body>
+              <Small>{sent[a.id]}</Small>
             ))}
         </Card>
       ))}
       {checkedAt !== null && (
-        <Body muted style={{ fontSize: 13 }}>
+        <Small style={{ textAlign: "center" }}>
           Checked at {clock(checkedAt)} · updates every 20 s
-        </Body>
+        </Small>
       )}
     </View>
   );

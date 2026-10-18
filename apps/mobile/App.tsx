@@ -9,8 +9,8 @@ import { Preflight } from "./src/screens/Preflight";
 import { Status } from "./src/screens/Status";
 import { Watcher } from "./src/screens/Watcher";
 import { Welcome } from "./src/screens/Welcome";
-import { color, font, radius, space } from "./src/theme";
-import { Body, Button } from "./src/ui";
+import { color, font, radius, space, type } from "./src/theme";
+import { Body, Small, TextButton } from "./src/ui";
 
 /** The planner's three steps, as tabs. */
 const TABS = [
@@ -97,16 +97,24 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 40, backgroundColor: color.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: space.sm, // the window already starts below the status bar
+        backgroundColor: color.bg,
+      }}
+    >
       {role === "planner" && TABS.some(([t]) => t === screen) && (
         <View
           accessibilityRole="tablist"
           style={{
             flexDirection: "row",
-            gap: space.sm,
-            paddingHorizontal: space.lg,
-            paddingTop: space.sm,
-            paddingBottom: space.sm,
+            marginHorizontal: space.lg + 4,
+            marginTop: space.sm,
+            marginBottom: space.xs,
+            padding: space.xs,
+            borderRadius: radius.button,
+            backgroundColor: color.blush,
           }}
         >
           {TABS.map(([s, label]) => {
@@ -120,15 +128,15 @@ export default function App() {
                 style={{
                   flex: 1,
                   alignItems: "center",
-                  paddingVertical: 10,
+                  paddingVertical: 9,
                   borderRadius: radius.button,
-                  backgroundColor: on ? color.primary : color.blush,
+                  backgroundColor: on ? color.primary : "transparent",
                 }}
               >
                 <Text
                   style={{
                     ...font.extrabold,
-                    fontSize: 15,
+                    ...type.small,
                     color: on ? color.white : color.primary,
                   }}
                 >
@@ -140,7 +148,7 @@ export default function App() {
         </View>
       )}
       {screen === "loading" && (
-        <Body muted style={{ padding: space.lg }}>
+        <Body muted style={{ padding: space.lg, textAlign: "center" }}>
           Loading…
         </Body>
       )}
@@ -195,26 +203,38 @@ export default function App() {
       {screen === "watcher" && (
         <View
           style={{
-            marginHorizontal: space.lg,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: space.sm,
+            marginHorizontal: space.lg + 4,
             marginTop: space.sm,
-            padding: space.md,
+            paddingVertical: space.md,
+            paddingHorizontal: space.lg,
             borderRadius: radius.card,
-            backgroundColor: color.blush,
+            backgroundColor: active ? color.primary : color.blush,
           }}
         >
-          <Body style={{ ...font.semibold, color: color.primary }}>
+          <View
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: active ? color.white : color.muted,
+            }}
+          />
+          <Small style={{ flex: 1, ...font.bold, color: active ? color.white : color.text }}>
             {active
-              ? "BathroomBestie is on: your phone is sending your rough area until the night ends. 💗"
+              ? "The night is on. Your phone sends your rough area until it ends."
               : `Waiting for ${planner || "your friend"} to start the night…`}
-          </Body>
+          </Small>
         </View>
       )}
       {screen === "watcher" && (
         <Watcher contractId={contractId} me={me} target={planner || "your friend"} />
       )}
       {role !== null && screen !== "welcome" && screen !== "join" && !typing && (
-        <View style={{ paddingHorizontal: space.lg, paddingBottom: space.md }}>
-          <Button tone="quiet" title="Leave this night" onPress={() => void leave()} />
+        <View style={{ paddingBottom: space.sm }}>
+          <TextButton title="Leave this night" onPress={() => void leave()} />
         </View>
       )}
     </SafeAreaView>
