@@ -4,10 +4,10 @@ Plays the phones for the recorded demo by driving the **real apps** (Maestro tap
 and Android emulators) and watching the **server** for what to do next. The two sides share nothing but the API, so
 nobody has to relay the join code or call the timing.
 
-| Side         | Phones                       | Command                                                          |
-| ------------ | ---------------------------- | ---------------------------------------------------------------- |
-| iOS (Emily)  | Cynthia, Dee (iOS Simulator) | `pnpm demo:conductor ios [--record DIR]`                         |
-| Android (Elika) | Ana, Bea (Android emulator) | `pnpm demo:conductor android --ana SERIAL --bea SERIAL`          |
+| Side            | Phones                       | Command                                                 |
+| --------------- | ---------------------------- | ------------------------------------------------------- |
+| iOS (Emily)     | Cynthia, Dee (iOS Simulator) | `pnpm demo:conductor ios [--record DIR]`                |
+| Android (Elika) | Ana, Bea (Android emulator)  | `pnpm demo:conductor android --ana SERIAL --bea SERIAL` |
 
 ## One-time setup (each Mac that runs Maestro)
 
