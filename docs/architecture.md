@@ -42,6 +42,82 @@ Gemini: only POST /contracts/compile (sentence -> DraftPlan -> deterministic bui
 
 The engine depends only on the schema. That is why the API, the simulator and the tests can all drive identical code.
 
+### 2.1 End-to-end data flow
+
+One night, in order. Sections 4 to 8 give the detail behind each step.
+
+**Phase 1: Setup (the only place Gemini runs)**
+
+1. The planner enters a first name and a sentence. `POST /contracts/compile` asks Gemini for a `DraftPlan` only (friends,
+   hours, radius, preset, watch order, optional `home_by_hours`, the 911 flag, a read-back).
+2. Zod re-validates the output. If the model fails the route returns 503; with no API key `MockCompiler` produces the
+   draft.
+3. `buildContract` (deterministic code) computes the id, thresholds, watch slots, `expires` and any home milestone. The
+   response carries the contract, the read-back, the deterministic terms and a join code. A read-back containing a
+   banned word is replaced by the terms.
+4. The contract is stored as `draft`. The preset can change until it is active.
+
+**Phase 2: Pre-flight and activation**
+
+1. Friends join by code (`GET /join/:code`) and accept a watch slot.
+2. She sets home: the position is stored on the device and a 150 m geofence is registered. The server never sees it.
+3. The phone `POST /preflight`s a real snapshot; `preflight(snapshot, contract)` returns ready, ready with warnings or
+   not ready (section 5.12). `POST /contracts/:id/activate` returns 409 unless the stored readiness is ready.
+
+**Phase 3: Evidence in (about every 3 minutes per phone)**
+
+1. The phone builds a report: time, rounded location, motion, battery and charging, permission state.
+2. `POST /evidence` parses (rounds again), checks membership, clamps `t` to now, drops `area` on an arrival and
+   appends. A DB CHECK allows a missing location only when `home_arrived` is true.
+3. Entering the home geofence sends one `homeArrived` report with no area, after which the phone stops reporting.
+4. Friends post `confirm` or `worry` (with an optional reason) to `POST /actions`; `t` is clamped and the row appended.
+
+**Phase 4: Runner tick (every 60 s, injected clock)**
+
+For each active contract the runner loads the cached `engine_state` and its `ev_seq` / `act_seq` cursors, rebuilds it
+from the logs if its version is stale (no alerts are emitted for past minutes), then folds new rows **one minute at a
+time** through `evaluate`. Each row is delivered once, at the first minute evaluated at or after its time, and the
+cursor only advances over rows that are due. The new state goes to `engine_state` and alerts to `incidents`
+(idempotent on the alert id).
+
+**Phase 5: Inside `evaluate` (per minute)**
+
+1. **Ingest evidence** in time order (section 5.3).
+2. **Apply friend actions** (section 5.9). A `confirm` resolves her open incident and restarts her exit-alone clock; a
+   `worry` is rate limited per friend per person and can open a rung-2 incident even when evidence looks normal.
+3. **Per member:** update cohesion; if she is home, resolve any open incident and skip her; if she has never reported,
+   skip her; otherwise `observe`, then `detectConcern` (first detector with an opinion wins, section 5.7), then open a
+   rung-1 incident (respecting the cooldown) or `stepIncident` on the open one.
+
+**Phase 6: Ladder and rendering**
+
+`ladder.ts` resolves, upgrades in place or escalates one open incident: rung 1 to her, rung 2 her watcher, rung 3 the
+next person then the group, one step per `ack_timeout_min`. Only a watcher's `worry` reaches rung 4. `render.ts` turns
+the incident into alert text from fixed templates, with observable factors only (section 5.10).
+
+**Phase 7: Delivery and response**
+
+Phones poll `GET /incidents?contractId=&to=<me>` every 20 s. A friend's "I'm with her" (`confirm`) or "I'm worried"
+(`worry`) goes back through `POST /actions` and is picked up by the next tick, closing the loop.
+
+**Trace of one incident (illustrative, standard preset: `exit_alone_min` 45, `ack_timeout_min` 5, cy is the watcher)**
+
+| When               | Event                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| T                  | ana's report puts her more than 150 m from every fresh peer; the exit-alone clock starts   |
+| T + 45             | `exitAloneOverdue` fires (hard); rung 1 nudge to ana                                       |
+| T + 50             | No ack; rung 2 to cy                                                                       |
+| cy confirms        | Incident resolves; 30-minute cooldown; ana's exit-alone clock restarts from the confirm    |
+| cy worries instead | cy is the current watcher, so the incident goes straight to rung 4 (takeover for cy only)  |
+| ana reaches home   | Geofence fires; `homeArrived` carries no area; incident resolves as `arrived`, no cooldown |
+
+**Two consequences of the flow**
+
+- A dying battery (at or below 5%, falling, not charging) is suppressed, so nothing is raised. This avoids the most
+  common benign silence, at the cost that a real emergency at low battery also stays quiet.
+- A member is not monitored until their first report, so a friend who has not opened the app raises nothing, and with
+  one reporting phone the group-based detectors are inert (section 5.2).
+
 ## 3. Invariants and where they are enforced
 
 | #   | Invariant                                       | Enforcement                                                                                                                                                                                                                                                        |
