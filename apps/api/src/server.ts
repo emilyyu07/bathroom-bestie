@@ -16,6 +16,7 @@ import type { Clock } from "./clock";
 import { buildContract, safeReadBack, termsOf, type Compiler } from "./compile";
 import { backstageOf } from "./backstage";
 import { EmergencyContact, emergencyNotice } from "./emergency";
+import { worryRoute } from "./worryRoute";
 import { idPrefixOfCode, joinCodeOf } from "./join";
 import type { Store } from "./store";
 
@@ -259,8 +260,18 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
       ...rest,
       t: Math.min(rest.t ?? clock.nowMinute(), clock.nowMinute()),
     });
+    // A worry's reply says who hears about it, so the friend's phone can tell them.
+    const route =
+      a.type === "worry"
+        ? worryRoute(
+            stored.contract,
+            (await store.getEngine(contractId))?.state ?? null,
+            (await store.actionsAfter(contractId, 0)).map((r) => r.a),
+            a,
+          )
+        : undefined;
     await store.addAction(contractId, a);
-    return reply.code(202).send({ ok: true });
+    return reply.code(202).send({ ok: true, ...(route && { route }) });
   });
 
   // `to=<personId>`: only alerts addressed to that person (the friend's view polls this).
