@@ -101,7 +101,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
         hint="Your friends see your first name in any alert."
         value={name}
         onChangeText={setName}
-        placeholder="Ana"
+        placeholder="Your name…"
         autoCapitalize="words"
         maxLength={30}
       />
@@ -109,7 +109,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
         label="What's the plan?"
         value={sentence}
         onChangeText={setSentence}
-        placeholder="Out with Bea and Cy until 2am, home by 3"
+        placeholder="Your plans… (e.g. drinks with Ana and Addy)"
         multiline
       />
       <Button
