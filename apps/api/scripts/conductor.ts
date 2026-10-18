@@ -91,8 +91,13 @@ interface Alert {
   t: number;
 }
 interface Backstage {
+  owner: string;
+  members: { id: string; view: string }[];
   incidents: { personId: string; kind: string; status: string; resolution: string | null }[];
 }
+/** She is home when the server's view of her says so (an open incident then closes as "home"). */
+const arrived = (b: Backstage | null) =>
+  !!b?.members.some((m) => m.id === b.owner && m.view === "home");
 const latest = async () => (await api<Latest>("/demo/latest")).json ?? undefined;
 
 // Maestro needs Java 17; Homebrew's openjdk@17 is keg-only, so point at it when it is there.
@@ -167,6 +172,9 @@ async function runIos() {
     for (const r of recordings) r.kill("SIGINT"); // SIGINT finishes the file properly
     if (recordings.length) await sleep(3000);
   };
+  // Ctrl-C or a kill must still close the recordings, or the Simulator is left "already recording".
+  for (const sig of ["SIGINT", "SIGTERM"] as const)
+    process.once(sig, () => void stopRecording().then(() => process.exit(130)));
 
   try {
     if ((await api("/health")).status !== 200)
@@ -235,7 +243,7 @@ async function runIos() {
       "Ana to reach her safe place",
       async () => {
         const b = (await api<Backstage>(`/contracts/${night.contractId}/backstage`)).json;
-        return b?.incidents.some((i) => i.resolution === "arrived") ? true : undefined;
+        return arrived(b) ? true : undefined;
       },
       10 * 60,
     );
@@ -348,7 +356,7 @@ async function runAndroid() {
     "the arrival to register",
     async () => {
       const b = (await api<Backstage>(`/contracts/${night.contractId}/backstage`)).json;
-      return b?.incidents.some((i) => i.resolution === "arrived") ? true : undefined;
+      return arrived(b) ? true : undefined;
     },
     3 * 60,
   ).catch(() => log("arrival not seen on the server yet (the geofence can take a minute)"));
