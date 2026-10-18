@@ -82,8 +82,13 @@ export function Watcher({
           <Small>Let us know any time. Nothing is sent unless you tap.</Small>
         </View>
         <Button big tone="withHer" title="I'm with her" onPress={() => void send("confirm")} />
+        <Button big tone="worry" title="I'm worried" onPress={() => void send("worry")} />
         <Divider />
-        <Body style={font.semibold}>Something feels off?</Body>
+        {/* A picked reason goes with the next "I'm worried", so pick it before tapping. */}
+        <View style={{ gap: space.xs }}>
+          <Body style={font.semibold}>Something feels off?</Body>
+          <Small>Pick a reason before you tap "I'm worried" (optional).</Small>
+        </View>
         <View style={{ flexDirection: "row", gap: space.sm, flexWrap: "wrap" }}>
           {REASONS.map(([id, label]) => (
             <Chip
@@ -94,7 +99,6 @@ export function Watcher({
             />
           ))}
         </View>
-        <Button big tone="worry" title="I'm worried" onPress={() => void send("worry")} />
         {sent &&
           (sent.startsWith("Couldn't") ? <ErrorText>{sent}</ErrorText> : <Small>{sent}</Small>)}
       </Card>
