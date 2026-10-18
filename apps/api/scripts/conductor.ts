@@ -41,6 +41,8 @@ const SAFE = { lat: 43.665, lon: -79.38 }; // ~1.7 km from the bar
 const WALK = [43.652, 43.654, 43.656, 43.658, 43.66]; // away from the bar, ~220 m per step
 
 // ---- helpers -------------------------------------------------------------------------------------
+/** How long a conductor waits on the other side (a person re-running, a slow emulator) before giving up. */
+const MAX_WAIT_S = Number(opt("max-wait", "120")) * 60;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const stamp = () => new Date().toLocaleTimeString("en-GB");
 const log = (m: string) => console.log(`${stamp()} [${role}] ${m}`);
@@ -121,10 +123,35 @@ function maestro(device: string, flow: string, vars: Record<string, string> = {}
     env,
     stdio: ["ignore", "pipe", "pipe"],
     encoding: "utf8",
+    // A lagging emulator can leave Maestro waiting forever; a flow that is not done by now has failed.
+    timeout: Number(opt("flow-timeout", "240")) * 1000,
+    killSignal: "SIGKILL",
   });
+  if (r.error && (r.error as NodeJS.ErrnoException).code === "ETIMEDOUT")
+    throw new Error(`maestro flow ${flow} on ${device} did not finish in time (emulator lagging?)`);
   if (r.status !== 0) {
     console.error((r.stdout ?? "") + (r.stderr ?? ""));
     throw new Error(`maestro flow ${flow} failed on ${device}`);
+  }
+}
+
+/**
+ * Runs a flow; if it fails or times out, says exactly what to do by hand and carries on, so one stuck tap
+ * (a lagging emulator, a label that differs) does not end the night. Returns whether the flow ran.
+ */
+function flowOrHandOff(
+  device: string,
+  flow: string,
+  vars: Record<string, string>,
+  yourTurn: string,
+): boolean {
+  try {
+    maestro(device, flow, vars);
+    return true;
+  } catch (e) {
+    log(`FLOW FAILED: ${(e as Error).message.split("\n")[0]}`);
+    log(`YOUR TURN (on ${device}): ${yourTurn}`);
+    return false;
   }
 }
 
@@ -158,19 +185,43 @@ async function runIos() {
     for (const [name, d] of [
       ["cynthia", cynthia],
       ["dee", dee],
-    ] as const)
-      recordings.push(
-        spawn(
-          "xcrun",
-          ["simctl", "io", d, "recordVideo", "--codec=h264", "--force", join(dir, `${name}.mp4`)],
-          { stdio: "ignore" },
-        ),
+    ] as const) {
+      const r = spawn(
+        "xcrun",
+        ["simctl", "io", d, "recordVideo", "--codec=h264", "--force", join(dir, `${name}.mp4`)],
+        { stdio: "ignore" },
       );
+      r.on("exit", (code) => {
+        if (!stopping)
+          log(
+            `RECORDING STOPPED EARLY for ${name} (exit ${code}): "Host recording is already in progress"? Reboot the simulator.`,
+          );
+      });
+      recordings.push(r);
+    }
     log(`recording both phones to ${dir}`);
+    // A recorder that cannot start exits straight away; say so now, not after the take.
+    await sleep(2500);
+    if (recordings.some((r) => r.exitCode !== null))
+      log(
+        "WARNING: a recording did not start, so that phone will not be filmed. Reboot the Simulators and re-run.",
+      );
   }
+  let stopping = false;
   const stopRecording = async () => {
+    stopping = true;
     for (const r of recordings) r.kill("SIGINT"); // SIGINT finishes the file properly
-    if (recordings.length) await sleep(3000);
+    // Writing a long take to disk takes a while: wait for each recorder to exit, up to 90 s.
+    await Promise.all(
+      recordings.map(
+        (r) =>
+          new Promise<void>((done) => {
+            if (r.exitCode !== null) return done();
+            r.once("exit", () => done());
+            setTimeout(done, 90_000);
+          }),
+      ),
+    );
   };
   // Ctrl-C or a kill must still close the recordings, or the Simulator is left "already recording".
   for (const sig of ["SIGINT", "SIGTERM"] as const)
@@ -188,7 +239,7 @@ async function runIos() {
         ? "waiting for Ana to plan a NEW night (ignoring the existing one)..."
         : "waiting for Ana's plan...",
     );
-    const night = await until(
+    let night = await until(
       "Ana's plan",
       async () => {
         const l = await latest();
@@ -196,29 +247,36 @@ async function runIos() {
       },
       Number(opt("wait", "30")) * 60,
     );
-    log(`CODE ${night.joinCode}  members ${night.members.join(", ")}`);
 
-    // Join the two iOS friends by typing the code in the real app.
-    for (const [name, d] of [
-      ["cynthia", cynthia],
-      ["dee", dee],
-    ] as const) {
-      if (!night.members.includes(name)) {
-        log(`skipping ${name}: not in this night (${night.members.join(", ")})`);
-        continue;
+    // Join the two iOS friends by typing the code in the real app. Ana may re-plan before she starts
+    // (a retry, a fixed tap): then the friends leave the old night and join the newest one.
+    for (;;) {
+      log(`CODE ${night.joinCode}  members ${night.members.join(", ")}`);
+      for (const [name, d] of [
+        ["cynthia", cynthia],
+        ["dee", dee],
+      ] as const) {
+        if (!night.members.includes(name)) {
+          log(`skipping ${name}: not in this night (${night.members.join(", ")})`);
+          continue;
+        }
+        maestro(d, "ios-join.yaml", { CODE: night.joinCode, NAME: name });
+        log(`JOINED ${name}`);
       }
-      maestro(d, "ios-join.yaml", { CODE: night.joinCode, NAME: name });
-      log(`JOINED ${name}`);
+      const outcome = await until(
+        "the night to start (Ana taps Start), or a newer plan",
+        async () => {
+          const l = await latest();
+          if (!l) return undefined;
+          if (l.contractId !== night.contractId) return { replanned: l };
+          return l.status === "active" ? { replanned: null } : undefined;
+        },
+        MAX_WAIT_S,
+      );
+      if (!outcome.replanned) break;
+      log("Ana planned a NEW night: moving the friends to it");
+      night = outcome.replanned;
     }
-
-    await until(
-      "the night to start (Ana taps Start)",
-      async () => {
-        const l = await latest();
-        return l?.contractId === night.contractId && l.status === "active" ? true : undefined;
-      },
-      20 * 60,
-    );
     log("T0: the night is active");
 
     // Cynthia is the first named friend, so she is the first watcher: her alert is the first rung-2 one.
@@ -230,7 +288,7 @@ async function runIos() {
         );
         return r.json?.alerts.find((a) => a.rung >= 2) ?? undefined;
       },
-      20 * 60,
+      MAX_WAIT_S,
     );
     log(
       `ALERT for Cynthia (rung ${alert.rung}, ${alert.kind}); letting it show for ${opt("worry-delay", "12")}s`,
@@ -281,19 +339,31 @@ async function runAndroid() {
   log("Ana and Bea placed at the bar");
 
   const before = (await latest())?.contractId;
-  maestro(ana, "android-ana-plan.yaml", { NAME: name, SENTENCE: sentence });
+  const planned = flowOrHandOff(
+    ana,
+    "android-ana-plan.yaml",
+    { NAME: name, SENTENCE: sentence },
+    `plan the night by hand: name "${name}", the plan "${sentence}", Make my plan, then "The plan looks right"`,
+  );
   const night = await until(
     "the plan to reach the API",
     async () => {
       const l = await latest();
       return l && l.contractId !== before ? l : undefined;
     },
-    120,
+    planned ? 120 : 10 * 60,
   );
   log(`PLANNED. CODE ${night.joinCode}  members ${night.members.join(", ")}`);
 
-  maestro(bea, "android-bea-join.yaml", { CODE: night.joinCode, NAME: "bea" });
-  log("JOINED bea");
+  if (
+    flowOrHandOff(
+      bea,
+      "android-bea-join.yaml",
+      { CODE: night.joinCode, NAME: "bea" },
+      `join by hand: Join a friend's night, code ${night.joinCode}, Find the night, I'm bea`,
+    )
+  )
+    log("JOINED bea");
 
   // Ana goes on only once every friend has accepted (Cynthia and Dee are joined by the iOS side).
   const friends = night.members.slice(1);
@@ -314,18 +384,32 @@ async function runAndroid() {
   // "I'm there now, use this spot" saves where she is right now, so stand her at the safe place first.
   place(ana, SAFE);
   await sleep(4000);
-  maestro(ana, "android-ana-safeplace.yaml");
+  if (
+    !flowOrHandOff(
+      ana,
+      "android-ana-safeplace.yaml",
+      {},
+      `tap "I'm there now, use this spot" (Ana is standing at the safe place); I wait ${opt("hand-wait", "60")}s`,
+    )
+  )
+    await sleep(Number(opt("hand-wait", "60")) * 1000);
   place(ana, BAR);
   await sleep(4000);
-  maestro(ana, "android-ana-ready.yaml", {
-    CONTACT_NAME: opt("contact-name", "Mom")!,
-    CONTACT_PHONE: opt("contact-phone", "+1 555 010 0123")!,
-  });
+  flowOrHandOff(
+    ana,
+    "android-ana-ready.yaml",
+    {
+      CONTACT_NAME: opt("contact-name", "Mom")!,
+      CONTACT_PHONE: opt("contact-phone", "+1 555 010 0123")!,
+    },
+    "save the emergency contact, tap Check I'm ready (allow permissions), then Start the night",
+  );
 
+  // Either the flow started the night or a person is finishing it by hand: wait for the server to say so.
   await until(
-    "the night to start",
+    "the night to start (Start the night on Ana's phone)",
     async () => ((await latest())?.status === "active" ? true : undefined),
-    5 * 60,
+    10 * 60,
   );
   log("T0: the night is active");
 
