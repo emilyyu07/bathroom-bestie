@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Linking, Platform, Pressable, Text, View } from "react-native";
 import { color, font, radius, space, type } from "../theme";
-import { Body, Button, Card, ErrorText, Label, Pill, Small } from "../ui";
+import { Body, Button, Card, ErrorText, Heading, InfoRow, Label, Pill, Small } from "../ui";
 import { get, nowMinute, post } from "../api";
+import { sentMessage, type WorryRoute } from "../sent";
+import {
+  callContact,
+  friendText,
+  loadEmergency,
+  textContact,
+  type EmergencyContact,
+  type EmergencyNotice,
+} from "../emergency";
 
 /** Mirrors Alert in packages/schema (the mobile app is outside the workspace). */
 interface Alert {
@@ -43,10 +52,13 @@ const openMap = ({ lat, lon }: { lat: number; lon: number }) =>
 export function FriendAlerts({
   contractId,
   me,
+  target,
   reason,
 }: {
   contractId: string;
   me: string;
+  /** The planner: whose emergency contact this is. */
+  target: string;
   /** The reason chip currently picked on the Watcher screen, sent with "I'm worried". */
   reason?: string;
 }) {
@@ -54,6 +66,8 @@ export function FriendAlerts({
   const [checkedAt, setCheckedAt] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [sent, setSent] = useState<Record<string, string>>({});
+  const [contact, setContact] = useState<EmergencyContact | null>(null);
+  const [notice, setNotice] = useState<EmergencyNotice | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -61,6 +75,9 @@ export function FriendAlerts({
         `/incidents?contractId=${encodeURIComponent(contractId)}&to=${encodeURIComponent(me)}`,
       );
       setAlerts([...r.alerts].sort((a, b) => b.t - a.t));
+      const e = await loadEmergency(contractId).catch(() => null);
+      setContact(e?.contact ?? null);
+      setNotice(e?.notice ?? null);
       setCheckedAt(nowMinute());
       setError(false);
     } catch {
@@ -76,14 +93,14 @@ export function FriendAlerts({
 
   const act = async (a: Alert, type: "confirm" | "worry") => {
     try {
-      await post("/actions", {
+      const r = await post<{ route?: WorryRoute }>("/actions", {
         contractId,
         type,
         by: me,
         targetPersonId: a.personId,
         ...(type === "worry" && reason ? { reason } : {}),
       });
-      setSent((s) => ({ ...s, [a.id]: type === "confirm" ? "Sent: you're with her." : "Sent." }));
+      setSent((s) => ({ ...s, [a.id]: sentMessage(type, a.personId, r.route) }));
     } catch {
       setSent((s) => ({ ...s, [a.id]: "Couldn't send. Try again." }));
     }
@@ -92,6 +109,27 @@ export function FriendAlerts({
   const now = nowMinute();
   return (
     <View style={{ gap: space.lg }}>
+      {contact && (
+        <Card>
+          <View style={{ gap: space.xs }}>
+            <Heading>{target}'s emergency contact</Heading>
+            <Small>Someone she picked. Reach out if you need to; nothing is sent for you.</Small>
+          </View>
+          <InfoRow label={contact.name} value={contact.phone} />
+          <View style={{ flexDirection: "row", gap: space.sm }}>
+            <View style={{ flex: 1 }}>
+              <Button tone="secondary" title="Call" onPress={() => void callContact(contact)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                tone="secondary"
+                title="Text"
+                onPress={() => void textContact(contact, friendText(contact.name, me, target))}
+              />
+            </View>
+          </View>
+        </Card>
+      )}
       <Label>Alerts for you</Label>
       {error && <ErrorText>Can't reach BathroomBestie. Retrying…</ErrorText>}
       {!error && alerts.length === 0 && (
@@ -144,6 +182,27 @@ export function FriendAlerts({
               </Body>
               <Body selectable>{a.script911}</Body>
               <Small>BathroomBestie never calls anyone.</Small>
+            </View>
+          )}
+          {contact && notice?.alertId === a.id && (
+            // Demo only: BathroomBestie shows the text it would send, and never sends it.
+            <View
+              style={{
+                borderWidth: 1.5,
+                borderColor: color.blushBorder,
+                borderStyle: "dashed",
+                padding: space.lg,
+                borderRadius: radius.inset,
+                gap: space.sm,
+              }}
+            >
+              <Body style={font.bold}>
+                {notice.due
+                  ? `No one has responded, so BathroomBestie would now text ${contact.name}:`
+                  : `If no one responds by ${clock(notice.at)}, BathroomBestie would text ${contact.name}:`}
+              </Body>
+              <Small>“{notice.message}”</Small>
+              <Small style={font.bold}>Demo only: no text is sent.</Small>
             </View>
           )}
           <View style={{ flexDirection: "row", gap: space.sm }}>

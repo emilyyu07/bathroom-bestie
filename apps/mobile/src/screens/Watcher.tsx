@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { get, post } from "../api";
 import { font, space } from "../theme";
 import { Body, Button, Card, Chip, Divider, ErrorText, Heading, Screen, Small } from "../ui";
+import { sentMessage, type WorryRoute } from "../sent";
 import { FriendAlerts } from "./FriendAlerts";
 
 const REASONS = [
@@ -38,18 +39,14 @@ export function Watcher({
   const [sent, setSent] = useState<string | null>(null);
   const send = async (type: "confirm" | "worry") => {
     try {
-      await post("/actions", {
+      const r = await post<{ route?: WorryRoute }>("/actions", {
         contractId,
         type,
         by: me,
         targetPersonId: target,
         ...(type === "worry" && reason ? { reason } : {}),
       });
-      setSent(
-        type === "confirm"
-          ? `Sent: you're with ${target}. 💗`
-          : "Sent. BathroomBestie will let the right friend know.",
-      );
+      setSent(sentMessage(type, target, r.route));
     } catch {
       setSent("Couldn't send. Try again.");
     }
@@ -102,7 +99,7 @@ export function Watcher({
         {sent &&
           (sent.startsWith("Couldn't") ? <ErrorText>{sent}</ErrorText> : <Small>{sent}</Small>)}
       </Card>
-      <FriendAlerts contractId={contractId} me={me} reason={reason} />
+      <FriendAlerts contractId={contractId} me={me} target={target} reason={reason} />
     </Screen>
   );
 }

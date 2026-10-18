@@ -23,4 +23,15 @@ export async function get<T>(path: string): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+/** PUT or DELETE; throws on any error status. */
+export async function send<T>(method: "PUT" | "DELETE", path: string, body?: unknown): Promise<T> {
+  const r = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: body === undefined ? undefined : { "content-type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`${path}: ${r.status}`);
+  return r.json() as Promise<T>;
+}
+
 export const nowMinute = () => Math.floor(Date.now() / 60000);
