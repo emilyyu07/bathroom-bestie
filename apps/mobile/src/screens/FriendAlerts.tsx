@@ -3,6 +3,7 @@ import { Linking, Platform, Pressable, Text, View } from "react-native";
 import { color, font, radius, space, type } from "../theme";
 import { Body, Button, Card, ErrorText, Heading, InfoRow, Label, Pill, Small } from "../ui";
 import { get, nowMinute, post } from "../api";
+import { sentMessage, type WorryRoute } from "../sent";
 import {
   callContact,
   friendText,
@@ -92,14 +93,14 @@ export function FriendAlerts({
 
   const act = async (a: Alert, type: "confirm" | "worry") => {
     try {
-      await post("/actions", {
+      const r = await post<{ route?: WorryRoute }>("/actions", {
         contractId,
         type,
         by: me,
         targetPersonId: a.personId,
         ...(type === "worry" && reason ? { reason } : {}),
       });
-      setSent((s) => ({ ...s, [a.id]: type === "confirm" ? "Sent: you're with her." : "Sent." }));
+      setSent((s) => ({ ...s, [a.id]: sentMessage(type, a.personId, r.route) }));
     } catch {
       setSent((s) => ({ ...s, [a.id]: "Couldn't send. Try again." }));
     }
