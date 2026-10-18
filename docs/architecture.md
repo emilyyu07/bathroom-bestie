@@ -363,6 +363,14 @@ scrubber were cut for time.
 - **Backstage shows state, never position**, so it is not live location sharing.
 - **Demo nights are contract data**, not a code path.
 - **Gemini fills a small `DraftPlan`**, not the full contract.
+- **Safe place, set by address or on the spot.** The planner names it (Home, a friend's place) and types an address
+  or uses where she is. The phone's geocoder resolves the address; the address and point stay on the device and the
+  server still learns only `arrived` (invariant 5). It feeds the same `home_geofence` pre-flight check.
+- **Emergency contact: friends reach them, BathroomBestie never does.** The planner adds a name and number
+  (`/contracts/:id/emergency-contact`). Friends see it all night with Call and Text buttons that open their own phone
+  with a fixed, pre-filled message. If the newest top-rung alert about her gets no friend response within
+  `ack_timeout_min`, the friend's card and backstage show the fixed-template text BathroomBestie _would_ send: a
+  demo only, nothing is sent (no SMS provider). Backstage's copy omits the map link.
 - **A friend's report is labelled as one (invariant 8).** Any alert raised by a friend's "I'm worried" has kind
   `friend_worry`, even when it lifts an incident something else opened. The incident keeps its own kind, so detection
   and the ladder do not change; only the alert says whose report it is.
