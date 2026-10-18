@@ -41,6 +41,8 @@ const SAFE = { lat: 43.665, lon: -79.38 }; // ~1.7 km from the bar
 const WALK = [43.652, 43.654, 43.656, 43.658, 43.66]; // away from the bar, ~220 m per step
 
 // ---- helpers -------------------------------------------------------------------------------------
+/** How long a conductor waits on the other side (a person re-running, a slow emulator) before giving up. */
+const MAX_WAIT_S = Number(opt("max-wait", "120")) * 60;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const stamp = () => new Date().toLocaleTimeString("en-GB");
 const log = (m: string) => console.log(`${stamp()} [${role}] ${m}`);
@@ -245,7 +247,7 @@ async function runIos() {
           if (l.contractId !== night.contractId) return { replanned: l };
           return l.status === "active" ? { replanned: null } : undefined;
         },
-        20 * 60,
+        MAX_WAIT_S,
       );
       if (!outcome.replanned) break;
       log("Ana planned a NEW night: moving the friends to it");
@@ -262,7 +264,7 @@ async function runIos() {
         );
         return r.json?.alerts.find((a) => a.rung >= 2) ?? undefined;
       },
-      20 * 60,
+      MAX_WAIT_S,
     );
     log(
       `ALERT for Cynthia (rung ${alert.rung}, ${alert.kind}); letting it show for ${opt("worry-delay", "12")}s`,
