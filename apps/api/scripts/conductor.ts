@@ -121,10 +121,35 @@ function maestro(device: string, flow: string, vars: Record<string, string> = {}
     env,
     stdio: ["ignore", "pipe", "pipe"],
     encoding: "utf8",
+    // A lagging emulator can leave Maestro waiting forever; a flow that is not done by now has failed.
+    timeout: Number(opt("flow-timeout", "240")) * 1000,
+    killSignal: "SIGKILL",
   });
+  if (r.error && (r.error as NodeJS.ErrnoException).code === "ETIMEDOUT")
+    throw new Error(`maestro flow ${flow} on ${device} did not finish in time (emulator lagging?)`);
   if (r.status !== 0) {
     console.error((r.stdout ?? "") + (r.stderr ?? ""));
     throw new Error(`maestro flow ${flow} failed on ${device}`);
+  }
+}
+
+/**
+ * Runs a flow; if it fails or times out, says exactly what to do by hand and carries on, so one stuck tap
+ * (a lagging emulator, a label that differs) does not end the night. Returns whether the flow ran.
+ */
+function flowOrHandOff(
+  device: string,
+  flow: string,
+  vars: Record<string, string>,
+  yourTurn: string,
+): boolean {
+  try {
+    maestro(device, flow, vars);
+    return true;
+  } catch (e) {
+    log(`FLOW FAILED: ${(e as Error).message.split("\n")[0]}`);
+    log(`YOUR TURN (on ${device}): ${yourTurn}`);
+    return false;
   }
 }
 
@@ -288,19 +313,31 @@ async function runAndroid() {
   log("Ana and Bea placed at the bar");
 
   const before = (await latest())?.contractId;
-  maestro(ana, "android-ana-plan.yaml", { NAME: name, SENTENCE: sentence });
+  const planned = flowOrHandOff(
+    ana,
+    "android-ana-plan.yaml",
+    { NAME: name, SENTENCE: sentence },
+    `plan the night by hand: name "${name}", the plan "${sentence}", Make my plan, then "The plan looks right"`,
+  );
   const night = await until(
     "the plan to reach the API",
     async () => {
       const l = await latest();
       return l && l.contractId !== before ? l : undefined;
     },
-    120,
+    planned ? 120 : 10 * 60,
   );
   log(`PLANNED. CODE ${night.joinCode}  members ${night.members.join(", ")}`);
 
-  maestro(bea, "android-bea-join.yaml", { CODE: night.joinCode, NAME: "bea" });
-  log("JOINED bea");
+  if (
+    flowOrHandOff(
+      bea,
+      "android-bea-join.yaml",
+      { CODE: night.joinCode, NAME: "bea" },
+      `join by hand: Join a friend's night, code ${night.joinCode}, Find the night, I'm bea`,
+    )
+  )
+    log("JOINED bea");
 
   // Ana goes on only once every friend has accepted (Cynthia and Dee are joined by the iOS side).
   const friends = night.members.slice(1);
@@ -321,18 +358,32 @@ async function runAndroid() {
   // "I'm there now, use this spot" saves where she is right now, so stand her at the safe place first.
   place(ana, SAFE);
   await sleep(4000);
-  maestro(ana, "android-ana-safeplace.yaml");
+  if (
+    !flowOrHandOff(
+      ana,
+      "android-ana-safeplace.yaml",
+      {},
+      `tap "I'm there now, use this spot" (Ana is standing at the safe place); I wait ${opt("hand-wait", "60")}s`,
+    )
+  )
+    await sleep(Number(opt("hand-wait", "60")) * 1000);
   place(ana, BAR);
   await sleep(4000);
-  maestro(ana, "android-ana-ready.yaml", {
-    CONTACT_NAME: opt("contact-name", "Mom")!,
-    CONTACT_PHONE: opt("contact-phone", "+1 555 010 0123")!,
-  });
+  flowOrHandOff(
+    ana,
+    "android-ana-ready.yaml",
+    {
+      CONTACT_NAME: opt("contact-name", "Mom")!,
+      CONTACT_PHONE: opt("contact-phone", "+1 555 010 0123")!,
+    },
+    "save the emergency contact, tap Check I'm ready (allow permissions), then Start the night",
+  );
 
+  // Either the flow started the night or a person is finishing it by hand: wait for the server to say so.
   await until(
-    "the night to start",
+    "the night to start (Start the night on Ana's phone)",
     async () => ((await latest())?.status === "active" ? true : undefined),
-    5 * 60,
+    10 * 60,
   );
   log("T0: the night is active");
 

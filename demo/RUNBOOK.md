@@ -101,7 +101,38 @@ the phone; quiet by default (no check-ins, no live map); a nudge to her; a frien
 last-known area; the ladder; a human "I'm worried" with a reason; the labelled "Demo only" preview (nothing is
 sent); arrival with no location.
 
-## 7. Known limits
+## 7. When a step lags or sticks (Android)
+
+A flow that does not finish in 240 s is stopped (`--flow-timeout S`), and a failed Android step no longer ends
+the night. The conductor prints `FLOW FAILED` and then `YOUR TURN (on <device>): ...` with the exact taps to do
+by hand, and keeps waiting for the server to confirm. So a stuck emergency-contact screen costs one manual step,
+not the whole run.
+
+| Step                       | If it fails, do this by hand on Ana's emulator                                   | The conductor then waits for                           |
+| -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Plan                       | name `Ana`, the plan sentence, Make my plan, "The plan looks right"              | the new plan on the server (10 min)                    |
+| Bea joins                  | Join a friend's night, the code in the log, Find the night, I'm bea              | all three friends joined (10 min)                      |
+| Safe place                 | with Ana at the safe place, "I'm there now, use this spot"                       | 60 s (`--hand-wait S`), then moves Ana back to the bar |
+| Contact, pre-flight, Start | Mom + number, Save contact; Check I'm ready (allow permissions); Start the night | the night going active (10 min)                        |
+
+After the by-hand step the run carries on by itself: the 180 s hold, the walk, and the arrival.
+
+**If the screen is lagging, it is almost always the emulator, not the API** (the API answers in milliseconds over
+Tailscale). Check, in this order:
+
+1. Only what is needed is running: Metro, two emulators, the conductor. Stop Gradle (`cd apps/mobile/android &&
+./gradlew --stop`) and quit Android Studio after the build.
+2. RAM: two emulators need about 6 GB free. Give each 2 GB or less, use the host GPU, and cold-boot them.
+3. `adb -s <serial> shell top -n 1 | head -15`: if the emulator itself is pinned, restart it.
+4. A pre-filled text box or the keyboard covering a button is the other usual cause: tap the field by hand once.
+5. Still slow: run the full conductor once the emulators feel responsive, and keep Maestro's studio closed.
+
+**Salvaging a night that is already stuck:** all three friends have joined, so do the stuck step by hand and tap
+**Start the night**. Emily's conductor sees the night go active by itself. Then walk Ana yourself (`adb -s <ana> emu
+geo fix -79.38 <lat>` for 43.652, 43.654, 43.656, 43.658, 43.660, 15 s apart, after 3 minutes), and finally to
+43.665. Or press Ctrl-C and re-run; Emily's conductor follows the new plan.
+
+## 8. Known limits
 
 The iOS half has been run end to end. The Android flows are written from the screens' labels and have **not** been
 run on an emulator, so the first full run may need a tap fixed (use `maestro studio`).
