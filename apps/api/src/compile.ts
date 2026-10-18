@@ -102,11 +102,18 @@ const withTimeout = <T>(p: Promise<T>, model: string, ms: number): Promise<T> =>
 };
 
 /**
- * Fast first (a demo should not wait on the model), then the strongest, then another. Each model has
+ * Fast first (a demo should not wait on the model), then the strongest, then the rest. Each model has
  * its own quota, so one running out (a free key allows ~20 requests a day per model) or being
  * overloaded does not stop a plan from being made.
  */
-export const DEFAULT_MODELS = ["gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-3.7-flash"];
+export const DEFAULT_MODELS = [
+  "gemini-3.1-flash-lite",
+  "gemini-3.5-flash-lite",
+  "gemini-3.8-flash",
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3-flash-preview",
+];
 
 /** GEMINI_MODEL (comma-separated) is the preferred model(s); the defaults follow as fallbacks. */
 export const modelChain = (env?: string): string[] => [
