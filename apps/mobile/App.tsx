@@ -19,6 +19,9 @@ const TABS = [
   ["status", "Tonight"],
 ] as const;
 
+/** The API says this night does not exist (e.g. it was restarted and forgot it): `get` throws "<path>: 404". */
+const gone = (e: unknown) => String(e).includes(": 404");
+
 type Screen = "loading" | "welcome" | "join" | "plan" | "preflight" | "status" | "watcher";
 
 // Auth is out of scope: a phone is the planner or one friend of one night (see identity.ts).
@@ -44,6 +47,18 @@ export default function App() {
       hide.remove();
     };
   }, []);
+  // Back to the start: stop reporting, forget this night. Also what happens by itself when the night
+  // is gone from the server, so a friend is never left "waiting" for a night that no longer exists.
+  const leave = useCallback(async () => {
+    await endNight(); // stops this phone's reporting, whichever role
+    await clearIdentity();
+    setRole(null);
+    setContractId("");
+    setMe("");
+    setActive(false);
+    setConfirmed(false);
+    setScreen("welcome");
+  }, []);
   // Both roles report once the night is active: the group checks compare her with her friends.
   useNightReporting(contractId, me, active, nightEnded);
 
@@ -53,11 +68,13 @@ export default function App() {
     const check = () =>
       get<{ status: string }>(`/contracts/${encodeURIComponent(contractId)}`)
         .then((c) => c.status === "active" && setActive(true))
-        .catch(() => undefined);
+        .catch((e) => {
+          if (gone(e)) void leave();
+        });
     void check();
     const h = setInterval(() => void check(), 20_000);
     return () => clearInterval(h);
-  }, [role, active, contractId]);
+  }, [role, active, contractId, leave]);
 
   useEffect(() => {
     void (async () => {
@@ -75,26 +92,22 @@ export default function App() {
       setActive(!!n && n.contractId === id.contractId);
       setConfirmed(id.role === "planner"); // saved only when she confirmed the plan
       if (id.role === "friend") {
-        const c = await get<{ contract: { group: { members: string[] } } }>(
-          `/contracts/${encodeURIComponent(id.contractId)}`,
-        ).catch(() => null);
-        setPlanner(c?.contract.group.members[0] ?? "");
+        let members: string[] | null = null;
+        try {
+          members = (
+            await get<{ contract: { group: { members: string[] } } }>(
+              `/contracts/${encodeURIComponent(id.contractId)}`,
+            )
+          ).contract.group.members;
+        } catch (e) {
+          if (gone(e)) return void leave(); // the night is gone; offline is not the same thing
+        }
+        setPlanner(members?.[0] ?? "");
         return setScreen("watcher");
       }
       setScreen(n ? "status" : "preflight");
     })();
-  }, []);
-
-  const leave = async () => {
-    await endNight(); // stops this phone's reporting, whichever role
-    await clearIdentity();
-    setRole(null);
-    setContractId("");
-    setMe("");
-    setActive(false);
-    setConfirmed(false);
-    setScreen("welcome");
-  };
+  }, [leave]);
 
   return (
     <SafeAreaView
