@@ -1,0 +1,24 @@
+# Ana (Android): plan the night and confirm the plan, landing on "Get ready".
+# Env: NAME (her first name), SENTENCE (the plan). Written from the screens' labels; untested on Android,
+# so check taps with `maestro studio` if one misses (a prefilled name box is the likeliest).
+appId: app.bathroombestie.mobile
+---
+- launchApp:
+    stopApp: false
+    permissions:
+      all: allow
+- tapOn:
+    text: "Leave this night"
+    optional: true
+- tapOn: "Plan my night"
+- tapOn: "Your name….*|${NAME}"
+- eraseText: 40
+- inputText: ${NAME}
+- tapOn: "Your plans.*"
+- inputText: ${SENTENCE}
+- hideKeyboard
+- tapOn: "Make my plan"
+- extendedWaitUntil:
+    visible: "The plan looks right"
+    timeout: 40000
+- tapOn: "The plan looks right"

@@ -1,0 +1,19 @@
+# Bea (Android): join by code. Env: CODE, NAME (bea). Runtime permissions are granted up front.
+appId: app.bathroombestie.mobile
+---
+- launchApp:
+    stopApp: false
+    permissions:
+      all: allow
+- tapOn:
+    text: "Leave this night"
+    optional: true
+- tapOn: "Join a friend's night"
+- tapOn: "9F3A1B"
+- inputText: ${CODE}
+- hideKeyboard
+- tapOn: "Find the night"
+- tapOn: "I'm ${NAME}"
+- extendedWaitUntil:
+    visible: ".*(Waiting for your friend|BathroomBestie is on|How's).*"
+    timeout: 20000
