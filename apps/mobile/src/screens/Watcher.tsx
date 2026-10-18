@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { get, post } from "../api";
-import { space } from "../theme";
-import { Body, Button, Card, Chip, ErrorText, Heading, Screen } from "../ui";
+import { font, space } from "../theme";
+import { Body, Button, Card, Chip, Divider, ErrorText, Heading, Screen, Small } from "../ui";
 import { FriendAlerts } from "./FriendAlerts";
 
 const REASONS = [
@@ -57,7 +57,7 @@ export function Watcher({
   if (!watching)
     return (
       <Screen>
-        <Card>
+        <Card tint>
           <Heading>{target} wants you on her team tonight 💗</Heading>
           <Body>
             You'll only hear from BathroomBestie if something seems off. Any time, you can say
@@ -77,18 +77,26 @@ export function Watcher({
   return (
     <Screen>
       <Card>
-        <Heading>How's {target}?</Heading>
-        <Body muted>If you're with her, let us know. If something feels off, say so.</Body>
+        <View style={{ gap: space.xs }}>
+          <Heading>How's {target}?</Heading>
+          <Small>Let us know any time. Nothing is sent unless you tap.</Small>
+        </View>
         <Button big tone="withHer" title="I'm with her" onPress={() => void send("confirm")} />
-        <Button big tone="worry" title="I'm worried" onPress={() => void send("worry")} />
-        <Body muted>Why? (optional)</Body>
+        <Divider />
+        <Body style={font.semibold}>Something feels off?</Body>
         <View style={{ flexDirection: "row", gap: space.sm, flexWrap: "wrap" }}>
           {REASONS.map(([id, label]) => (
-            <Chip key={id} label={label} selected={reason === id} onPress={() => setReason(id)} />
+            <Chip
+              key={id}
+              label={label}
+              selected={reason === id}
+              onPress={() => setReason(reason === id ? undefined : id)}
+            />
           ))}
         </View>
+        <Button big tone="worry" title="I'm worried" onPress={() => void send("worry")} />
         {sent &&
-          (sent.startsWith("Couldn't") ? <ErrorText>{sent}</ErrorText> : <Body muted>{sent}</Body>)}
+          (sent.startsWith("Couldn't") ? <ErrorText>{sent}</ErrorText> : <Small>{sent}</Small>)}
       </Card>
       <FriendAlerts contractId={contractId} me={me} reason={reason} />
     </Screen>

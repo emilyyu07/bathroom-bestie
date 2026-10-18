@@ -3,8 +3,21 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { post } from "../api";
 import { consequence } from "../sweep";
-import { color, font, space } from "../theme";
-import { Body, Button, Card, Chip, ErrorText, Field, Heading, Screen, Title } from "../ui";
+import { color, font, space, type } from "../theme";
+import {
+  Body,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  ErrorText,
+  Field,
+  Heading,
+  InfoRow,
+  Screen,
+  Small,
+  Title,
+} from "../ui";
 
 const PRESETS = ["relaxed", "standard", "cautious"] as const;
 /** What she sees; the contract keeps the preset names. */
@@ -80,10 +93,12 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
 
   return (
     <Screen>
-      <Title>Plan your night 💗</Title>
-      <Body muted>One sentence is enough. We'll read it back so you can check it.</Body>
+      <Title subtitle="One sentence is enough. We'll read it back so you can check it.">
+        Plan your night
+      </Title>
       <Field
         label="Your first name"
+        hint="Your friends see your first name in any alert."
         value={name}
         onChangeText={setName}
         placeholder="Ana"
@@ -97,9 +112,6 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
         placeholder="Out with Bea and Cy until 2am, home by 3"
         multiline
       />
-      <Body muted style={{ fontSize: 14 }}>
-        Your friends see your first name in any alert.
-      </Body>
       <Button
         big
         title={making ? "Making your plan…" : "Make my plan"}
@@ -108,21 +120,23 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
       />
       {error && <ErrorText>{error}</ErrorText>}
       {readBack && (
-        <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
+        <Card tint>
           <Heading>Here's your plan</Heading>
           <Body>{readBack}</Body>
+          <View style={{ gap: space.sm }}>
+            {terms.map((t) => (
+              <View key={t} style={{ flexDirection: "row", gap: space.sm }}>
+                <Text style={{ ...font.extrabold, ...type.body, color: color.primary }}>✓</Text>
+                <Body style={{ flex: 1 }}>{t}</Body>
+              </View>
+            ))}
+          </View>
           {joinCode && (
-            <Body>
-              Friends join with the code{" "}
-              <Text style={{ ...font.extrabold, color: color.primary }}>{joinCode}</Text>
-            </Body>
+            <>
+              <Divider />
+              <InfoRow label="Friends join with" value={joinCode} />
+            </>
           )}
-          {terms.map((t) => (
-            <View key={t} style={{ flexDirection: "row", gap: space.sm }}>
-              <Text style={{ ...font.extrabold, color: color.primary, fontSize: 16 }}>✓</Text>
-              <Body style={{ flex: 1 }}>{t}</Body>
-            </View>
-          ))}
         </Card>
       )}
       {id && (
@@ -138,16 +152,16 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
               />
             ))}
           </View>
-          <Body muted>{consequence(preset)}</Body>
+          <Small>{consequence(preset)}</Small>
         </Card>
       )}
       {id && me && (
         // Pre-flight's "Night plan confirmed" check means this tap: she read the plan back.
-        <View style={{ gap: space.sm }}>
-          <Body muted>
-            Anything off? Change the sentence and make it again, or pick another setting.
-          </Body>
+        <View style={{ gap: space.md }}>
           <Button big title="The plan looks right" onPress={() => onCompiled({ id, me })} />
+          <Small style={{ textAlign: "center" }}>
+            Anything off? Change the sentence and make it again.
+          </Small>
         </View>
       )}
     </Screen>

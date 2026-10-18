@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { View } from "react-native";
 import { get, nowMinute } from "../api";
-import { color, space } from "../theme";
-import { Body, Card, Heading, Pill, Screen, Title } from "../ui";
+import { Body, Card, InfoRow, Label, Pill, Screen, Small, Title } from "../ui";
 
 interface Contract {
   window: { start: number; end: number };
@@ -54,10 +52,7 @@ export function Status({
   if (!active)
     return (
       <Screen>
-        <Card>
-          <Heading>No night yet</Heading>
-          <Body muted>Make a plan and check you're ready, then start your night here.</Body>
-        </Card>
+        <Title subtitle="Make a plan and check you're ready, then start your night.">Tonight</Title>
       </Screen>
     );
 
@@ -69,41 +64,31 @@ export function Status({
   );
   return (
     <Screen>
-      <Title>We're looking out for you tonight 💗</Title>
+      <Title subtitle="We're looking out for you. Have fun 💗">Tonight</Title>
       <Card>
         {current && (
-          <Body>
-            <Body style={{ color: color.primary }}>Watching now: </Body>
-            {current.who} (until {clock(current.to)})
-          </Body>
+          <InfoRow label="Watching now" value={`${current.who} until ${clock(current.to)}`} />
         )}
-        {next && (
-          <Body>
-            <Body style={{ color: color.primary }}>Next: </Body>
-            {next.who} (from {clock(next.from)})
-          </Body>
-        )}
-        {contract && <Body muted>Night ends around {clock(contract.window.end)}</Body>}
-        {home && <Body muted>Home by {clock(home.by)} 🏠</Body>}
+        {next && <InfoRow label="Next" value={`${next.who} from ${clock(next.from)}`} />}
+        {home && <InfoRow label="Home by" value={clock(home.by)} />}
+        {contract && <InfoRow label="Night ends" value={`around ${clock(contract.window.end)}`} />}
       </Card>
-      <Heading>Messages for you</Heading>
+      <Label>Messages for you</Label>
       {alerts.length === 0 && (
         <Card>
-          <Body>Nothing to do. Have fun! ✨</Body>
+          <Body muted>Nothing to do. Enjoy your night ✨</Body>
         </Card>
       )}
       {alerts.slice(0, 3).map((a) => (
-        <Card key={a.id} style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
-          <View style={{ flexDirection: "row" }}>
-            <Pill>{Math.max(0, now - a.t)} min ago</Pill>
-          </View>
+        <Card key={a.id} tint>
+          <Pill>{Math.max(0, now - a.t)} min ago</Pill>
           {/* Fixed engine template text: shown exactly as written. */}
           <Body>{a.message}</Body>
         </Card>
       ))}
-      <Body muted style={{ fontSize: 14, marginTop: space.sm }}>
+      <Small style={{ textAlign: "center" }}>
         Got a nudge? Just open the app. That sends a fresh update and clears it.
-      </Body>
+      </Small>
     </Screen>
   );
 }

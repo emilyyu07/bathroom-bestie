@@ -3,8 +3,8 @@ import { Linking, Platform, Share, Text, View } from "react-native";
 import { get, post } from "../api";
 import { clearHome, homeIsSet, setHomeHere } from "../home";
 import { collectSnapshot, requestPermissions } from "../readiness";
-import { color, font, space } from "../theme";
-import { Body, Button, Card, ErrorText, Heading, Screen } from "../ui";
+import { color, font, space, type } from "../theme";
+import { Body, Button, Card, ErrorText, Heading, Screen, Small, Title } from "../ui";
 
 /** Same rule as the API's joinCodeOf (apps/api/src/join.ts): the id's first 6 hex digits. */
 const joinCodeOf = (contractId: string) => contractId.replace(/^c_/, "").slice(0, 6).toUpperCase();
@@ -79,21 +79,22 @@ export function Preflight({
   const batteryRestricted =
     Platform.OS === "android" &&
     report?.checks.some((c) => c.id === "battery_settings" && c.status === "fail");
+  const ready = report !== null && report.state !== "not_ready";
   return (
     <Screen>
+      <Title subtitle="A couple of things before you head out.">Get ready</Title>
       {contractId !== "" && (
-        <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
-          <Heading>Invite your friends 💌</Heading>
-          <Body muted>They join with this code:</Body>
-          <Text
-            selectable
-            style={{ ...font.extrabold, fontSize: 32, color: color.primary, letterSpacing: 4 }}
-          >
-            {joinCodeOf(contractId)}
-          </Text>
-          <Body muted style={{ fontSize: 13 }}>
-            (or the full night code {contractId})
-          </Body>
+        <Card tint>
+          <Heading>Invite your friends</Heading>
+          <View style={{ gap: space.xs }}>
+            <Small>They join with this code</Small>
+            <Text
+              selectable
+              style={{ ...font.extrabold, fontSize: 34, color: color.primary, letterSpacing: 4 }}
+            >
+              {joinCodeOf(contractId)}
+            </Text>
+          </View>
           <Button
             tone="quiet"
             title="Share the code"
@@ -103,47 +104,19 @@ export function Preflight({
               }).catch(() => undefined)
             }
           />
-          <Body muted>
+          <Body style={font.semibold}>
             {joined.length ? `Joined: ${joined.join(", ")} 💗` : "Nobody has joined yet."}
           </Body>
+          <Small selectable>Full night code: {contractId}</Small>
         </Card>
-      )}
-      <Button
-        big
-        title={running ? "Checking…" : report ? "Check again" : "Check I'm ready"}
-        disabled={running || !contractId}
-        onPress={() => void run()}
-      />
-      {needsPermissions && (
-        <Button
-          tone="secondary"
-          title="Allow location and notifications"
-          onPress={async () => {
-            await requestPermissions();
-            await run();
-          }}
-        />
-      )}
-      {batteryRestricted && (
-        // She exempts the app herself; we don't request REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-        // (restricted by Play policy). Re-run pre-flight after to see the change.
-        <Button
-          tone="secondary"
-          title="Open battery settings"
-          onPress={() =>
-            void Linking.sendIntent("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS").catch(
-              () => Linking.openSettings(),
-            )
-          }
-        />
       )}
       {Platform.OS === "android" && (
         <Card>
-          <Heading>Home 🏠</Heading>
+          <Heading>Home</Heading>
           <Body muted>
             {home === "set"
-              ? "Home is saved on this phone. Your friends only learn that you got home, never where."
-              : "Save your home so BathroomBestie knows when you're back. It never leaves this phone."}
+              ? "Saved on this phone. Your friends only learn that you got home, never where."
+              : "Save your home so we know when you're back. It never leaves this phone."}
           </Body>
           <Button
             tone={home === "set" ? "quiet" : "secondary"}
@@ -181,30 +154,61 @@ export function Preflight({
                 c.status === "pass" ? "pass" : c.severity === "blocking" ? "blocking" : "warning"
               ];
             return (
-              <View key={c.id} style={{ flexDirection: "row", gap: space.sm }}>
-                <Text style={{ ...font.extrabold, fontSize: 17, color: m.color, width: 18 }}>
+              <View key={c.id} style={{ flexDirection: "row", gap: space.md }}>
+                <Text style={{ ...font.extrabold, ...type.body, color: m.color, width: 16 }}>
                   {m.glyph}
                 </Text>
-                <Body style={{ flex: 1 }}>
-                  <Text style={{ ...font.bold }}>{c.label}</Text>
-                  {"  "}
-                  <Text style={{ color: color.muted }}>{c.detail}</Text>
-                </Body>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Body style={font.bold}>{c.label}</Body>
+                  <Small>{c.detail}</Small>
+                </View>
               </View>
             );
           })}
+          {needsPermissions && (
+            <Button
+              tone="secondary"
+              title="Allow location and notifications"
+              onPress={async () => {
+                await requestPermissions();
+                await run();
+              }}
+            />
+          )}
+          {batteryRestricted && (
+            // She exempts the app herself; we don't request REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+            // (restricted by Play policy). Re-run pre-flight after to see the change.
+            <Button
+              tone="secondary"
+              title="Open battery settings"
+              onPress={() =>
+                void Linking.sendIntent(
+                  "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS",
+                ).catch(() => Linking.openSettings())
+              }
+            />
+          )}
         </Card>
       )}
-      {report && report.state !== "not_ready" && (
+      <View style={{ gap: space.md }}>
+        {ready && (
+          <Button
+            big
+            title="Start the night"
+            onPress={async () => {
+              await post(`/contracts/${contractId}/activate`, {});
+              onActive();
+            }}
+          />
+        )}
         <Button
-          big
-          title="Start the night"
-          onPress={async () => {
-            await post(`/contracts/${contractId}/activate`, {});
-            onActive();
-          }}
+          big={!ready}
+          tone={ready ? "quiet" : "primary"}
+          title={running ? "Checking…" : report ? "Check again" : "Check I'm ready"}
+          disabled={running || !contractId}
+          onPress={() => void run()}
         />
-      )}
+      </View>
     </Screen>
   );
 }

@@ -4,8 +4,19 @@ import { Platform, View } from "react-native";
 import { get, post } from "../api";
 import { saveIdentity, type Identity } from "../identity";
 import { requestPermissions } from "../readiness";
-import { color, space } from "../theme";
-import { Body, Button, Card, ErrorText, Field, Heading, Screen, Title } from "../ui";
+import { font, space } from "../theme";
+import {
+  Button,
+  Card,
+  Divider,
+  ErrorText,
+  Field,
+  Heading,
+  Screen,
+  Small,
+  TextButton,
+  Title,
+} from "../ui";
 
 interface Night {
   contract: { id: string; group: { members: string[] } };
@@ -31,7 +42,7 @@ export function Join({
     setError(null);
     try {
       // Either the short code she reads out (6 hex digits) or the full night code she shares.
-      const typed = code.trim();
+      const typed = code.trim().toLowerCase(); // night codes are lower-case; the box capitalises
       const id = /^[0-9a-f]{6}$/i.test(typed)
         ? (await get<{ contractId: string }>(`/join/${typed}`)).contractId
         : typed;
@@ -69,41 +80,42 @@ export function Join({
   const [planner, ...friends] = night?.contract.group.members ?? [];
   return (
     <Screen>
-      <Title>Join a friend's night 💌</Title>
+      <Title subtitle="Got a code from a friend? Pop it in.">Join a friend's night</Title>
       <Field
         label="Join code"
+        hint="The 6 characters she gives you (or the full night code)."
         value={code}
         onChangeText={setCode}
         placeholder="9F3A1B"
-        autoCapitalize="none"
+        autoCapitalize="characters"
         autoCorrect={false}
       />
-      <Body muted style={{ fontSize: 14 }}>
-        The 6 characters she gives you (or the full night code).
-      </Body>
       <Button big title="Find the night" disabled={!code.trim()} onPress={() => void find()} />
       {error && <ErrorText>{error}</ErrorText>}
       {night && (
-        <View style={{ gap: space.md }}>
+        <Card tint>
           <Heading>{planner}'s night. Which one are you?</Heading>
           {friends.map((f) => (
             <Button key={f} title={`I'm ${f}`} onPress={() => void join(f)} />
           ))}
-          <Card style={{ backgroundColor: color.blush, borderColor: color.blushBorder }}>
-            <Body>
-              Joining means you'll watch out for {planner} tonight: BathroomBestie may send you
-              alerts about her, and you can say you're with her or that you're worried.
-            </Body>
-            <Body muted>
-              Once the night starts, your phone also sends your rough area (about 100 m), so
-              BathroomBestie can tell whether the group is together. Nobody sees anyone's location;
-              only an alert about someone shows their last-known area. You'll be asked to allow
-              location (all the time) and notifications.
-            </Body>
-          </Card>
-        </View>
+          <Divider />
+          <View style={{ gap: space.sm }}>
+            <Small>
+              <Small style={font.bold}>What joining means: </Small>
+              you watch out for {planner} tonight. You may get alerts about her, and you can say
+              you're with her or that you're worried.
+            </Small>
+            <Small>
+              <Small style={font.bold}>Your location: </Small>
+              once the night starts, your phone sends your rough area (about 100 m) so we can tell
+              if the group is together. Nobody sees anyone's location; only an alert about someone
+              shows their last-known area. You'll be asked to allow location (all the time) and
+              notifications.
+            </Small>
+          </View>
+        </Card>
       )}
-      <Button tone="quiet" title="Back" onPress={onBack} />
+      <TextButton title="Back" onPress={onBack} />
     </Screen>
   );
 }

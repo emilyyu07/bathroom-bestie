@@ -18,6 +18,7 @@ export const color = {
   berry: "#8E1046", // the most serious alert cards (rung 4)
   text: "#3D1A2B", // deep plum
   muted: "#7A4A5E",
+  placeholder: "#B596A4", // example text in an empty box: clearly lighter than anything typed
   error: "#B3261E",
   white: "#FFFFFF",
 } as const;
@@ -50,5 +51,18 @@ export const font = {
   },
 };
 
-export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 } as const;
-export const radius = { card: 20, button: 999, chip: 999, field: 14 } as const;
+export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
+export const radius = { card: 20, button: 999, chip: 999, field: 14, inset: 14 } as const;
+
+/**
+ * The type scale. Every piece of text uses one of these sizes (via ui.tsx), so screens line up and
+ * nothing is smaller than 13. Line heights are ~1.4x for easy reading.
+ */
+export const type = {
+  display: { fontSize: 32, lineHeight: 38 },
+  title: { fontSize: 26, lineHeight: 32 },
+  heading: { fontSize: 18, lineHeight: 24 },
+  body: { fontSize: 16, lineHeight: 23 },
+  small: { fontSize: 14, lineHeight: 20 },
+  label: { fontSize: 13, lineHeight: 18 },
+} as const;

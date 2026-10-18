@@ -12,5 +12,12 @@ export function consequence(name: string): string {
   const p = presets[name];
   if (!p || p.medianTimeToAlertMin === null)
     return "No simulation data bundled yet (run `pnpm sim sweep`).";
-  return `In simulated nights: a friend is alerted about ${p.medianTimeToAlertMin} min after trouble begins, with ${p.falseAlertsPerNormalNight} unneeded alerts per normal night.`;
+  return `In practice runs, a friend heard about ${p.medianTimeToAlertMin} min after something seemed off. ${falseAlarms(p.falseAlertsPerNormalNight)}`;
+}
+
+/** The unneeded-alert rate in words: "about once every 9 normal nights" reads easier than 0.111. */
+function falseAlarms(perNight: number): string {
+  if (perNight <= 0) return "No false alarms on normal nights.";
+  if (perNight >= 1) return `About ${Math.round(perNight)} false alarm(s) on a normal night.`;
+  return `A false alarm about once every ${Math.round(1 / perNight)} normal nights.`;
 }
