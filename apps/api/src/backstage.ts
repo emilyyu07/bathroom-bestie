@@ -1,5 +1,6 @@
 import type { Alert, Contract } from "@bathroombestie/schema";
 import { separatedFor, silentMinutes, watcherFor, type EngineState } from "@bathroombestie/engine";
+import type { EmergencyContact, EmergencyNotice } from "./emergency";
 
 /**
  * What a presenter (or a developer) needs to follow a night: who is reporting, who is quiet, which
@@ -43,6 +44,8 @@ export interface Backstage {
     minutesOpen: number;
   }[];
   alerts: { t: number; rung: number; kind: string; about: string; to: string[]; message: string }[];
+  /** Her emergency contact and the message BathroomBestie would send them (demo only, never sent). */
+  emergency: { contact: EmergencyContact | null; notice: EmergencyNotice | null };
 }
 
 export function backstageOf(
@@ -52,6 +55,7 @@ export function backstageOf(
   alerts: Alert[],
   joined: string[],
   now: number,
+  emergency: Backstage["emergency"] = { contact: null, notice: null },
 ): Backstage {
   const [owner, ...friends] = contract.group.members;
   const watcher = watcherFor(contract, owner!, now);
@@ -111,5 +115,6 @@ export function backstageOf(
         to: a.to,
         message: a.message,
       })),
+    emergency,
   };
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Linking, Platform, Share, Text, View } from "react-native";
 import { get, post } from "../api";
-import { clearHome, homeIsSet, setHomeHere } from "../home";
 import { collectSnapshot, requestPermissions } from "../readiness";
+import { EmergencyContactCard } from "./EmergencyContactCard";
+import { SafePlaceCard } from "./SafePlaceCard";
 import { color, font, space, type } from "../theme";
 import { Body, Button, Card, ErrorText, Heading, Screen, Small, Title } from "../ui";
 
@@ -45,7 +46,6 @@ export function Preflight({
 }) {
   const [report, setReport] = useState<Report | null>(null);
   const [running, setRunning] = useState(false);
-  const [home, setHome] = useState<"unset" | "set" | "saving">("unset");
   // Friends join on their own phones with the night code; show who has so far.
   const [joined, setJoined] = useState<string[]>([]);
   useEffect(() => {
@@ -60,10 +60,6 @@ export function Preflight({
     const h = setInterval(() => void load(), 10_000);
     return () => clearInterval(h);
   }, [contractId]);
-  const [homeError, setHomeError] = useState<string | null>(null);
-  useEffect(() => {
-    if (Platform.OS === "android") void homeIsSet().then((s) => setHome(s ? "set" : "unset"));
-  }, []);
   const run = async () => {
     setRunning(true);
     try {
@@ -110,41 +106,9 @@ export function Preflight({
           <Small selectable>Full night code: {contractId}</Small>
         </Card>
       )}
-      {Platform.OS === "android" && (
-        <Card>
-          <Heading>Home</Heading>
-          <Body muted>
-            {home === "set"
-              ? "Saved on this phone. Your friends only learn that you got home, never where."
-              : "Save your home so we know when you're back. It never leaves this phone."}
-          </Body>
-          <Button
-            tone={home === "set" ? "quiet" : "secondary"}
-            title={
-              home === "saving"
-                ? "Saving…"
-                : home === "set"
-                  ? "Clear home"
-                  : "I'm home now, save it"
-            }
-            disabled={home === "saving"}
-            onPress={async () => {
-              setHomeError(null);
-              const was = home;
-              setHome("saving");
-              try {
-                if (was === "set") await clearHome();
-                else await setHomeHere();
-                setHome(was === "set" ? "unset" : "set");
-              } catch (e) {
-                setHome(was);
-                setHomeError((e as Error).message);
-              }
-            }}
-          />
-          {homeError && <ErrorText>{homeError}</ErrorText>}
-        </Card>
-      )}
+      {/* The safe place is an Android geofence today (iOS has no background location yet). */}
+      {Platform.OS === "android" && <SafePlaceCard />}
+      {contractId !== "" && <EmergencyContactCard contractId={contractId} />}
       {report && (
         <Card>
           <Heading>{TITLE[report.state]}</Heading>

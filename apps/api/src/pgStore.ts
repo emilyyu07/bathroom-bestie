@@ -7,6 +7,7 @@ import type {
   FriendAction,
   ReadinessReport,
 } from "@bathroombestie/schema";
+import type { EmergencyContact } from "./emergency";
 import type { EngineRow, Store, StoredContract } from "./store";
 
 /** Postgres/TimescaleDB store. Evidence is append-only; there is no UPDATE or DELETE on it. */
@@ -184,5 +185,22 @@ export class PgStore implements Store {
       args,
     );
     return r.rows.map((x) => x.body as Alert);
+  }
+  async setEmergencyContact(contractId: string, c: EmergencyContact | null) {
+    if (c)
+      await this.pool.query(
+        `INSERT INTO emergency_contacts (contract_id, name, phone) VALUES ($1, $2, $3)
+         ON CONFLICT (contract_id) DO UPDATE SET name = EXCLUDED.name, phone = EXCLUDED.phone`,
+        [contractId, c.name, c.phone],
+      );
+    else
+      await this.pool.query("DELETE FROM emergency_contacts WHERE contract_id = $1", [contractId]);
+  }
+  async getEmergencyContact(contractId: string) {
+    const r = await this.pool.query(
+      "SELECT name, phone FROM emergency_contacts WHERE contract_id = $1",
+      [contractId],
+    );
+    return r.rows[0] ? { name: r.rows[0].name as string, phone: r.rows[0].phone as string } : null;
   }
 }

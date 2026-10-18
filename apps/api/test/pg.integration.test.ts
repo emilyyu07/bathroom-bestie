@@ -90,7 +90,9 @@ describe.skipIf(!url)("postgres integration", () => {
     await pool?.end();
   });
   beforeEach(async () => {
-    await pool.query("TRUNCATE watchers, engine_state, incidents, actions, evidence, contracts");
+    await pool.query(
+      "TRUNCATE emergency_contacts, watchers, engine_state, incidents, actions, evidence, contracts",
+    );
     store = new PgStore(pool);
   });
 
@@ -177,6 +179,19 @@ describe.skipIf(!url)("postgres integration", () => {
       await store.acceptWatcher(contract.id, "bea", 11);
       await store.acceptWatcher(contract.id, "cy", 12);
       expect(await store.acceptedWatchers(contract.id)).toEqual(["cy", "bea"]);
+    });
+
+    it("stores, replaces and clears the emergency contact", async () => {
+      const { contract } = await compile();
+      expect(await store.getEmergencyContact(contract.id)).toBeNull();
+      await store.setEmergencyContact(contract.id, { name: "Mom", phone: "+1 416 555 0100" });
+      await store.setEmergencyContact(contract.id, { name: "Dad", phone: "416-555-0199" });
+      expect(await store.getEmergencyContact(contract.id)).toEqual({
+        name: "Dad",
+        phone: "416-555-0199",
+      });
+      await store.setEmergencyContact(contract.id, null);
+      expect(await store.getEmergencyContact(contract.id)).toBeNull();
     });
 
     it("stores only the rounded area", async () => {
