@@ -109,7 +109,7 @@ export function Plan({ onCompiled }: { onCompiled: (c: { id: string; me: string 
         label="What's the plan?"
         value={sentence}
         onChangeText={setSentence}
-        placeholder="Your plans… (e.g. drinks with Ana and Addy)"
+        placeholder="Your plans… (e.g. drinks with Ana and Em)"
         multiline
       />
       <Button
