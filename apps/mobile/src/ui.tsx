@@ -27,6 +27,7 @@ export function Screen({ children }: { children: ReactNode }) {
         gap: space.lg,
       }}
       keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets // iOS: lift fields above the keyboard (Android resizes the window itself)
     >
       {children}
     </ScrollView>

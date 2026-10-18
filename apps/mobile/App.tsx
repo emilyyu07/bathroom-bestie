@@ -100,7 +100,8 @@ export default function App() {
     <SafeAreaView
       style={{
         flex: 1,
-        paddingTop: space.sm, // the window already starts below the status bar
+        // Android: the window already starts below the status bar. iOS: SafeAreaView clears the notch.
+        paddingTop: space.sm,
         backgroundColor: color.bg,
       }}
     >
