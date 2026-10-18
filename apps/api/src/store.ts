@@ -6,6 +6,7 @@ import type {
   ReadinessReport,
 } from "@bathroombestie/schema";
 import type { EngineState } from "@bathroombestie/engine";
+import type { EmergencyContact } from "./emergency";
 
 export interface StoredContract {
   contract: Contract;
@@ -41,6 +42,9 @@ export interface Store {
   acceptedWatchers(contractId: string): Promise<string[]>;
   /** Alerts for a contract, and/or only those addressed to one person (`to` includes them). */
   listAlerts(contractId?: string, to?: string): Promise<Alert[]>;
+  /** The planner's emergency contact for a night; null clears it. */
+  setEmergencyContact(contractId: string, c: EmergencyContact | null): Promise<void>;
+  getEmergencyContact(contractId: string): Promise<EmergencyContact | null>;
 }
 
 /** In-memory store for tests and offline demos. */
@@ -51,6 +55,7 @@ export class MemoryStore implements Store {
   engine = new Map<string, EngineRow>();
   alerts: Alert[] = [];
   watchers = new Map<string, Map<string, number>>();
+  emergencyContacts = new Map<string, EmergencyContact>();
   private seq = 0;
 
   async saveContract(c: Contract) {
@@ -111,5 +116,12 @@ export class MemoryStore implements Store {
       (a) =>
         (!contractId || a.contractId === contractId) && (to === undefined || a.to.includes(to)),
     );
+  }
+  async setEmergencyContact(contractId: string, c: EmergencyContact | null) {
+    if (c) this.emergencyContacts.set(contractId, c);
+    else this.emergencyContacts.delete(contractId);
+  }
+  async getEmergencyContact(contractId: string) {
+    return this.emergencyContacts.get(contractId) ?? null;
   }
 }

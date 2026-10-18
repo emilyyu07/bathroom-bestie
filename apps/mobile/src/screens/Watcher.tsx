@@ -102,7 +102,7 @@ export function Watcher({
         {sent &&
           (sent.startsWith("Couldn't") ? <ErrorText>{sent}</ErrorText> : <Small>{sent}</Small>)}
       </Card>
-      <FriendAlerts contractId={contractId} me={me} reason={reason} />
+      <FriendAlerts contractId={contractId} me={me} target={target} reason={reason} />
     </Screen>
   );
 }

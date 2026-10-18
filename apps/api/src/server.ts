@@ -15,6 +15,7 @@ import { initialState, preflight } from "@bathroombestie/engine";
 import type { Clock } from "./clock";
 import { buildContract, safeReadBack, termsOf, type Compiler } from "./compile";
 import { backstageOf } from "./backstage";
+import { EmergencyContact, emergencyNotice } from "./emergency";
 import { idPrefixOfCode, joinCodeOf } from "./join";
 import type { Store } from "./store";
 
@@ -124,13 +125,19 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
     if (!stored) return reply.code(404).send({ error: "unknown_contract" });
     const { contract } = stored;
     const state = (await store.getEngine(contract.id))?.state ?? initialState(contract);
+    const alerts = await store.listAlerts(contract.id);
+    const contact = await store.getEmergencyContact(contract.id);
+    const actions = (await store.actionsAfter(contract.id, 0)).map((r) => r.a);
+    const now = clock.nowMinute();
     return backstageOf(
       contract,
       stored.status,
       state,
-      await store.listAlerts(contract.id),
+      alerts,
       await store.acceptedWatchers(contract.id),
-      clock.nowMinute(),
+      now,
+      // The backstage copy leaves out the map link: that view carries no location.
+      { contact, notice: emergencyNotice(contract, contact, alerts, actions, now, false) },
     );
   });
 
@@ -166,6 +173,38 @@ export function buildServer({ store, clock, compiler, demo = false }: Deps) {
       return reply.code(202).send({ ok: true });
     },
   );
+
+  // The planner's emergency contact. Friends read it all night (Call / Text on their own phones);
+  // `notice` is the message BathroomBestie would send them if no friend responds to a top-rung
+  // alert. Demo only: nothing is ever sent.
+  app.put<{ Params: { id: string } }>("/contracts/:id/emergency-contact", async (req, reply) => {
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    const parsed = EmergencyContact.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "bad_contact" });
+    await store.setEmergencyContact(stored.contract.id, parsed.data);
+    return { contact: parsed.data };
+  });
+  app.delete<{ Params: { id: string } }>("/contracts/:id/emergency-contact", async (req, reply) => {
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    await store.setEmergencyContact(stored.contract.id, null);
+    return { contact: null };
+  });
+  app.get<{ Params: { id: string } }>("/contracts/:id/emergency-contact", async (req, reply) => {
+    const stored = await store.getContract(req.params.id);
+    if (!stored) return reply.code(404).send({ error: "unknown_contract" });
+    const id = stored.contract.id;
+    const contact = await store.getEmergencyContact(id);
+    const notice = emergencyNotice(
+      stored.contract,
+      contact,
+      await store.listAlerts(id),
+      (await store.actionsAfter(id, 0)).map((r) => r.a),
+      clock.nowMinute(),
+    );
+    return { contact, notice };
+  });
 
   // Pre-flight's watcher list. "Reachable" is "accepted" until push delivery exists.
   app.get<{ Params: { id: string } }>("/contracts/:id/watchers", async (req, reply) => {

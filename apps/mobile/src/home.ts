@@ -27,16 +27,13 @@ TaskManager.defineTask<{ eventType: Location.GeofencingEventType }>(
   },
 );
 
-/** Saves where she is now as home (on this phone only) and starts the home geofence. */
-export async function setHomeHere(): Promise<void> {
-  const timeout = new Promise<null>((r) => setTimeout(() => r(null), 30_000));
-  const pos = await Promise.race([
-    Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
-    timeout,
-  ]);
-  if (!pos) throw new Error("No location fix yet. Try again in a moment.");
-  const { latitude, longitude } = pos.coords;
-  await AsyncStorage.setItem(HOME_KEY, JSON.stringify({ latitude, longitude }));
+/** Where she's ending up tonight: home, or a friend's place. Only ever stored on this phone. */
+export interface SafePlace {
+  label: string;
+}
+
+async function fence(latitude: number, longitude: number, label: string): Promise<void> {
+  await AsyncStorage.setItem(HOME_KEY, JSON.stringify({ latitude, longitude, label }));
   await Location.startGeofencingAsync(HOME_GEOFENCE_TASK, [
     {
       identifier: "home",
@@ -47,6 +44,36 @@ export async function setHomeHere(): Promise<void> {
       notifyOnExit: false,
     },
   ]);
+}
+
+/** Saves where she is now as her safe place (on this phone only) and starts the geofence. */
+export async function setHomeHere(label = "Home"): Promise<void> {
+  const timeout = new Promise<null>((r) => setTimeout(() => r(null), 30_000));
+  const pos = await Promise.race([
+    Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }),
+    timeout,
+  ]);
+  if (!pos) throw new Error("No location fix yet. Try again in a moment.");
+  await fence(pos.coords.latitude, pos.coords.longitude, label);
+}
+
+/**
+ * Saves a typed address as her safe place. The phone's own geocoder turns it into a point; the
+ * address and the point stay on this phone and are never sent to BathroomBestie (invariant 5).
+ */
+export async function setHomeAtAddress(address: string, label = "Home"): Promise<void> {
+  const found = await Location.geocodeAsync(address.trim()).catch(() => []);
+  const first = found[0];
+  if (!first) throw new Error("Couldn't find that address. Try adding the city.");
+  await fence(first.latitude, first.longitude, label);
+}
+
+/** Her saved safe place's name, if a geofence is running. */
+export async function safePlace(): Promise<SafePlace | null> {
+  if (!(await homeIsSet())) return null;
+  const raw = await AsyncStorage.getItem(HOME_KEY).catch(() => null);
+  const label = raw ? (JSON.parse(raw) as { label?: string }).label : undefined;
+  return { label: label || "Home" };
 }
 
 export async function clearHome(): Promise<void> {
