@@ -185,19 +185,43 @@ async function runIos() {
     for (const [name, d] of [
       ["cynthia", cynthia],
       ["dee", dee],
-    ] as const)
-      recordings.push(
-        spawn(
-          "xcrun",
-          ["simctl", "io", d, "recordVideo", "--codec=h264", "--force", join(dir, `${name}.mp4`)],
-          { stdio: "ignore" },
-        ),
+    ] as const) {
+      const r = spawn(
+        "xcrun",
+        ["simctl", "io", d, "recordVideo", "--codec=h264", "--force", join(dir, `${name}.mp4`)],
+        { stdio: "ignore" },
       );
+      r.on("exit", (code) => {
+        if (!stopping)
+          log(
+            `RECORDING STOPPED EARLY for ${name} (exit ${code}): "Host recording is already in progress"? Reboot the simulator.`,
+          );
+      });
+      recordings.push(r);
+    }
     log(`recording both phones to ${dir}`);
+    // A recorder that cannot start exits straight away; say so now, not after the take.
+    await sleep(2500);
+    if (recordings.some((r) => r.exitCode !== null))
+      log(
+        "WARNING: a recording did not start, so that phone will not be filmed. Reboot the Simulators and re-run.",
+      );
   }
+  let stopping = false;
   const stopRecording = async () => {
+    stopping = true;
     for (const r of recordings) r.kill("SIGINT"); // SIGINT finishes the file properly
-    if (recordings.length) await sleep(3000);
+    // Writing a long take to disk takes a while: wait for each recorder to exit, up to 90 s.
+    await Promise.all(
+      recordings.map(
+        (r) =>
+          new Promise<void>((done) => {
+            if (r.exitCode !== null) return done();
+            r.once("exit", () => done());
+            setTimeout(done, 90_000);
+          }),
+      ),
+    );
   };
   // Ctrl-C or a kill must still close the recordings, or the Simulator is left "already recording".
   for (const sig of ["SIGINT", "SIGTERM"] as const)
